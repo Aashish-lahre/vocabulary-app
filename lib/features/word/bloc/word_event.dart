@@ -25,3 +25,8 @@ class SearchWord extends WordEvent {
 
 
 }
+
+class LoadSingleWordInOrder extends WordEvent {
+  @override
+  List<Object?> get props => [];
+}

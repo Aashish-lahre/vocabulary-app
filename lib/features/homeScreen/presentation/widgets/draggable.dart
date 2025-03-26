@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 class DraggableSlider extends StatefulWidget {
   final Widget widget;
   final bool isEnableDrag;
-  final void Function({required double angle, required Offset endOffset}) slideOut;
+  final void Function({required double angleInDegree, required Offset endOffset, required Offset startOffset,required int direction}) slideOut;
   const DraggableSlider({required this.widget, this.isEnableDrag = true, required this.slideOut, super.key});
 
   @override
@@ -19,7 +19,7 @@ class _DraggableSliderState extends State<DraggableSlider> with SingleTickerProv
   double _angle = 0;
   late AnimationController _restoreController;
   late Size screenSize;
-  Size slideSize = Size.zero;
+   Size slideSize = Size.zero;
   late Offset initialSlideTopLeftPosition;
   late Offset initialSlideTopRightPosition;
 
@@ -35,8 +35,9 @@ class _DraggableSliderState extends State<DraggableSlider> with SingleTickerProv
     _restoreController = AnimationController(vsync: this, duration: Duration(milliseconds: 300))..addListener(animationListener);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      getChildSize();
-      getInitialSlideTopLeftPosition();
+      getSlideSize();
+      getInitialSlideTopLeftGlobalPosition();
+      getInitialSlideTopRightGlobalPosition();
       screenSize = MediaQuery.of(context).size;
     });
     super.initState();
@@ -44,31 +45,34 @@ class _DraggableSliderState extends State<DraggableSlider> with SingleTickerProv
 
   @override
   void dispose() {
-
+    _restoreController..removeListener(animationListener)..dispose();
     super.dispose();
   }
 
 
-  void getChildSize() {
+  void getSlideSize() {
     slideSize = (_widgetKey.currentContext?.findRenderObject() as RenderBox?)?.size ?? Size.zero;
   }
 
-  void getInitialSlideTopLeftPosition() {
+  void getInitialSlideTopLeftGlobalPosition() {
     final renderBox = (_widgetKey.currentContext?.findRenderObject() as RenderBox?);
     initialSlideTopLeftPosition = renderBox?.localToGlobal(Offset.zero) ?? Offset.zero;
   }
 
-  void getInitialSlideTopRightPosition() {
+  void getInitialSlideTopRightGlobalPosition() {
     final renderBox = (_widgetKey.currentContext?.findRenderObject() as RenderBox?);
     initialSlideTopRightPosition = renderBox?.localToGlobal(Offset(renderBox.size.width, 0)) ?? Offset.zero;
   }
 
   void animationListener() {
     if(_restoreController.isCompleted) {
-      _restoreController.reset();
-      _angle = 0;
-      _startOffset = Offset.zero;
-      _endOffset = Offset.zero;
+      setState(() {
+        _restoreController.reset();
+        _angle = 0;
+        _startOffset = Offset.zero;
+        _endOffset = Offset.zero;
+      });
+
     }
   }
 
@@ -103,27 +107,44 @@ class _DraggableSliderState extends State<DraggableSlider> with SingleTickerProv
   double get getAngle {
     if (slideSize == Size.zero || screenSize == Size.zero) return 0;
 
-    double dx = getCurrentTopLeftPosition.dx;
-    double centerX = dx + (slideSize.width / 2);
-    double screenCenterX = screenSize.width / 2;
+    double leftDx = getCurrentTopLeftPosition.dx;
+    double rightDx = getCurrentTopRightPosition.dx;
 
-    // Calculate angle based on the center position relative to screen center
-    double angle = (pi * 0.1) * ((centerX - screenCenterX) / screenCenterX);
+    // Calculate slide's center X position
+    double slideCenterDx = (leftDx + rightDx) / 2;
 
+    // Get screen center X position
+    double screenCenterDx = screenSize.width / 2;
+
+    // Normalize the deviation (-1 to 1 range)
+    double normalizedDeviation = (slideCenterDx - screenCenterDx) / screenCenterDx;
+
+    // Max angle range (adjust as needed)
+    double maxRotation = pi * 0.08; // Example: max ±18 degrees (~0.1π rad)
+
+    // Calculate angle
+    double angle = maxRotation * normalizedDeviation;
+
+    // angle is in radians.
+    radiansToDegrees(angle);
     return angle;
   }
 
+
   double radiansToDegrees(double radians) {
+    print('rotate : ${radians * (180 / pi)}');
     return radians * (180 / pi);
   }
 
   void onPanStart(DragStartDetails details) {
+    if(_restoreController.isAnimating) return;
     setState(() {
       _startOffset = details.localPosition;
     });
 
   }
   void onPanUpdate(DragUpdateDetails details) {
+    if(_restoreController.isAnimating) return;
     setState(() {
       _endOffset = details.localPosition - _startOffset;
     });
@@ -131,28 +152,31 @@ class _DraggableSliderState extends State<DraggableSlider> with SingleTickerProv
 
   }
   void onPanEnd(DragEndDetails end) {
+    if(_restoreController.isAnimating) return;
     double leftX = getCurrentTopLeftPosition.dx;
     double rightX = getCurrentTopRightPosition.dx;
 
     if (leftX < outSizeLimitLeft) {
       // Entire widget has moved past the left limit
-      handleSlideOut(angle: radiansToDegrees(getAngle), endOffset: _endOffset);
+      handleSlideOut(angle: getAngle, endOffset: _endOffset, startOffset: _startOffset, direction: -1);
     } else if (rightX > outSizeLimitRight) {
       // Entire widget has moved past the right limit
-      handleSlideOut(angle: radiansToDegrees(getAngle), endOffset: _endOffset);
+      handleSlideOut(angle: getAngle, endOffset: _endOffset, startOffset: _startOffset, direction: 1);
+
     } else {
-      // If not fully out, restore position
       restorePosition();
+
     }
+    // restorePosition();
   }
 
   void restorePosition() {
     _restoreController.forward();
   }
 
-  void handleSlideOut({required double angle, required Offset endOffset}) {
-
-    widget.slideOut(angle: angle, endOffset: endOffset);
+  void handleSlideOut({required double angle, required Offset endOffset, required Offset startOffset, required int direction}) {
+    // provided angle is in radians, converting to degree
+    widget.slideOut(angleInDegree: radiansToDegrees(angle), endOffset: endOffset, startOffset: startOffset, direction: direction);
   }
 
 

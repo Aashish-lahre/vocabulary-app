@@ -6,12 +6,13 @@ import 'dart:ui';
 
 import 'package:dictionary_api/dictionary_api.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_improve_vocabulary/features/homeScreen/presentation/widgets/draggable.dart';
+import 'package:flutter_improve_vocabulary/features/word/bloc/word_bloc.dart';
 
 class WordSlider extends StatefulWidget {
-  final int itemCount;
-  final Widget Function(BuildContext context, int index) itemBuilder;
-  const WordSlider({required this.itemCount, required this.itemBuilder, super.key});
+  final Widget wordWidget;
+  const WordSlider({required this.wordWidget, super.key});
 
   @override
   State<WordSlider> createState() => _WordSliderState();
@@ -24,12 +25,13 @@ class _WordSliderState extends State<WordSlider> with SingleTickerProviderStateM
   Offset _endOffset = Offset.zero;
   Animation? _offsetAnimation;
   Animation? _rotateAnimation;
-  double _angle = 0;
+  double _angleInDegree = 0;
   double _index = 0;
-  int _slidesNumber = 2;
+
 
 
   Offset getOffset(int index) {
+    print('getOffset : ${_offsetAnimation?.value}');
     return {
       0: Offset(0,0),
       1: _offsetAnimation?.value ?? Offset(0, 0),
@@ -46,67 +48,82 @@ class _WordSliderState extends State<WordSlider> with SingleTickerProviderStateM
   double getRotationAngle(int index) {
     return {
       0: 0.0,
-      1: _rotateAnimation?.value ?? _angle,
+      1: degreesToRadians(_rotateAnimation?.value ?? 0)  ?? 0.0,
 
     }[index] ?? 0.0;
 
   }
   
 
-
-
   double degreesToRadians(double degrees) {
     return degrees * (pi / 180);
   }
 
-  void slideOut({required double angle, required Offset endOffset}) {
-    _angle = angle;
-    _endOffset = endOffset;
-    startAnimation();
+
+
+  void slideOut({required double angleInDegree, required Offset endOffset, required Offset startOffset, required int direction}) {
+    setState(() {
+      _angleInDegree = angleInDegree;
+      _endOffset = endOffset;
+      _startOffset = startOffset;
+    });
+
+    startAnimation(direction: direction);
   }
 
-  void startAnimation() {
+  void startAnimation({required int direction}) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
     // Calculate large distance to move the container off-screen
-    double throwDistance = max(screenWidth, screenHeight) * 1.5; // Ensures movement beyond screen bounds
+    double throwDistance = max(600, 0); // Ensures movement beyond screen bounds
 
-    double radians = _angle * (pi / 180);
+    double radians = _angleInDegree * (pi / 180);
     // double radians = _angle;
 
+    double throwDirection = direction.toDouble(); // 🔥 Determine drag direction
+
     Offset throwOffset = Offset(
-      cos(radians) * throwDistance,
+      cos(radians) * throwDistance * throwDirection, // 🔥 Adjust offset direction
       sin(radians) * throwDistance,
     );
 
-    double remainingRotationAngle = 36 - _angle;
+    print('throwOffset : $throwOffset');
+
+    double remainingRotationAngle = 36 - _angleInDegree;
     // double remainingRotationAngle = 36 - 18;
 
 
     _offsetAnimation = Tween<Offset>(
       begin: _endOffset,
       end:  throwOffset,
+      // begin: _endOffset - _startOffset,
+      // end: _endOffset - _startOffset + throwOffset,
     ).animate(CurvedAnimation(parent: _slideMoveController, curve: Curves.easeOut));
 
-    _rotateAnimation = Tween<double>(begin: _angle, end: _angle + remainingRotationAngle).animate(_slideMoveController);
+    // _rotateAnimation = Tween<double>(begin: _angleInDegree, end: _angleInDegree + remainingRotationAngle).animate(_slideMoveController);
+    _rotateAnimation = Tween<double>(
+      begin: _angleInDegree,
+      end: _angleInDegree + (_angleInDegree > 0 ? remainingRotationAngle : -remainingRotationAngle), // 🔥 Limit rotation based on drag direction
+    ).animate(_slideMoveController);
 
-    _slideMoveController.forward(from: 0);
+    _rotateAnimation = Tween<double>(
+      begin: _angleInDegree,
+      end: 20.0, // 🔥 Limit rotation based on drag direction
+    ).animate(_slideMoveController);
+
+    _slideMoveController.forward();
   }
 
   void animationListener() {
     if(_slideMoveController.isCompleted) {
       setState(() {
-        _angle = 0;
+        _angleInDegree = 0;
         _startOffset = Offset.zero;
         _endOffset = Offset.zero;
-        _slideMoveController.reset();
-        if(_index == widget.itemCount - 1) {
-          _slidesNumber = 1;
-        } else {
-          _slidesNumber = 2;
-          _index++;
-        }
+
+        context.read<WordBloc>().add(LoadSingleWordInOrder());
+
       });
 
     }
@@ -116,7 +133,8 @@ class _WordSliderState extends State<WordSlider> with SingleTickerProviderStateM
 
   @override
   void initState() {
-   _slideMoveController = AnimationController(vsync: this, duration: Duration(milliseconds: 300))..addListener(animationListener);
+    print('initstate called');
+   _slideMoveController = AnimationController(vsync: this, duration: Duration(seconds: 1))..addListener(animationListener);
     super.initState();
   }
 
@@ -135,24 +153,27 @@ class _WordSliderState extends State<WordSlider> with SingleTickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
+    bool isEnableDrag = context.read<WordBloc>().wordIndex != context.read<WordBloc>().allWords.length -1;
     return AnimatedBuilder(
       animation: _slideMoveController,
       builder: (context, _) => Stack(
         fit: StackFit.expand,
         alignment: Alignment.center,
-        children: List.generate(_slidesNumber, (index) {
-          final int wordIndex = (_index + 1 - index).toInt();
+        children: List.generate(2, (index) {
+          print('generated $index');
+          // final int wordIndex = (_index + 1 - index).toInt();
           return Transform.translate(
             offset: getOffset(index),
             child: Transform.scale(
               scale: getScale(index),
               child: Transform.rotate(
                 angle: getRotationAngle(index),
+                // angle: degreesToRadians(_angleInDegree),
                 child: Container(
                   // width: 100,
                   // height: 100,
                   color: Colors.white70,
-                  child: DraggableSlider(widget: widget.itemBuilder(context, wordIndex), slideOut: slideOut)
+                  child: DraggableSlider(widget: widget.wordWidget, slideOut: slideOut, isEnableDrag: isEnableDrag)
                 ),
               ),
             ),

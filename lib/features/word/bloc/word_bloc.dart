@@ -10,13 +10,21 @@ class WordBloc extends Bloc<WordEvent, WordState> {
 
   final DictionaryRepository _repository;
 
+  // this word will be shown on homeScreen first, than as "wordIndex" increments, following words will be shown.
+  int wordIndex = 0;
+  final List<Word> allWords = [];
+
   WordBloc({DictionaryRepository? repository}) : _repository = repository ?? DictionaryRepository(), super(WordInitial()) {
 
     on<LoadWords>((event, emit) async {
       try {
         emit(WordLoadingState());
         final Map<int, Word> receivedWords = await _repository.fetchRandomWords(event.noOfWordToSearch);
-        emit(WordLoadSuccess(words: receivedWords.values.toList()));
+        // emit(WordLoadSuccess(words: receivedWords.values.toList()));
+        allWords.addAll(receivedWords.values);
+        if(wordIndex == 0) {
+          emit(FetchingSingleWordState(word: allWords[wordIndex]));
+        }
       } on WordRequestFailure {
         emit(InternetFailure());
       }
@@ -40,7 +48,20 @@ class WordBloc extends Bloc<WordEvent, WordState> {
     });
 
 
+    on<LoadSingleWordInOrder>((event, emit) {
+      wordIndex++;
+      if(wordIndex < allWords.length) {
+        print('entered here');
+        emit(FetchingSingleWordState(word: allWords[wordIndex]));
+      } else {
+        // wordIndex exceeds allWords.length
+        print('wordIndex exceeds allwords length');
+        emit(InternetFailure());
+      }
 
+
+
+    });
 
 
 

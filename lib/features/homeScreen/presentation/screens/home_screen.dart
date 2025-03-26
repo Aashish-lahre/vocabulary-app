@@ -16,20 +16,22 @@ class HomeScreen extends StatelessWidget {
             // word slider
             BlocBuilder<WordBloc, WordState>(
   builder: (context, state) {
-    if(WordLoadSuccess == state.runtimeType) {
+    print('stated changed');
+    if(state is FetchingSingleWordState) {
+      print('entered in homescreen');
       return Positioned.fill(left: 30, right: 30, top: 50, bottom: 50, child: Container(
           color: Colors.deepPurpleAccent,
           child: WordSlider(
-            itemCount:(state as WordLoadSuccess).words.length,
-            itemBuilder: (_, index) => Container(
-                // width: 100,
+            key: ValueKey(state.word.word),
+            wordWidget: Container(
+              // width: 100,
                 height: 200,
                 color: Colors.green,
                 child: Column(
                   children: [
-                    Text(state.words[index].word),
+                    Text(state.word.word),
 
-                    Text(state.words[index].meanings.first.definitions.first.definition),
+                    Text(state.word.meanings.first.definitions.first.definition),
                   ],
                 )),
           ),) , );

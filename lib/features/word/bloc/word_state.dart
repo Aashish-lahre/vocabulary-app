@@ -32,6 +32,23 @@ final class WordLoadSuccess extends WordState {
 
 }
 
+
+final class FetchingSingleWordState extends WordState {
+
+  final Word word;
+
+  const FetchingSingleWordState({required this.word});
+
+
+
+  @override
+  List<Object?> get props => [word];
+
+}
+
+
+
+
 final class WordSearchFailed extends WordState {
   @override
   // TODO: implement props
