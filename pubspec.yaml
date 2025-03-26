@@ -38,6 +38,8 @@ dependencies:
   hydrated_bloc: ^10.0.0
   flutter_bloc: ^9.1.0
   path_provider: ^2.1.5
+  connectivity_plus: ^6.1.3
+  awesome_snackbar_content: ^0.1.5
   dictionary_api:
     path: "./packages/dictionary_api"
   dictionary_repository:

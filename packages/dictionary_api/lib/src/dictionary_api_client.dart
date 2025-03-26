@@ -1,13 +1,15 @@
 
 
 
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 
 import 'package:dictionary_api/dictionary_api.dart';
 import 'package:http/http.dart' as http;
 
-
+const url = "https://api.dictionaryapi.dev/api/v2/entries/en";
 
 // failure when no internet is available
 class WordRequestFailure implements Exception {
@@ -18,43 +20,50 @@ class WordRequestFailure implements Exception {
 class WordNotFoundFailure implements Exception {}
 
 
-class DictionaryApiClient {
+abstract class DictionaryServices {
+  Future<Word> searchWord(String word);
+}
 
 
-  // final http.Client _httpClient;
-
-
-
-  // if no dependency is provided, DictionaryApiClient will automatically takes one new http.Client as dependency
-  DictionaryApiClient();
-
-  static const url = "https://api.dictionaryapi.dev";
-
-
+class DictionaryApiClient implements DictionaryServices{
+  final http.Client client;
+  DictionaryApiClient({ http.Client? client}) : client = client ?? http.Client() ;
 
   // this method searches the word in api, fetches the word json, converts the word json into word object with all information embedded
+  @override
   Future<Word> searchWord(String word) async {
-    print('search word on api arrived');
 
-    // final urlRequest = Uri.https(url, '/api/v2/entries/en/$word');
-    // final urlResponse = await _httpClient.get(urlRequest);
-    final urlResponse = await http.get(
-    Uri.parse('https://api.dictionaryapi.dev/api/v2/entries/en/$word'),
-  );
+    try {
+      final uri = Uri.parse('$url/$word');
 
 
-    if(urlResponse.statusCode != 200) throw WordRequestFailure();
+      final response = await client.get(uri);
 
-    final responseJsonArray = jsonDecode(urlResponse.body) as List<dynamic>;
-    final responseJson = responseJsonArray.first;
+      print('response code : ${response.statusCode}');
 
-    if(!responseJson.containsKey('word')) throw WordNotFoundFailure();
+      if(response.statusCode != 200) throw WordNotFoundFailure();
 
-    return Word.fromJson(responseJson);
+      final responseJsonArray = jsonDecode(response.body) as List<dynamic>;
+      final responseJson = responseJsonArray.first;
+
+      if(!responseJson.containsKey('word')) throw WordNotFoundFailure();
+
+      return Word.fromJson(responseJson);
+    } on SocketException {
+      throw WordRequestFailure();
+    } on TimeoutException {
+      throw WordRequestFailure();
+
+    } on WordNotFoundFailure {
+      throw WordNotFoundFailure();
+    }
+
+    catch(err) {
+      print('error catch on api client : $err');
+      throw Exception(err);
+    }
 
   }
-  // void close() {
-  //   _httpClient.close();
-  // }
 
+  void dispose() => client.close();
 }
