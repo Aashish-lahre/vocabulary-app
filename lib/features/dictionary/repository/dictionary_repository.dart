@@ -1,22 +1,14 @@
 import 'package:dictionary_api/dictionary_api.dart';
-import 'package:dictionary_repository/src/helpers/get_random_words.dart';
+import '../utility/get_random_words.dart';
+import 'package:flutter/material.dart';
 
-/*
-get 10 words
-
-search for each of them
-  if success
-    store them in a list.
-  if wordNotFound failure
-    get another word
- */
 
 class DictionaryRepository {
 
 
   final DictionaryApiClient _dictionaryApiClient;
 
-  final Map<int, Word>  words = {};
+  final Map<int, Word>  wordsAvailableOnApi = {};
 
   DictionaryRepository._({DictionaryApiClient? dictionaryApiClient}) : _dictionaryApiClient = dictionaryApiClient ?? DictionaryApiClient();
 
@@ -24,17 +16,24 @@ class DictionaryRepository {
 
   factory DictionaryRepository({DictionaryApiClient? apiClient}) {
 
-    _instance ??=  DictionaryRepository._(dictionaryApiClient: apiClient);
+    return _instance ??=  DictionaryRepository._(dictionaryApiClient: apiClient);
 
 
-    return _instance!;
    }
 
 
   Future<Word> fetchWord(String queryWord) async {
-    print('fetchWord on repo arrived');
-    final retrivedWord = await _dictionaryApiClient.searchWord(queryWord);
-    return retrivedWord;
+    try {
+      final retrivedWord = await _dictionaryApiClient.searchWord(queryWord);
+      return retrivedWord;
+    } on NoInternetFailure {
+
+    } on WordNotFoundFailure {
+
+    } on UnexpectedFailure {
+
+    }
+
   }
 
   // void fetchRandomWords(int count) async {
@@ -83,16 +82,20 @@ class DictionaryRepository {
 
   Future<Map<int, Word>> fetchRandomWords(int count) async {
     assert(count > 0);
+
+    final Map<int, Word> receivedWords = {};
     // get "count" no. of random words from "getRandomWords" class.
     final Map<int, ({int index, String wordName})> randomWords = GetRandomWords().generateRandomWords(count: count);
-    randomWords[3] = (index: 12, wordName: 'ddd');
-    randomWords[5] = (index: 32, wordName: 'fff');
+    // randomWords[3] = (index: 12, wordName: 'ddd');
+    // randomWords[5] = (index: 32, wordName: 'fff');
     // for loop all the words and search each word one by one.
     // if successfully retrived the word, store it in "words" map.
     for (var entry in randomWords.values) {
       try {
         final retrivedWord = await _dictionaryApiClient.searchWord(entry.wordName);
-        words[words.length + 1] = retrivedWord;
+        wordsAvailableOnApi[wordsAvailableOnApi.length + 1] = retrivedWord;
+        GetRandomWords().wordsAvailableInApi(entry);
+        receivedWords[receivedWords.length + 1] = retrivedWord;
 
       } on WordNotFoundFailure {
 
@@ -111,7 +114,9 @@ class DictionaryRepository {
             final retrivedWord = await _dictionaryApiClient.searchWord(newRandomWord[1]!.wordName);
 
             // If successful, add the word in "words" map and exit retry loop
-            words[words.length + 1] = retrivedWord;
+            wordsAvailableOnApi[wordsAvailableOnApi.length + 1] = retrivedWord;
+            GetRandomWords().wordsAvailableInApi(newRandomWord[1]!);
+            receivedWords[receivedWords.length + 1] = retrivedWord;
             break;
 
           } on WordNotFoundFailure {
@@ -135,7 +140,7 @@ class DictionaryRepository {
         }
       }
     }
-    return words;
+    return receivedWords;
   }
 
 

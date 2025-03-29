@@ -18,6 +18,7 @@ class GetRandomWords {
   // These words are not available in DictionaryApi.
   //https://dictionaryapi.dev/
   final Map<int, ({String wordName, int index})> theseWordsNotFoundOnApi = {};
+  final Map<int, ({String wordName, int index})> theseWordsFoundOnApi = {};
   final List<String> allWords = List.from(all);
 
 
@@ -26,8 +27,8 @@ class GetRandomWords {
   void wordNotAvailableInApi(({String wordName, int index}) word) {
     // we remove the word from "allWords" because we than do not have to filter
     // out these words again when randomly selecting word from "allWords".
-    allWords.removeAt(word.index);
-
+    // allWords.removeAt(word.index);
+      allWords.remove(word.wordName);
     // know what words does not have data on DictionaryApi
 
     final  addEntry = {
@@ -35,6 +36,16 @@ class GetRandomWords {
     };
 
     theseWordsNotFoundOnApi.addEntries(addEntry.entries);
+  }
+
+  void wordsAvailableInApi(({String wordName, int index}) word) {
+    allWords.remove(word.wordName);
+
+    final  addEntry = {
+      theseWordsFoundOnApi.length + 1 : (wordName: word.wordName, index: word.index),
+    };
+
+    theseWordsFoundOnApi.addEntries(addEntry.entries);
   }
 
 
