@@ -1,13 +1,24 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
-part 'latter_word_fetch_event.dart';
-part 'latter_word_fetch_state.dart';
+part 'later_word_fetch_event.dart';
+part 'later_word_fetch_state.dart';
 
-class LatterWordFetchBloc extends Bloc<LatterWordFetchEvent, LatterWordFetchState> {
-  LatterWordFetchBloc() : super(LatterWordFetchInitial()) {
-    on<LatterWordFetchEvent>((event, emit) {
-      // TODO: implement event handler
+class LaterWordFetchBloc extends Bloc<LaterWordFetchEvent, LaterWordFetchState> {
+
+   int laterWordFetchLimit;
+
+
+  LaterWordFetchBloc({required this.laterWordFetchLimit}) : super(LaterWordFetchInitialState(count: laterWordFetchLimit)) {
+
+    on<InitialLaterWordFetchCount>((event, emit) {
+      emit(LaterWordFetchInitialState(count: event.count));
+    });
+
+    on<ChangeLaterWordFetchCount>((event, emit) {
+
+      laterWordFetchLimit = event.changedCount;
+      emit(LaterWordFetchCountChanged(count: event.changedCount));
     });
   }
 }

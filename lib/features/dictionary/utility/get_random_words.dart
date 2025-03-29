@@ -19,7 +19,7 @@ class GetRandomWords {
   //https://dictionaryapi.dev/
   final Map<int, ({String wordName, int index})> theseWordsNotFoundOnApi = {};
   final Map<int, ({String wordName, int index})> theseWordsFoundOnApi = {};
-  final List<String> allWords = List.from(all);
+  List<String> allWords = List.from(all);
 
 
   // when the word is not available in DictionaryApi, we call this function to
@@ -51,18 +51,20 @@ class GetRandomWords {
 
   // generate count no. of words from "allWords" list.
   // it also filter out all the words from wordNotAvailableInApi.
-  Map<int, ({String wordName, int index})> generateRandomWords({required int count}) {
+  List<({String wordName, int index})> generateRandomWords({required int count}) {
+
+    if(allWords.length <= count) {
+      allWords.clear();
+      theseWordsFoundOnApi.values.toList().forEach((item) {allWords.add(item.wordName);});
+    }
 
   final random = Random();
   // set of records is used to prevent duplicate record
   final Set<({String wordName, int index})> setOfWords = {};
 
-  // while function to get "count" words in a "words" set.
+  // while function to get "count" no. of words in a "words" set.
   while (setOfWords.length < count) {
 
-    // checking is allWords is not empty because in later code "allWords.length"
-    // should be more than 0. it will prevent nextInt(0) error.
-    assert(allWords.isNotEmpty);
 
     // random index of allWords
     final int index = random.nextInt(allWords.length);
@@ -75,10 +77,9 @@ class GetRandomWords {
 
   }
 
-  // this code converts the set of records into map<int, record>
-  Map<int, ({String wordName, int index})> words = {
-    for(var entry in setOfWords.toList().asMap().entries) entry.key + 1 : entry.value
-  };
+  List<({String wordName, int index})> words = setOfWords.toList();
+
+
 
   return words;
   }

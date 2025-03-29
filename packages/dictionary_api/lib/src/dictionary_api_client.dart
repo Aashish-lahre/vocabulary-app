@@ -7,17 +7,16 @@ import 'dart:io';
 
 
 import 'package:dictionary_api/dictionary_api.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+
+import 'dictionary_failures.dart';
+
 
 const url = "https://api.dictionaryapi.dev/api/v2/entries/en";
 
-// failure when no internet is available
-class WordRequestFailure implements Exception {
 
-}
 
-// failure when word is not found in api
-class WordNotFoundFailure implements Exception {}
 
 
 abstract class DictionaryServices {
@@ -37,11 +36,20 @@ class DictionaryApiClient implements DictionaryServices{
       final uri = Uri.parse('$url/$word');
 
 
-      final response = await client.get(uri);
+      final response = await client.get(uri).timeout(Duration(seconds: 10));
 
-      print('response code : ${response.statusCode}');
+      debugPrint('response code : ${response.statusCode}');
 
-      if(response.statusCode != 200) throw WordNotFoundFailure();
+      if (response.statusCode == 404) {
+        throw WordNotFoundFailure();
+      } else if (response.statusCode == 429) {
+        throw Exception('Rate limit exceeded. Please try again later.');
+      } else if (response.statusCode >= 500) {
+        throw Exception('Server error. Please try again later.');
+      } else if (response.statusCode != 200) {
+        throw Exception('Unexpected API response: ${response.statusCode}');
+      }
+
 
       final responseJsonArray = jsonDecode(response.body) as List<dynamic>;
       final responseJson = responseJsonArray.first;
@@ -50,17 +58,17 @@ class DictionaryApiClient implements DictionaryServices{
 
       return Word.fromJson(responseJson);
     } on SocketException {
-      throw WordRequestFailure();
+      throw NoInternetFailure();
     } on TimeoutException {
-      throw WordRequestFailure();
-
+      throw NoInternetFailure();
     } on WordNotFoundFailure {
-      throw WordNotFoundFailure();
+      rethrow;
     }
 
-    catch(err) {
-      print('error catch on api client : $err');
-      throw Exception(err);
+    catch(err, stackTrace) {
+      debugPrint('error catch on api client : $err');
+      debugPrintStack(stackTrace: stackTrace);
+      throw UnexpectedFailure(errorMessage: err.toString());
     }
 
   }

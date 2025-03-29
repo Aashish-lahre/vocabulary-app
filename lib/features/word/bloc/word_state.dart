@@ -20,25 +20,11 @@ final class WordLoadingState extends WordState {
 
 }
 
-final class WordLoadSuccess extends WordState {
-
-  final List<Word> words;
-
-  const WordLoadSuccess({required this.words});
-
-
-  @override
-  List<Object?> get props => [words];
-
-}
-
-
-final class FetchingSingleWordState extends WordState {
+final class WordSearchLoadSuccess extends WordState {
 
   final Word word;
 
-  const FetchingSingleWordState({required this.word});
-
+  const WordSearchLoadSuccess({required this.word});
 
 
   @override
@@ -47,23 +33,104 @@ final class FetchingSingleWordState extends WordState {
 }
 
 
+final class FetchedSingleWordState extends WordState {
+
+  final Word word;
+
+  const FetchedSingleWordState({required this.word});
 
 
-final class WordSearchFailed extends WordState {
+
   @override
-  // TODO: implement props
+  List<Object?> get props => [word];
+
+}
+
+final class NoMoreWordAvailableState extends WordState {
+  @override
   List<Object?> get props => [];
 
 }
 
 
-final class InternetFailure extends WordState {
-
-  final List<Word>? words;
-
-  const InternetFailure([this.words]);
+final class LaterWordsLoading extends WordState {
 
   @override
   List<Object?> get props => [];
+
+}
+
+final class LaterWordsLoadingSuccess extends WordState {
+
+  @override
+  List<Object?> get props => [];
+
+}
+
+final class WordSearchUnavailabilityState extends WordState {
+  @override
+
+  List<Object?> get props => [];
+
+}
+
+
+final class InternetFailureState extends WordState {
+
+  final int wordNotSearched;
+  final int wordRetrived;
+  final int wordSkipped;
+
+  const InternetFailureState({required this.wordNotSearched, required this.wordSkipped, required this.wordRetrived});
+
+  @override
+  List<Object?> get props => [wordSkipped, wordRetrived, wordNotSearched];
+
+}
+
+final class HomeErrorScreenState extends WordState {
+  final HomeErrorType homeErrorType;
+
+  const HomeErrorScreenState({required this.homeErrorType});
+
+  @override
+  // TODO: implement props
+  List<Object?> get props => [homeErrorType];
+
+
+}
+
+// final class LaterInternetFailureState extends WordState {
+//
+//   final int wordNotSearched;
+//   final int wordRetrived;
+//   final int wordSkipped;
+//
+//   const LaterInternetFailureState({required this.wordNotSearched, required this.wordSkipped, required this.wordRetrived});
+//
+//
+//
+//   @override
+//   List<Object?> get props => [wordSkipped, wordRetrived, wordNotSearched];
+//
+// }
+
+final class UnexpectedState extends WordState {
+  final String errorMessage;
+
+  const UnexpectedState({required this.errorMessage});
+  @override
+  List<Object?> get props => [errorMessage];
+}
+
+final class PartialDataState extends WordState {
+
+  final int wordFailedCount;
+  final int wordFetchedCount;
+
+  const PartialDataState({required this.wordFailedCount, required this.wordFetchedCount});
+
+  @override
+  List<Object?> get props => [wordFailedCount, wordFetchedCount];
 
 }

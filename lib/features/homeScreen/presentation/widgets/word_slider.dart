@@ -8,6 +8,7 @@ import 'package:dictionary_api/dictionary_api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_improve_vocabulary/features/homeScreen/presentation/widgets/draggable.dart';
+import 'package:flutter_improve_vocabulary/features/homeScreen/presentation/widgets/word_card_shimmer.dart';
 import 'package:flutter_improve_vocabulary/features/word/bloc/word_bloc.dart';
 
 class WordSlider extends StatefulWidget {
@@ -31,7 +32,7 @@ class _WordSliderState extends State<WordSlider> with SingleTickerProviderStateM
 
 
   Offset getOffset(int index) {
-    print('getOffset : ${_offsetAnimation?.value}');
+
     return {
       0: Offset(0,0),
       1: _offsetAnimation?.value ?? Offset(0, 0),
@@ -40,8 +41,9 @@ class _WordSliderState extends State<WordSlider> with SingleTickerProviderStateM
   
   double getScale(int index) {
     return {
-      0: lerpDouble(0.75, 1, _slideMoveController.value),
-      1: 1.0,
+      // 0: lerpDouble(0.75, 1, _slideMoveController.value),
+      0: 1.0,
+      1: (1.0 - _slideMoveController.value).clamp(0.3, 1.0),
     }[index] ?? 1;
   }
 
@@ -76,7 +78,7 @@ class _WordSliderState extends State<WordSlider> with SingleTickerProviderStateM
     double screenHeight = MediaQuery.of(context).size.height;
 
     // Calculate large distance to move the container off-screen
-    double throwDistance = max(600, 0); // Ensures movement beyond screen bounds
+    double throwDistance = max(350, 0); // Ensures movement beyond screen bounds
 
     double radians = _angleInDegree * (pi / 180);
     // double radians = _angle;
@@ -85,10 +87,10 @@ class _WordSliderState extends State<WordSlider> with SingleTickerProviderStateM
 
     Offset throwOffset = Offset(
       cos(radians) * throwDistance * throwDirection, // 🔥 Adjust offset direction
-      sin(radians) * throwDistance,
+      // sin(radians) * throwDistance,
+      0
     );
 
-    print('throwOffset : $throwOffset');
 
     double remainingRotationAngle = 36 - _angleInDegree;
     // double remainingRotationAngle = 36 - 18;
@@ -133,8 +135,7 @@ class _WordSliderState extends State<WordSlider> with SingleTickerProviderStateM
 
   @override
   void initState() {
-    print('initstate called');
-   _slideMoveController = AnimationController(vsync: this, duration: Duration(seconds: 1))..addListener(animationListener);
+   _slideMoveController = AnimationController(vsync: this, duration: Duration(milliseconds: 700))..addListener(animationListener);
     super.initState();
   }
 
@@ -153,28 +154,25 @@ class _WordSliderState extends State<WordSlider> with SingleTickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
-    bool isEnableDrag = context.read<WordBloc>().wordIndex != context.read<WordBloc>().allWords.length -1;
+
     return AnimatedBuilder(
       animation: _slideMoveController,
       builder: (context, _) => Stack(
         fit: StackFit.expand,
         alignment: Alignment.center,
         children: List.generate(2, (index) {
-          print('generated $index');
+
           // final int wordIndex = (_index + 1 - index).toInt();
           return Transform.translate(
             offset: getOffset(index),
             child: Transform.scale(
               scale: getScale(index),
-              child: Transform.rotate(
-                angle: getRotationAngle(index),
-                // angle: degreesToRadians(_angleInDegree),
-                child: Container(
-                  // width: 100,
-                  // height: 100,
-                  color: Colors.white70,
-                  child: DraggableSlider(widget: widget.wordWidget, slideOut: slideOut, isEnableDrag: isEnableDrag)
-                ),
+              child: Container(
+                // width: 100,
+                // height: 100,
+                // color: Colors.white70,
+                child:
+                index == 0 ? WordCardShimmer() : DraggableSlider(widget: widget.wordWidget, slideOut: slideOut)
               ),
             ),
           );

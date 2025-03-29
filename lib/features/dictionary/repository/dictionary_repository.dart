@@ -1,4 +1,5 @@
 import 'package:dictionary_api/dictionary_api.dart';
+import 'package:flutter_improve_vocabulary/core/utility/result.dart';
 import '../utility/get_random_words.dart';
 import 'package:flutter/material.dart';
 
@@ -22,80 +23,39 @@ class DictionaryRepository {
    }
 
 
-  Future<Word> fetchWord(String queryWord) async {
+  Future<Result<Word, DictionaryFailure>> fetchWord(String queryWord) async {
     try {
       final retrivedWord = await _dictionaryApiClient.searchWord(queryWord);
-      return retrivedWord;
+      return Result<Word, DictionaryFailure>(data: retrivedWord);
     } on NoInternetFailure {
-
+        return Result<Word, DictionaryFailure>(failure: NoInternetFailure(wordsRetrived: 0, wordsSkipped: 0, wordsNotSearched: 1));
     } on WordNotFoundFailure {
+      return Result<Word, DictionaryFailure>(failure: WordNotFoundFailure());
 
-    } on UnexpectedFailure {
+    } on UnexpectedFailure catch (err){
+      return Result<Word, DictionaryFailure>(failure: UnexpectedFailure(errorMessage: err.errorMessage));
 
     }
 
   }
 
-  // void fetchRandomWords(int count) async {
-  //   assert(count > 0);
-  //   final Map<int, ({int index, String wordName})> randomWords = GetRandomWords().generateRandomWords(count: count);
-  //
-  //   while (words.length < count) {
-  //     try {
-  //       // itemNo is incrementing no. starting from 1.
-  //       final int itemNo = words.length + 1;
-  //       String wordString = randomWords[itemNo]!.wordName;
-  //
-  //       final retrivedWord = await _dictionaryApiClient.searchWord(wordString);
-  //       words[itemNo] = retrivedWord;
-  //
-  //     } on WordNotFoundFailure catch (_) {
-  //       // Retry mechanism with a max attempt limit
-  //       int maxRetries = 5;
-  //       int attempts = 0;
-  //
-  //       while (attempts < maxRetries) {
-  //         try {
-  //           attempts++;
-  //           final Map<int, ({int index, String wordName})> randomWord = GetRandomWords().generateRandomWords(count: 1);
-  //           final retrivedWord = await _dictionaryApiClient.searchWord(randomWord[1]!.wordName);
-  //
-  //           // If successful, add the word and exit the loop
-  //           words[words.length + 1] = retrivedWord;
-  //           break;
-  //
-  //         } on WordNotFoundFailure {
-  //           // Continue retrying until maxRetries is reached
-  //           if (attempts >= maxRetries) {
-  //             print("Skipping word after $maxRetries failed attempts.");
-  //             break;
-  //           }
-  //         } on WordRequestFailure {
-  //           // If WordRequestFailure occurs, stop the loop immediately
-  //           print("Request failed. Stopping retries.");
-  //           return;
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
 
-  Future<Map<int, Word>> fetchRandomWords(int count) async {
+  Future<Result<List<Word>, DictionaryFailure>> fetchRandomWords(int count) async {
     assert(count > 0);
+    int wordSkipped = 0;
 
-    final Map<int, Word> receivedWords = {};
+    final List<Word> receivedWords = [];
     // get "count" no. of random words from "getRandomWords" class.
-    final Map<int, ({int index, String wordName})> randomWords = GetRandomWords().generateRandomWords(count: count);
-    // randomWords[3] = (index: 12, wordName: 'ddd');
-    // randomWords[5] = (index: 32, wordName: 'fff');
+    final List<({int index, String wordName})> randomWords = GetRandomWords().generateRandomWords(count: count);
+
     // for loop all the words and search each word one by one.
     // if successfully retrived the word, store it in "words" map.
-    for (var entry in randomWords.values) {
+    for (var entry in randomWords) {
       try {
         final retrivedWord = await _dictionaryApiClient.searchWord(entry.wordName);
         wordsAvailableOnApi[wordsAvailableOnApi.length + 1] = retrivedWord;
         GetRandomWords().wordsAvailableInApi(entry);
-        receivedWords[receivedWords.length + 1] = retrivedWord;
+        receivedWords.add(retrivedWord);
 
       } on WordNotFoundFailure {
 
@@ -108,39 +68,67 @@ class DictionaryRepository {
         // Retry mechanism with max attempts for 1 new random word get from
         // "GetRandomWord" class.
         int maxRetries = 5;
+
         for (int i = 0; i < maxRetries; i++) {
           try {
-            final Map<int, ({int index, String wordName})> newRandomWord = GetRandomWords().generateRandomWords(count: 1);
-            final retrivedWord = await _dictionaryApiClient.searchWord(newRandomWord[1]!.wordName);
+            final List<({int index, String wordName})> newRandomWord = GetRandomWords().generateRandomWords(count: 1);
+            final retrivedWord = await _dictionaryApiClient.searchWord(newRandomWord.first.wordName);
 
             // If successful, add the word in "words" map and exit retry loop
             wordsAvailableOnApi[wordsAvailableOnApi.length + 1] = retrivedWord;
-            GetRandomWords().wordsAvailableInApi(newRandomWord[1]!);
-            receivedWords[receivedWords.length + 1] = retrivedWord;
+            GetRandomWords().wordsAvailableInApi(newRandomWord.first);
+            receivedWords.add(retrivedWord);
             break;
 
           } on WordNotFoundFailure {
             // Continue retrying in the same loop
             if (i == maxRetries - 1) {
-              print("Skipping word after $maxRetries failed attempts.");
+              debugPrint("Skipping word after $maxRetries failed attempts.");
+              wordSkipped++;
             }
 
-          } on WordRequestFailure {
-            // "WordRequestFailure" is meant for No Internet Connection error.
+            // we come here when we encounter NoInternetFailure when executing retry word block.
+          } on NoInternetFailure {
+
             // If WordRequestFailure occurs, stop the entire function and
-            // "fetchRandomWords" returns the updated "words" map.
-            print("Request failed. Stopping word fetching.");
+            // this method"fetchRandomWords" returns the updated "words" map.
+            int wordsNotSearched = count - (receivedWords.length + wordSkipped);
 
-            throw WordRequestFailure();
-          } catch(err){
+            return Result<List<Word>, DictionaryFailure>(
+              data: receivedWords,
+              failure: NoInternetFailure(wordsRetrived: receivedWords.length, wordsSkipped: wordSkipped, wordsNotSearched: wordsNotSearched),
+            );
+          } on UnexpectedFailure catch(unExpectedFailureObject) {
+            debugPrint('printing error from dictionary_repository.dart, '
+                'this error is bubbled up to here(dictionary_repository.dart) from dictionary_api_client.dart');
 
-            print('error catch on repo : $err');
-            rethrow;
+            return Result(data: receivedWords, failure: UnexpectedFailure(errorMessage: unExpectedFailureObject.errorMessage));
           }
         }
       }
+      // no Internet failure when code didn't enter retry block.
+
+      // when we starts executing this whole function are immediately received no internet failure, we come here.
+      on NoInternetFailure
+      {
+
+        // If WordRequestFailure occurs, stop the entire function and
+        // this method"fetchRandomWords" returns the updated "words" map.
+        int wordsNotSearched = count - (receivedWords.length + wordSkipped);
+
+        return Result<List<Word>, DictionaryFailure>(
+          data: receivedWords,
+          failure: NoInternetFailure(wordsRetrived: receivedWords.length, wordsSkipped: wordSkipped, wordsNotSearched: wordsNotSearched),
+        );
+      }
+      on UnexpectedFailure catch(unExpectedFailureObject) {
+        debugPrint('printing error from dictionary_repository.dart, '
+            'this error is bubbled up to here(dictionary_repository.dart) from dictionary_api_client.dart');
+
+        return Result(data: receivedWords, failure: UnexpectedFailure(errorMessage: unExpectedFailureObject.errorMessage));
+      }
     }
-    return receivedWords;
+    return Result<List<Word>, DictionaryFailure>(data: receivedWords, failure: wordSkipped > 0 ? PartialDataFailure(fetchedWordCount: receivedWords.length, failedWordsCount: wordSkipped) : null);
   }
 
 

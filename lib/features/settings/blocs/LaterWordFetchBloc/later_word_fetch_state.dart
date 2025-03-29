@@ -1,10 +1,27 @@
-part of 'latter_word_fetch_bloc.dart';
+part of 'later_word_fetch_bloc.dart';
 
-sealed class LatterWordFetchState extends Equatable {
-  const LatterWordFetchState();
+sealed class LaterWordFetchState extends Equatable {
+  const LaterWordFetchState();
 }
 
-final class LatterWordFetchInitial extends LatterWordFetchState {
+final class LaterWordFetchInitialState extends LaterWordFetchState {
+
+  final int count;
+
+  const LaterWordFetchInitialState({required this.count});
+
   @override
   List<Object> get props => [];
+}
+
+
+
+final class LaterWordFetchCountChanged extends LaterWordFetchState {
+
+  final int count;
+
+  const LaterWordFetchCountChanged({required this.count});
+
+  @override
+  List<Object?> get props => [];
 }

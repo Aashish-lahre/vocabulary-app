@@ -1,12 +1,15 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_improve_vocabulary/features/settings/blocs/LaterWordFetchBloc/later_word_fetch_bloc.dart';
+import 'package:flutter_improve_vocabulary/features/word/bloc/word_bloc.dart';
 
 class DraggableSlider extends StatefulWidget {
   final Widget widget;
-  final bool isEnableDrag;
+  // final bool isEnableDrag;
   final void Function({required double angleInDegree, required Offset endOffset, required Offset startOffset,required int direction}) slideOut;
-  const DraggableSlider({required this.widget, this.isEnableDrag = true, required this.slideOut, super.key});
+  const DraggableSlider({required this.widget, required this.slideOut, super.key});
 
   @override
   State<DraggableSlider> createState() => _DraggableSliderState();
@@ -22,6 +25,8 @@ class _DraggableSliderState extends State<DraggableSlider> with SingleTickerProv
    Size slideSize = Size.zero;
   late Offset initialSlideTopLeftPosition;
   late Offset initialSlideTopRightPosition;
+  bool isEnableDrag = true;
+  bool _isPanEndTriggered = false; // To prevent multiple manual panEnd triggers
 
 
 
@@ -94,6 +99,16 @@ class _DraggableSliderState extends State<DraggableSlider> with SingleTickerProv
     return renderBox?.localToGlobal(Offset(renderBox.size.width, 0)) ?? Offset.zero;
   }
 
+  Offset get getCurrentBottomLeftPosition {
+    final renderBox = (_widgetKey.currentContext?.findRenderObject() as RenderBox?);
+    return renderBox?.localToGlobal(Offset(0, renderBox.size.height)) ?? Offset.zero;
+  }
+
+  Offset get getCurrentBottomRightPosition {
+    final renderBox = (_widgetKey.currentContext?.findRenderObject() as RenderBox?);
+    return renderBox?.localToGlobal(Offset(renderBox.size.width, renderBox.size.height)) ?? Offset.zero;
+  }
+
 
 
 
@@ -132,45 +147,117 @@ class _DraggableSliderState extends State<DraggableSlider> with SingleTickerProv
 
 
   double radiansToDegrees(double radians) {
-    print('rotate : ${radians * (180 / pi)}');
+
     return radians * (180 / pi);
   }
 
   void onPanStart(DragStartDetails details) {
+
     if(_restoreController.isAnimating) return;
     setState(() {
+      isEnableDrag = context.read<WordBloc>().wordIndex != context.read<WordBloc>().allWords.length -1;
       _startOffset = details.localPosition;
+      _isPanEndTriggered = false;
     });
 
   }
+
+
+
   void onPanUpdate(DragUpdateDetails details) {
     if(_restoreController.isAnimating) return;
+    if(!isEnableDrag) {
+        if(_isPanEndTriggered != true) {
+          if (getCurrentTopLeftPosition.dx <= 0 || getCurrentBottomLeftPosition.dx <= 0) {
+            // Moving left (prevent going beyond the left screen boundary)
+            setState(() {
+              _isPanEndTriggered = true;
+            });
+            print('going to add laterLoadWord');
+            context.read<WordBloc>().add(LaterLoadWords(noOfWordsToLoad: context.read<LaterWordFetchBloc>().laterWordFetchLimit));
+            print('going to call restore position');
+            restorePosition();
+
+            return;
+          }
+
+          if (getCurrentTopRightPosition.dx >= screenSize.width || getCurrentBottomRightPosition.dx >= screenSize.height) {
+            // Moving right (prevent going beyond the right screen boundary)
+            setState(() {
+              _isPanEndTriggered = true;
+            });
+            context.read<WordBloc>().add(LaterLoadWords(noOfWordsToLoad:  context.read<LaterWordFetchBloc>().laterWordFetchLimit));
+            restorePosition();
+
+            return;
+          }
+
+          if (getCurrentTopLeftPosition.dy <= 0 || getCurrentTopRightPosition.dy <= 0) {
+            // Moving top (prevent going beyond the top screen boundary)
+            setState(() {
+              _isPanEndTriggered = true;
+            });
+            context.read<WordBloc>().add(LaterLoadWords(noOfWordsToLoad:  context.read<LaterWordFetchBloc>().laterWordFetchLimit));
+            restorePosition();
+            return;
+          }
+
+          if (getCurrentBottomLeftPosition.dy >= screenSize.height || getCurrentBottomRightPosition.dy >= screenSize.height) {
+            // Moving bottom (prevent going beyond the bottom screen boundary)
+            setState(() {
+              _isPanEndTriggered = true;
+            });
+            context.read<WordBloc>().add(LaterLoadWords(noOfWordsToLoad:  context.read<LaterWordFetchBloc>().laterWordFetchLimit));
+            restorePosition();
+            return;
+          }
+        } else {
+          return;
+        }
+
+
+    }
+
+
+
     setState(() {
       _endOffset = details.localPosition - _startOffset;
+      // _endOffset = details.globalPosition - _startOffset;
+
+      _angle = getAngle;
     });
 
 
   }
   void onPanEnd(DragEndDetails end) {
+    print('onPanEnd');
     if(_restoreController.isAnimating) return;
-    double leftX = getCurrentTopLeftPosition.dx;
-    double rightX = getCurrentTopRightPosition.dx;
+    if(!_isPanEndTriggered) {
+      double leftX = getCurrentTopLeftPosition.dx;
+      double rightX = getCurrentTopRightPosition.dx;
 
-    if (leftX < outSizeLimitLeft) {
-      // Entire widget has moved past the left limit
-      handleSlideOut(angle: getAngle, endOffset: _endOffset, startOffset: _startOffset, direction: -1);
-    } else if (rightX > outSizeLimitRight) {
-      // Entire widget has moved past the right limit
-      handleSlideOut(angle: getAngle, endOffset: _endOffset, startOffset: _startOffset, direction: 1);
+      if (leftX < outSizeLimitLeft) {
+        // Entire widget has moved past the left limit
+        handleSlideOut(angle: getAngle, endOffset: _endOffset, startOffset: _startOffset, direction: -1);
+      } else if (rightX > outSizeLimitRight) {
+        // Entire widget has moved past the right limit
+        handleSlideOut(angle: getAngle, endOffset: _endOffset, startOffset: _startOffset, direction: 1);
 
-    } else {
-      restorePosition();
+      } else {
+        restorePosition();
 
+      }
+      setState(() {
+        _isPanEndTriggered = true;
+      });
     }
+
+
     // restorePosition();
   }
 
   void restorePosition() {
+    if(_restoreController.isAnimating) return;
     _restoreController.forward();
   }
 
@@ -186,7 +273,7 @@ class _DraggableSliderState extends State<DraggableSlider> with SingleTickerProv
   Widget build(BuildContext context) {
 
     final child = SizedBox(key: _widgetKey, child: widget.widget,);
-    if(!widget.isEnableDrag) return child;
+    // if(!widget.isEnableDrag) return child;
 
     return GestureDetector(
       onPanStart: onPanStart,
@@ -199,7 +286,7 @@ class _DraggableSliderState extends State<DraggableSlider> with SingleTickerProv
           return Transform.translate(
               offset: _endOffset * value,
               child: Transform.rotate(
-                  angle: getAngle,
+                  angle: _angle * value,
                   child: child,
               )
           );

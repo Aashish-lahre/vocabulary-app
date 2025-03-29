@@ -13,6 +13,18 @@ class LoadWords extends WordEvent {
   List<Object?> get props => [noOfWordToSearch];
 }
 
+class LaterLoadWords extends WordEvent {
+  final int noOfWordsToLoad;
+
+  const LaterLoadWords({required this.noOfWordsToLoad});
+
+  @override
+
+  List<Object?> get props => [noOfWordsToLoad];
+
+
+}
+
 
 class SearchWord extends WordEvent {
 
