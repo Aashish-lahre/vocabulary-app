@@ -253,7 +253,7 @@ class HomeScreen extends StatelessWidget {
           Icons.settings,
           color: Theme.of(context).colorScheme.onPrimaryFixed,
         ),
-      ),
+),
     );
   }
 }

@@ -61,8 +61,14 @@ class VocabularyAppView extends StatelessWidget {
   Widget build(BuildContext context) {
 
     
-    return BlocBuilder<ThemeCubit, ThemeType>(
+    return BlocBuilder<ThemeCubit, ThemeType?>(
   builder: (context, state) {
+    if(state == null) {
+      return MaterialApp(
+        theme: ThemeData.light(),
+        home: SizedBox.expand(),
+      );
+    }
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
