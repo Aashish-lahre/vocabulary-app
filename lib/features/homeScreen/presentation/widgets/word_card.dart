@@ -16,7 +16,7 @@ class WordCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        color: Colors.white,
+        color: colorScheme.primaryContainer,
         boxShadow: [
           BoxShadow(offset: Offset(0, 4), blurRadius: 8, spreadRadius: 3, color: Color(0x40000000)),
         ],
@@ -36,18 +36,9 @@ class WordCard extends StatelessWidget {
               spacing: 20,
               children: [
                 Gap(10),
-                // AnimatedTextKit(
-                //     isRepeatingAnimation: false,
-                //     displayFullTextOnTap: true,
-                //
-                //     animatedTexts: [
-                //
-                //       TyperAnimatedText(word.word, textStyle: textTheme.displayMedium?.copyWith(fontWeight: FontWeight.bold, color: colorScheme.onSurface)),
-                //     ],
-                // ),
-                Text(word.word, style: textTheme.displayMedium?.copyWith(fontWeight: FontWeight.bold, color: colorScheme.onSurface)),
+                Text(word.word, style: textTheme.displayMedium?.copyWith(fontWeight: FontWeight.bold, color: colorScheme.onPrimaryContainer)),
 
-                IconButton(onPressed: () {}, icon: Icon(Icons.volume_up_rounded, color: colorScheme.onSurface,)),
+                IconButton(onPressed: () {}, icon: Icon(Icons.volume_up_rounded, color: colorScheme.onPrimaryContainer,)),
               ],
             ),
             Gap(20),
@@ -56,14 +47,14 @@ class WordCard extends StatelessWidget {
             Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(5),
-                color: colorScheme.primary,
+                color: colorScheme.secondary,
               ),
               padding: EdgeInsets.all(8),
               child: Row(
                 spacing: 30,
                 children: [
-                  Icon(Icons.arrow_downward_rounded, color: colorScheme.onPrimary,),
-                  Text('Chose Definition to learn.', style: textTheme.bodyMedium?.copyWith(color: colorScheme.onPrimary),),
+                  Icon(Icons.arrow_downward_rounded, color: colorScheme.onSecondary,),
+                  Text('Chose Definition to learn.', style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSecondary),),
                 ],
               ),
             ),
@@ -93,7 +84,7 @@ Widget _buildDefinitionContainer(BuildContext context, Definition definition) {
     margin: EdgeInsets.all(8),
     // alignment: Alignment.center,
     decoration: BoxDecoration(
-      color: Theme.of(context).colorScheme.primaryContainer,
+      color: Theme.of(context).colorScheme.primaryFixedDim,
       borderRadius: BorderRadius.circular(10),
       boxShadow: [
         BoxShadow(
@@ -104,12 +95,13 @@ Widget _buildDefinitionContainer(BuildContext context, Definition definition) {
         )
       ],
     ),
-    child: Text(definition.definition, style: textTheme.bodyMedium?.copyWith(color: colorScheme.onPrimaryContainer),),
+    child: Text(definition.definition, style: textTheme.bodyMedium?.copyWith(color: colorScheme.onPrimaryFixed
+    ),),
   );
 }
 
 class Definitions extends StatelessWidget {
-   Definitions({required this.meaning, super.key});
+   const Definitions({required this.meaning, super.key});
 
   final Meaning meaning;
 
@@ -124,7 +116,7 @@ class Definitions extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(meaning.partOfSpeech, style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: colorScheme.onSurface),),
+          Text(meaning.partOfSpeech, style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: colorScheme.onPrimaryContainer),),
           ListView.builder(
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),

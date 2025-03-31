@@ -137,6 +137,10 @@ class WordBloc extends Bloc<WordEvent, WordState> {
           allWords.addAll(receivedWords.data!);
         }
 
+        if(receivedWords.failure!.runtimeType is NoInternetFailure) {
+          allWords.addAll(receivedWords.data!);
+        }
+
         _mapFailuresToStates(receivedWords.failure!, emit);
       }
 

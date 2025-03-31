@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_improve_vocabulary/core/network/internet_bloc.dart';
 import 'package:flutter_improve_vocabulary/core/theme/color_theme.dart';
+import 'package:flutter_improve_vocabulary/core/theme/cubit/theme_cubit.dart';
+import 'package:flutter_improve_vocabulary/core/theme/cubit/theme_cubit.dart';
 import 'package:flutter_improve_vocabulary/features/homeScreen/presentation/screens/home_screen.dart';
 import 'package:flutter_improve_vocabulary/features/settings/blocs/LaterWordFetchBloc/later_word_fetch_bloc.dart';
 import 'package:flutter_improve_vocabulary/features/word/bloc/word_bloc.dart';
@@ -24,6 +26,10 @@ class VocabularyApp extends StatelessWidget {
 
       child: MultiBlocProvider(
         providers: [
+
+          BlocProvider(
+            create: (_) => ThemeCubit(),
+          ),
 
           BlocProvider(
               lazy: false,
@@ -53,11 +59,15 @@ class VocabularyAppView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     
+    return BlocBuilder<ThemeCubit, ThemeType>(
+  builder: (context, state) {
+    print('in bloc builder : $state');
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: lightMonochrome,
+        colorScheme: themes[state],
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -65,6 +75,8 @@ class VocabularyAppView extends StatelessWidget {
       ).copyWith(textTheme: GoogleFonts.akatabTextTheme()),
       home: HomeScreen(initialWordFetchLimit: initialWordFetchLimit),
     );
+  },
+);
   }
 }
 

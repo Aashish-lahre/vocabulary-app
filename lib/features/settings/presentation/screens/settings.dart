@@ -1,8 +1,10 @@
 import 'package:easy_radio/easy_radio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_improve_vocabulary/core/theme/color_theme.dart';
 import 'package:gap/gap.dart';
 
+import '../../../../core/theme/cubit/theme_cubit.dart';
 import '../../blocs/LaterWordFetchBloc/later_word_fetch_bloc.dart';
 
 
@@ -50,73 +52,77 @@ final ValueNotifier<int> _laterWordFetchCountController = ValueNotifier<int>(1);
   Widget build(BuildContext context) {
     return
 
-     SafeArea(
-         child: Scaffold(
-           appBar: _Appbar(),
-           body: Padding(
-             padding: const EdgeInsets.all(8.0),
-             child: LayoutBuilder(
-               builder: (context, constraints) {
-                 return Column(
-                   spacing: 10,
+     Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
+       appBar: _Appbar(),
+       body: Padding(
+         padding: const EdgeInsets.all(8.0),
+         child: LayoutBuilder(
+           builder: (context, constraints) {
+             return Column(
+               spacing: 10,
+               children: [
+                 // Appearance container
+                 Container(
+                   width: constraints.maxWidth,
+                   padding: EdgeInsets.all(15),
+                   decoration: BoxDecoration(
+                     borderRadius: BorderRadius.circular(20),
+                     color: Theme.of(context).colorScheme.surfaceContainer,
+                   ),
+                   // height: 200,
+                   child: Column(
+                     spacing: 30,
+                     mainAxisSize: MainAxisSize.min,
+                     children: [
+
+                       _AppearanceWidget(constraints: constraints),
+
+                       // _AccentColorWidget(constraints: constraints,),
+
+                       // _TextSizeSliderWidget(constraints: constraints),
+                     ],
+                   ),
+                 ),
+
+                 // LaterFetchWord Slider container
+                 Container(
+                   width: constraints.maxWidth,
+                   padding: EdgeInsets.all(15),
+                   decoration: BoxDecoration(
+                     borderRadius: BorderRadius.circular(20),
+                     color: Theme.of(context).colorScheme.surfaceContainer,
+                     // color: Colors.pink.shade200,
+
+                   ),
+                   child: Column(
+                     spacing: 30,
+                     mainAxisSize: MainAxisSize.min,
+                     children: [
+                       _LaterWordFetchSliderWidget(constraints: constraints, laterWordFetchCountController: _laterWordFetchCountController,),
+
+                       _TextAnimationWidget(constraints: constraints)
+
+                     ],
+                   ),
+                 ),
+                 Row(
+                   mainAxisAlignment: MainAxisAlignment.end,
                    children: [
-                     Container(
-                       width: constraints.maxWidth,
-                       padding: EdgeInsets.all(15),
-                       decoration: BoxDecoration(
-                         borderRadius: BorderRadius.circular(20),
-                         color: Color(0xff363636ff),
-                       ),
-                       // height: 200,
-                       child: Column(
-                         spacing: 30,
-                         mainAxisSize: MainAxisSize.min,
-                         children: [
-
-                           _AppearanceWidget(constraints: constraints),
-
-                           _AccentColorWidget(constraints: constraints,),
-
-                           _TextSizeSliderWidget(constraints: constraints),
-                         ],
-                       ),
-                     ),
-                     Container(
-                       width: constraints.maxWidth,
-                       padding: EdgeInsets.all(15),
-                       decoration: BoxDecoration(
-                         borderRadius: BorderRadius.circular(20),
-                         color: Color(0xff363636ff),
-                         // color: Colors.pink.shade200,
-
-                       ),
-                       child: Column(
-                         spacing: 30,
-                         mainAxisSize: MainAxisSize.min,
-                         children: [
-                           _LaterWordFetchSliderWidget(constraints: constraints, laterWordFetchCountController: _laterWordFetchCountController,),
-
-                           _TextAnimationWidget(constraints: constraints)
-
-                         ],
-                       ),
-                     ),
-                     Row(
-                       mainAxisAlignment: MainAxisAlignment.end,
-                       children: [
-                         ElevatedButton(onPressed: () {
-                           context.read<LaterWordFetchBloc>().add(ChangeLaterWordFetchCount(changedCount: _laterWordFetchCountController.value));
-                           Navigator.of(context).pop();
-                         }, child: Text('Save'))
-                       ],
-                     ),
+                     FilledButton(
+                         
+                         onPressed: () {
+                       context.read<LaterWordFetchBloc>().add(ChangeLaterWordFetchCount(changedCount: _laterWordFetchCountController.value));
+                       Navigator.of(context).pop();
+                     }, child: Text('Save'))
                    ],
-                 );
-               }
-             ),
-           ),
+                 ),
+               ],
+             );
+           }
          ),
-       );
+       ),
+     );
 
 
   }
@@ -137,27 +143,10 @@ class _Appbar extends StatelessWidget implements PreferredSizeWidget{
           // spacing: 50,
           children: [
             Gap(20),
-            GestureDetector(
-              onTap: () => Navigator.of(context).pop(),
-              child: Container(
-                // alignment: Alignment.center,
-                // padding: EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  boxShadow: [
-                    BoxShadow(color: Theme.of(context).colorScheme.primary.withAlpha((0.25 * 255).toInt()))
-                  ],
-                  shape: BoxShape.circle,
-
-
-                ),
-                child: Center(child: Padding(
-                  padding: const EdgeInsets.all(15.0),
-                  child: Icon(Icons.arrow_back_rounded),
-                )),
-              ),
-            ),
+            IconButton(onPressed: () => Navigator.of(context).pop(), icon: Icon(Icons.arrow_back_rounded, color: Theme.of(context).colorScheme.onSurface
+              ,)),
             Gap(20),
-            Text('Settings', style: Theme.of(context).textTheme.titleLarge,),
+            Text('Settings', style: Theme.of(context).textTheme.titleLarge!.copyWith(color: Theme.of(context).colorScheme.onSurface),),
 
 
           ],
@@ -199,8 +188,8 @@ class _AppearanceWidgetState extends State<_AppearanceWidget> {
         Row(
           spacing: 10,
           children: [
-            Icon(Icons.sunny),
-            Text('Appearance'),
+            Icon(Icons.sunny, color: Theme.of(context).colorScheme.onSecondaryContainer,),
+            Text('Appearance', style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Theme.of(context).colorScheme.onSecondaryContainer),),
           ],
         ),
         Gap(20),
@@ -210,15 +199,17 @@ class _AppearanceWidgetState extends State<_AppearanceWidget> {
           child: ListView.builder(
             shrinkWrap: true,
             scrollDirection: Axis.horizontal,
-              itemCount: 3,
+              itemCount: themes.length,
               itemBuilder: (context, index) {
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 5.0),
               child: GestureDetector(
                 onTap: () {
                   setState(() {
+                    context.read<ThemeCubit>().changeThemeType(themes.keys.toList()[index]);
                     _selectedIndex = index;
                   });
+
                 },
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -227,20 +218,21 @@ class _AppearanceWidgetState extends State<_AppearanceWidget> {
                     Container(
                       clipBehavior: Clip.antiAlias,
                       decoration: BoxDecoration(
-                        // color: Colors.blue,
+                        color: themes[themes.keys.toList()[index]]!.primary,
                         borderRadius: BorderRadius.circular(10),
                         border:
-                         _selectedIndex == index ? Border.all(color: Colors.grey, style: BorderStyle.solid, width: 4) : null,
+                         _selectedIndex == index ? Border.all(color: Theme.of(context).colorScheme.onPrimary, style: BorderStyle.solid, width: 4) : null,
                       ),
 
                       width: widget.constraints.maxWidth * 0.28,
                       height: widget.constraints.maxWidth * 0.20,
-                      child:
-                      ClipRRect(
-                          borderRadius: BorderRadius.circular(5),
-                          child: Image.asset('assets/images/mode_$index.png', fit: BoxFit.cover,)),
+
+                      // child:
+                      // ClipRRect(
+                      //     borderRadius: BorderRadius.circular(5),
+                      //     child: Image.asset('assets/images/mode_$index.png', fit: BoxFit.cover,)),
                     ),
-                    Text(themeModeLabel(index))
+                    Text(themes.keys.toList()[index].name, style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Theme.of(context).colorScheme.onSecondaryContainer),)
                   ],
                 ),
               ),
@@ -255,7 +247,7 @@ class _AppearanceWidgetState extends State<_AppearanceWidget> {
 
 class _AccentColorWidget extends StatefulWidget {
   final BoxConstraints constraints;
-  const _AccentColorWidget({required this.constraints, super.key});
+  const _AccentColorWidget({required this.constraints});
 
   @override
   State<_AccentColorWidget> createState() => _AccentColorWidgetState();
@@ -273,7 +265,7 @@ class _AccentColorWidgetState extends State<_AccentColorWidget> {
               spacing: 10,
               children: [
                 Icon(Icons.palette_outlined),
-                Text('Accent color')
+                Text('Accent color', style: TextStyle(color: Theme.of(context).colorScheme.onPrimaryContainer),)
               ],)),
         Expanded(
           // width: constraints.maxWidth * .65,
@@ -405,27 +397,22 @@ class _LaterWordFetchSliderWidgetState extends State<_LaterWordFetchSliderWidget
       children: [
         // Flexible(
         //   child:
-          Container(
-            // color: Colors.blue.shade200,
-
-            // width: widget.constraints.maxWidth * .3,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              spacing: 10,
-              children: [
-                Icon(Icons.text_fields_rounded),
-                Text('Fetch Word')
-              ],
-            ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 10,
+            children: [
+              Icon(Icons.text_fields_rounded),
+              Text('Fetch Word', style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Theme.of(context).colorScheme.onSecondaryContainer),)
+            ],
           ),
         // ),
-        Container(
+        SizedBox(
           // color: Colors.cyan.shade200,
           width: widget.constraints.maxWidth * .6,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('1'),
+              Text('1', style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Theme.of(context).colorScheme.onSecondaryContainer),),
               SliderTheme(
                 data: SliderTheme.of(context).copyWith(
                   overlayShape: RoundSliderOverlayShape(overlayRadius: 8.0), ),// Default is 24.0
@@ -446,7 +433,7 @@ class _LaterWordFetchSliderWidgetState extends State<_LaterWordFetchSliderWidget
                             ),
 
               ),
-              Text('10')
+              Text('10', style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Theme.of(context).colorScheme.onSecondaryContainer),)
             ],
           ),
         ),
@@ -467,24 +454,29 @@ class _TextAnimationWidget extends StatefulWidget {
 class _TextAnimationWidgetState extends State<_TextAnimationWidget> {
 
 
-  final List<DropdownMenuItem<AnimationType>> _animationType = [
-    DropdownMenuItem(value: AnimationType.rotate,child: Text('Rotate'),),
-    DropdownMenuItem(value: AnimationType.fade,child: Text('Fade'),),
-    DropdownMenuItem(value: AnimationType.typer,child: Text('Typer'),),
-    DropdownMenuItem(value: AnimationType.typewriter,child: Text('Typewriter'),),
-    DropdownMenuItem(value: AnimationType.scale,child: Text('Scale'),),
-    DropdownMenuItem(value: AnimationType.colorize,child: Text('Colorize'),),
-    DropdownMenuItem(value: AnimationType.textLiquidFill,child: Text('TextLiquidFill'),),
-    DropdownMenuItem(value: AnimationType.wavy,child: Text('Wavy'),),
-    DropdownMenuItem(value: AnimationType.flicker,child: Text('Flicker'),),
+  List<DropdownMenuItem<AnimationType>> _animationType(BuildContext context) {
+    TextStyle textStyle = Theme.of(context).textTheme.bodyMedium!.copyWith(color: Theme.of(context).colorScheme.onSecondaryContainer);
+
+    return [
+      DropdownMenuItem(value: AnimationType.rotate,child: Text('Rotate', style: textStyle,),),
+      DropdownMenuItem(value: AnimationType.fade,child: Text('Fade', style: textStyle,),),
+      DropdownMenuItem(value: AnimationType.typer,child: Text('Typer', style: textStyle,),),
+      DropdownMenuItem(value: AnimationType.typewriter,child: Text('Typewriter', style: textStyle,),),
+      DropdownMenuItem(value: AnimationType.scale,child: Text('Scale', style: textStyle,),),
+      DropdownMenuItem(value: AnimationType.colorize,child: Text('Colorize', style: textStyle,),),
+      DropdownMenuItem(value: AnimationType.textLiquidFill,child: Text('TextLiquidFill', style: textStyle,),),
+      DropdownMenuItem(value: AnimationType.wavy,child: Text('Wavy', style: textStyle,),),
+      DropdownMenuItem(value: AnimationType.flicker,child: Text('Flicker', style: textStyle,),),
 
 
-  ];
+    ];
+  }
 
   AnimationType? _selectedAnimationType = AnimationType.typer;
 
   @override
   Widget build(BuildContext context) {
+
     return Row(
       children: [
         Expanded(
@@ -493,12 +485,12 @@ class _TextAnimationWidgetState extends State<_TextAnimationWidget> {
               spacing: 10,
               children: [
           Icon(Icons.animation),
-          Text('Text animation'),
+          Text('Text animation', style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Theme.of(context).colorScheme.onSecondaryContainer),),
         ],)),
 
         Expanded(
             child: DropdownButton(
-                items: _animationType,
+                items: _animationType(context),
                 value: _selectedAnimationType,
                 onChanged: (changedType) {
                   setState(() {

@@ -34,14 +34,10 @@ class _WordCardShimmerState extends State<WordCardShimmer> with SingleTickerProv
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(offset: Offset(0, 4), blurRadius: 8, spreadRadius: 3, color: Color(0x40000000)),
-        ],
-      ),
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      color: Theme.of(context).colorScheme.primaryContainer,
+
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -57,7 +53,7 @@ class _WordCardShimmerState extends State<WordCardShimmer> with SingleTickerProv
               spacing: 20,
               children: [
                 Gap(10),
-                AnimatedSkeleton(listenable: _animationController, child: Container(width: 150, height: 40, decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: Colors.grey.shade200),),),
+                buildAnimatedSkeleton(width: 150, height: 40),
                 IconButton(onPressed: () {}, icon: Icon(Icons.volume_up_rounded, color: colorScheme.onSurface,)),
               ],
             ),
@@ -67,14 +63,14 @@ class _WordCardShimmerState extends State<WordCardShimmer> with SingleTickerProv
             Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(5),
-                color: colorScheme.primary,
+                color: colorScheme.secondary,
               ),
               padding: EdgeInsets.all(8),
               child: Row(
                 spacing: 30,
                 children: [
-                  Icon(Icons.arrow_downward_rounded, color: colorScheme.onPrimary,),
-                  Text('Chose Definition to learn.', style: textTheme.bodyMedium?.copyWith(color: colorScheme.onPrimary),),
+                  Icon(Icons.arrow_downward_rounded, color: colorScheme.onSecondary,),
+                  Text('Chose Definition to learn.', style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSecondary),),
                 ],
               ),
             ),
@@ -94,9 +90,11 @@ class _WordCardShimmerState extends State<WordCardShimmer> with SingleTickerProv
       ),
     );
   }
+
+  AnimatedSkeleton buildAnimatedSkeleton({required double width, required double height}) => AnimatedSkeleton(listenable: _animationController, child: Container(width: width, height: height, decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: Theme.of(context).colorScheme.primary),),);
 }
 
-Widget _buildDefinitionContainer(AnimationController animationController) {
+Widget _buildDefinitionContainer(BuildContext context, AnimationController animationController) {
   return AnimatedSkeleton(
     listenable: animationController,
     child: Container(
@@ -104,7 +102,7 @@ Widget _buildDefinitionContainer(AnimationController animationController) {
       margin: EdgeInsets.all(8),
       // alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: Colors.grey.shade200,
+          color: Theme.of(context).colorScheme.primary,
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
@@ -134,13 +132,13 @@ class Definitions extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          AnimatedSkeleton(listenable: animationController, child: Container(width: 100, height: 40, decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: Colors.grey.shade200),),),
+          AnimatedSkeleton(listenable: animationController, child: Container(width: 100, height: 40, decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: Theme.of(context).colorScheme.primary),),),
           ListView.builder(
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
               itemCount: 3,
               itemBuilder: (_, index) {
-                return _buildDefinitionContainer(animationController);
+                return _buildDefinitionContainer(context, animationController);
               }),
         ],
       ),

@@ -25,10 +25,10 @@ class HomeErrorScreen extends StatelessWidget {
           children: [
             Theme(
                 data: Theme.of(context).copyWith(textTheme: GoogleFonts.eaterTextTheme()),
-                child: Text('Oops!', style: Theme.of(context).textTheme.headlineLarge!.copyWith(fontSize: 70),)),
-            Text(errorData.errorMessage, style: Theme.of(context).textTheme.bodyLarge,),
+                child: Text('Oops!', style: Theme.of(context).textTheme.headlineLarge!.copyWith(fontSize: 70, color: Theme.of(context).colorScheme.onSurface),)),
+            Text(errorData.errorMessage, style: Theme.of(context).textTheme.bodyLarge!.copyWith(color: Theme.of(context).colorScheme.onSurface),),
             if(HomeErrorType.internet == errorData.homeErrorType)
-            ElevatedButton(onPressed: () => AppRestartWidget.restartApp(context), child: Text('Retry'))
+            FilledButton(onPressed: () => AppRestartWidget.restartApp(context), child: Text('Retry'))
           ],
         ),
       ),

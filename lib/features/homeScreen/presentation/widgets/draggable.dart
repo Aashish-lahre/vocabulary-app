@@ -7,9 +7,9 @@ import 'package:flutter_improve_vocabulary/features/word/bloc/word_bloc.dart';
 
 class DraggableSlider extends StatefulWidget {
   final Widget widget;
-  // final bool isEnableDrag;
+  final int allWordsLength;
   final void Function({required double angleInDegree, required Offset endOffset, required Offset startOffset,required int direction}) slideOut;
-  const DraggableSlider({required this.widget, required this.slideOut, super.key});
+  const DraggableSlider({required this.widget, required this.allWordsLength, required this.slideOut, super.key});
 
   @override
   State<DraggableSlider> createState() => _DraggableSliderState();
@@ -151,11 +151,15 @@ class _DraggableSliderState extends State<DraggableSlider> with SingleTickerProv
     return radians * (180 / pi);
   }
 
-  void onPanStart(DragStartDetails details) {
+  void onPanStart(DragStartDetails details, int allWordsLength) {
 
     if(_restoreController.isAnimating) return;
+    int currentIndex = context.read<WordBloc>().wordIndex;
+    print('current index : $currentIndex');
+    print('words length : $allWordsLength');
+
     setState(() {
-      isEnableDrag = context.read<WordBloc>().wordIndex != context.read<WordBloc>().allWords.length -1;
+      isEnableDrag =  currentIndex != allWordsLength -1;
       _startOffset = details.localPosition;
       _isPanEndTriggered = false;
     });
@@ -275,8 +279,9 @@ class _DraggableSliderState extends State<DraggableSlider> with SingleTickerProv
     final child = SizedBox(key: _widgetKey, child: widget.widget,);
     // if(!widget.isEnableDrag) return child;
 
-    return GestureDetector(
-      onPanStart: onPanStart,
+    return
+    GestureDetector(
+      onPanStart: (details) => onPanStart(details, widget.allWordsLength),
       onPanUpdate: onPanUpdate,
       onPanEnd: onPanEnd,
       child: AnimatedBuilder(
@@ -293,5 +298,7 @@ class _DraggableSliderState extends State<DraggableSlider> with SingleTickerProv
         }
       ),
     );
+
+
   }
 }
