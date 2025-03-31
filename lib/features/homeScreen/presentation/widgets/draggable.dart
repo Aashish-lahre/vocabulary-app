@@ -156,7 +156,8 @@ class _DraggableSliderState extends State<DraggableSlider> with SingleTickerProv
     if(_restoreController.isAnimating) return;
     int currentIndex = context.read<WordBloc>().wordIndex;
     print('current index : $currentIndex');
-    print('words length : $allWordsLength');
+    int allWordsLength = context.read<WordBloc>().allWords.length;
+    print('allWords max index : ${allWordsLength - 1}');
 
     setState(() {
       isEnableDrag =  currentIndex != allWordsLength -1;
@@ -275,30 +276,25 @@ class _DraggableSliderState extends State<DraggableSlider> with SingleTickerProv
 
   @override
   Widget build(BuildContext context) {
-
     final child = SizedBox(key: _widgetKey, child: widget.widget,);
-    // if(!widget.isEnableDrag) return child;
-
     return
     GestureDetector(
-      onPanStart: (details) => onPanStart(details, widget.allWordsLength),
-      onPanUpdate: onPanUpdate,
-      onPanEnd: onPanEnd,
-      child: AnimatedBuilder(
-        animation: _restoreController,
-        builder: (context, _) {
-          final value = 1 - _restoreController.value;
-          return Transform.translate(
-              offset: _endOffset * value,
-              child: Transform.rotate(
-                  angle: _angle * value,
-                  child: child,
-              )
-          );
-        }
-      ),
-    );
-
-
+        onPanStart: (details) => onPanStart(details, widget.allWordsLength),
+        onPanUpdate: onPanUpdate,
+        onPanEnd: onPanEnd,
+        child: AnimatedBuilder(
+          animation: _restoreController,
+          builder: (context, _) {
+            final value = 1 - _restoreController.value;
+            return Transform.translate(
+                offset: _endOffset * value,
+                child: Transform.rotate(
+                    angle: _angle * value,
+                    child: child,
+                )
+            );
+          }
+        ),
+      );
   }
 }

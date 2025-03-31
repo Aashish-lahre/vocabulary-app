@@ -113,11 +113,10 @@ class HomeScreen extends StatelessWidget {
                             title: title,
                             message: message,
                             contentType: contentType,
-                            removeAfterDuration: Duration(seconds: 6));
+                            );
                       }
 
                       if (state is HomeErrorScreenState) {
-                        print('entered in home error screen state');
                         String errorMessage =
                             state.homeErrorType == HomeErrorType.internet
                                 ? 'No Internet Connection'
@@ -230,9 +229,7 @@ class HomeScreen extends StatelessWidget {
 
                         default:
                           return Positioned.fill(
-                              child: Container(
-                            child: Center(child: Text('unknown state')),
-                          ));
+                              child: Center(child: Text('unknown state')));
                       }
                     },
                   ),

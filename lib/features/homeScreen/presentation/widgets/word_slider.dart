@@ -12,7 +12,8 @@ class WordSlider extends StatefulWidget {
   final Widget wordWidget;
   final int wordsLength;
 
-  const WordSlider({required this.wordWidget, required this.wordsLength, super.key});
+  const WordSlider(
+      {required this.wordWidget, required this.wordsLength, super.key});
 
   @override
   State<WordSlider> createState() => _WordSliderState();
@@ -157,29 +158,36 @@ class _WordSliderState extends State<WordSlider>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _slideMoveController,
-      builder: (context, _) =>
-          Stack(
-            fit: StackFit.expand,
-            alignment: Alignment.center,
-            children: List.generate(2, (index) {
-              // final int wordIndex = (_index + 1 - index).toInt();
-              return Transform.translate(
-                offset: getOffset(index),
-                child: Transform.scale(
-                  scale: getScale(index),
-                  child: Container(
-                      child:
-                      index == 0 ? WordCardShimmer() : DraggableSlider(
-                        allWordsLength: widget.wordsLength,
-                          widget: widget.wordWidget, slideOut: slideOut)
+    print("word slider : ${context.watch<WordBloc>().allWords}");
+    return BlocListener<WordBloc, WordState>(
+      listener: (context, state) {
+        print('word slider listener called');
+        print('state is : ${state.runtimeType}');
+      },
+      child: AnimatedBuilder(
+        animation: _slideMoveController,
+        builder: (context, _) =>
+            Stack(
+              fit: StackFit.expand,
+              alignment: Alignment.center,
+              children: List.generate(2, (index) {
+                // final int wordIndex = (_index + 1 - index).toInt();
+                return Transform.translate(
+                  offset: getOffset(index),
+                  child: Transform.scale(
+                    scale: getScale(index),
+                    child: Container(
+                        child:
+                        index == 0 ? WordCardShimmer() : DraggableSlider(
+                            allWordsLength: widget.wordsLength,
+                            widget: widget.wordWidget, slideOut: slideOut)
+                    ),
                   ),
-                ),
-              );
-            }),
-          ),
+                );
+              }),
+            ),
 
+      ),
     );
   }
 

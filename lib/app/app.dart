@@ -63,7 +63,6 @@ class VocabularyAppView extends StatelessWidget {
     
     return BlocBuilder<ThemeCubit, ThemeType>(
   builder: (context, state) {
-    print('in bloc builder : $state');
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(

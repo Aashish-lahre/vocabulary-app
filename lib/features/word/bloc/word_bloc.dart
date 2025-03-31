@@ -132,13 +132,16 @@ class WordBloc extends Bloc<WordEvent, WordState> {
         emit(LaterWordsLoadingSuccess());
 
       } else {
-
-        if(receivedWords.failure!.runtimeType is PartialDataFailure) {
+print('entered in else block');
+        if(receivedWords.failure!.runtimeType == PartialDataFailure) {
           allWords.addAll(receivedWords.data!);
         }
 
-        if(receivedWords.failure!.runtimeType is NoInternetFailure) {
+        if(receivedWords.failure!.runtimeType == NoInternetFailure) {
+          print('internet failure received words addled');
           allWords.addAll(receivedWords.data!);
+          print('allwords length : ${allWords.length}');
+          print('allwords : $allWords');
         }
 
         _mapFailuresToStates(receivedWords.failure!, emit);

@@ -64,7 +64,9 @@ class DictionaryApiClient implements DictionaryServices{
     } on WordNotFoundFailure {
       rethrow;
     } on http.ClientException catch(exceptionObject) {
+      print('client exception occurred');
       if(exceptionObject.message == 'Connection reset by peer') {
+        print('throwing internet failure');
         throw NoInternetFailure();
       } else {
         throw UnexpectedFailure(errorMessage: exceptionObject.message);
