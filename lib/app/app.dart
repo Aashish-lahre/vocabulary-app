@@ -14,9 +14,12 @@ import '../features/dictionary/repository/dictionary_repository.dart';
 
 
 class VocabularyApp extends StatelessWidget {
-  const VocabularyApp({super.key});
-  final int initialWordFetchLimit = 3;
-  final int initialLaterWordFetchLimit = 3;
+
+  final int wordFetchLimit;
+  final int initialWordFetchLimit = 10;
+
+  const VocabularyApp( this.wordFetchLimit, {super.key});
+
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +42,7 @@ class VocabularyApp extends StatelessWidget {
           BlocProvider(
               lazy: false,
               // create: (_) => LaterWordFetchBloc(laterWordFetchLimit: 3)..add(InitialLaterWordFetchCount(count: initialLaterWordFetchLimit))
-    create: (_) => LaterWordFetchBloc(laterWordFetchLimit: initialLaterWordFetchLimit)
+    create: (_) => LaterWordFetchBloc(laterWordFetchLimit: wordFetchLimit)
 
     ),
 

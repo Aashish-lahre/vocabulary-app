@@ -4,12 +4,14 @@ import 'package:flutter_improve_vocabulary/core/utility/result.dart';
 import 'package:flutter_improve_vocabulary/features/gemini_ai/configuration/configuration.dart';
 import 'package:flutter_improve_vocabulary/features/gemini_ai/repository/gemini_errors.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:flutter_improve_vocabulary/api_key.dart';
 
 import '../model/ai_word.dart';
 
 
 
-final String _apiKey = String.fromEnvironment("API_KEY");
+
+
 
 class GeminiRepository {
 
@@ -26,7 +28,7 @@ class GeminiRepository {
 
   final model = GenerativeModel(
     model: 'gemini-2.5-pro-exp-03-25',
-    apiKey: _apiKey,
+    apiKey: apiKey,
 
   );
 

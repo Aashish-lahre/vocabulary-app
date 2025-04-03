@@ -45,5 +45,5 @@ app.*.map.json
 /android/app/release
 
 # Added by me
-api_key.json
+lib/api_key.dart
 devtools_options.yaml

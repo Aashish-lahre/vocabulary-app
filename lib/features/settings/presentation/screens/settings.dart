@@ -1,7 +1,9 @@
 import 'package:easy_radio/easy_radio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_improve_vocabulary/core/shared_preference/word_fetch_limit.dart';
 import 'package:flutter_improve_vocabulary/core/theme/color_theme.dart';
+import 'package:flutter_improve_vocabulary/features/gemini_ai/shared_Preference/gemini_status_storage.dart';
 import 'package:gap/gap.dart';
 
 import '../../../../core/theme/cubit/theme_cubit.dart';
@@ -48,7 +50,14 @@ class SettingScreen extends StatefulWidget {
 
 class _SettingScreenState extends State<SettingScreen> {
 
-final ValueNotifier<int> _laterWordFetchCountController = ValueNotifier<int>(1);
+late final ValueNotifier<int> _laterWordFetchCountController;
+
+@override
+  void initState() {
+    int limit = context.read<LaterWordFetchBloc>().laterWordFetchLimit;
+    _laterWordFetchCountController  = ValueNotifier<int>(limit);
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     return
@@ -109,17 +118,17 @@ final ValueNotifier<int> _laterWordFetchCountController = ValueNotifier<int>(1);
                      ],
                    ),
                  ),
-                 Row(
-                   mainAxisAlignment: MainAxisAlignment.end,
-                   children: [
-                     FilledButton(
-                         
-                         onPressed: () {
-                       context.read<LaterWordFetchBloc>().add(ChangeLaterWordFetchCount(changedCount: _laterWordFetchCountController.value));
-                       Navigator.of(context).pop();
-                     }, child: Text('Save'))
-                   ],
-                 ),
+                 // Row(
+                 //   mainAxisAlignment: MainAxisAlignment.end,
+                 //   children: [
+                 //     FilledButton(
+                 //
+                 //         onPressed: () {
+                 //       context.read<LaterWordFetchBloc>().add(ChangeLaterWordFetchCount(changedCount: _laterWordFetchCountController.value));
+                 //       Navigator.of(context).pop();
+                 //     }, child: Text('Save'))
+                 //   ],
+                 // ),
                ],
              );
            }
@@ -248,70 +257,6 @@ class _AppearanceWidgetState extends State<_AppearanceWidget> {
 }
 
 
-class _AccentColorWidget extends StatefulWidget {
-  final BoxConstraints constraints;
-  const _AccentColorWidget({required this.constraints});
-
-  @override
-  State<_AccentColorWidget> createState() => _AccentColorWidgetState();
-}
-
-class _AccentColorWidgetState extends State<_AccentColorWidget> {
-  AccentColor? _selectedAccentColor = AccentColor.purple;
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        SizedBox(
-            width: widget.constraints.maxWidth * .35,
-            child: Row(
-              spacing: 10,
-              children: [
-                Icon(Icons.palette_outlined),
-                Text('Accent color', style: TextStyle(color: Theme.of(context).colorScheme.onPrimaryContainer),)
-              ],)),
-        Expanded(
-          // width: constraints.maxWidth * .65,
-
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-
-              children: List.generate(_accentColors.length, (index) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 0.0),
-                  child: Transform.scale(
-                      scale: 1,
-                      child: Container(
-                        width: 30,
-                        decoration: BoxDecoration(
-                          color: _accentColors[index].color, // Completely fills the background with green
-                          shape: BoxShape.circle, // Ensures it's a circle
-                        ),
-                        padding: EdgeInsets.all(0), // Adjust padding to control size
-                        child: Transform.scale(
-                          scale: 1,
-                          child: EasyRadio<AccentColor>(
-                            activeBorderColor: Theme.of(context).colorScheme.primary,
-                            dotColor: Theme.of(context).colorScheme.primary,
-                            value: _accentColors[index],
-                            groupValue: _selectedAccentColor,
-                            onChanged: (value) {
-                              setState(() {
-                                _selectedAccentColor = value;
-                              });
-                            },
-                          ),
-                        ),
-                      )
-                  ),
-                );
-              }),
-
-            )),
-      ],
-    );
-  }
-}
 
 
 class _TextSizeSliderWidget extends StatefulWidget {
@@ -429,6 +374,8 @@ class _LaterWordFetchSliderWidgetState extends State<_LaterWordFetchSliderWidget
                               onChanged: (changedValue) {
                                 setState(() {
                                   widget.laterWordFetchCountController.value = changedValue.toInt();
+                                  context.read<LaterWordFetchBloc>().add(ChangeLaterWordFetchCount(changedCount: changedValue.toInt()));
+                                  WordFetchLimit().changeWordFetchLimit(changedValue.toInt());
                                 });
                               },
                 
@@ -539,7 +486,9 @@ class _GeminiAiSwitchState extends State<_GeminiAiSwitch> {
       onChanged: (bool value) {
         setState(() {
           _isOn = value;
+
           context.read<GeminiBloc>().add(ToggleGenerateWordsWithAiSwitchEvent(isOn: _isOn));
+          GeminiStatusStorage().changeGeminiStatus(_isOn);
         });
       },
     );

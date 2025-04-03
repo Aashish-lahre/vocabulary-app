@@ -1,6 +1,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_improve_vocabulary/core/shared_preference/word_fetch_limit.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -20,10 +21,10 @@ void main() async {
         : HydratedStorageDirectory((await getTemporaryDirectory()).path),
   );
 
-  // flutter run --dart-define-from-file=api_key.json
+  // flutter run --dart-define-from-file=api_key.dart
+  int wordFetchLimit = await WordFetchLimit().getWordFetchLimit;
 
-
-  runApp(VocabularyApp());
+  runApp(VocabularyApp(wordFetchLimit));
 
 }
 

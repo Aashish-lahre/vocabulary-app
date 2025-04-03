@@ -2,6 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_improve_vocabulary/features/gemini_ai/prompts/prompts.dart';
 import 'package:flutter_improve_vocabulary/features/gemini_ai/repository/gemini_ai_repository.dart';
+import 'package:flutter_improve_vocabulary/features/gemini_ai/shared_Preference/gemini_status_storage.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../model/ai_word.dart';
@@ -28,6 +29,10 @@ class GeminiBloc extends Bloc<GeminiEvent, GeminiState> {
 
   GeminiBloc({required this.repository}) : super(GeminiInitial()) {
 
+    void loadGeminiStatus() async {
+      isAiWordsGenerationOn = await GeminiStatusStorage().getGeminiStatus;
+    }
+    loadGeminiStatus();
 
     on<ToggleGenerateWordsWithAiSwitchEvent>((event, emit) {
       isAiWordsGenerationOn = event.isOn;
