@@ -50,8 +50,9 @@ dependencies:
   english_words: ^4.0.0
   top_snackbar_flutter: ^3.2.0
   shared_preferences: ^2.5.3
-  dictionary_api:
-    path: "./packages/dictionary_api"
+  google_generative_ai: ^0.4.6
+  http: ^1.3.0
+
 
   
 

@@ -233,13 +233,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.11"
-  dictionary_api:
-    dependency: "direct main"
-    description:
-      path: "packages/dictionary_api"
-      relative: true
-    source: path
-    version: "0.0.1"
   easy_radio:
     dependency: "direct main"
     description:
@@ -372,6 +365,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.2.1"
+  google_generative_ai:
+    dependency: "direct main"
+    description:
+      name: google_generative_ai
+      sha256: "81dae159c89e4d9bdc46955b6f4ee5ae0a291f9e8f990d76f43944e0d6041d4f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.4.6"
   graphs:
     dependency: transitive
     description:
@@ -389,7 +390,7 @@ packages:
     source: hosted
     version: "2.10.1"
   http:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: http
       sha256: fe7ab022b76f3034adc518fb6ea04a82387620e19977665ea18d30a1cf43442f

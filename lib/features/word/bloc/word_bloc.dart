@@ -1,7 +1,11 @@
 import 'package:bloc/bloc.dart';
-import 'package:dictionary_api/dictionary_api.dart';
+import 'package:flutter_improve_vocabulary/core/utility/base_class.dart';
+import 'package:flutter_improve_vocabulary/features/gemini_ai/bloc/gemini_bloc.dart';
+
 import 'package:flutter_improve_vocabulary/features/homeScreen/presentation/utility/home_error_types_enum.dart';
 import '../../../core/utility/result.dart';
+import '../../dictionary/data/dictionary_failures.dart';
+import '../../dictionary/models/word.dart';
 import '../../dictionary/repository/dictionary_repository.dart';
 import 'package:equatable/equatable.dart';
 import 'package:rxdart/rxdart.dart';
@@ -13,10 +17,12 @@ part 'word_state.dart';
 class WordBloc extends Bloc<WordEvent, WordState> {
 
   final DictionaryRepository repository;
+  final GeminiBloc geminiBloc;
 
   // this word will be shown on homeScreen first, than as "wordIndex" increments, following words will be shown.
   int wordIndex = 0;
-  final List<Word> allWords = [];
+  final List<BaseWord> allWords = [];
+
 
   EventTransformer<E> throttleRestartable<E>() {
     return (events, mapper) {
@@ -30,7 +36,21 @@ class WordBloc extends Bloc<WordEvent, WordState> {
 
 
 
-  WordBloc({ required this.repository}) : super(WordInitial()) {
+  WordBloc({ required this.repository, required this.geminiBloc}) : super(WordInitial()) {
+
+    geminiBloc.stream.listen((state) {
+      if(state is AiWordsLoadedState) {
+        allWords.addAll(state.aiWords);
+        if(wordIndex == 0) {
+          wordIndex = -1;
+          add(LoadSingleWordInOrder());
+        }
+      }
+
+      if(state is GeminiFailureState) {
+          add(GeminiFailureWordEvent(errorMessage: state.errorMessage));
+      }
+    });
 
     on<LoadWords>((event, emit) async {
 
@@ -70,6 +90,10 @@ class WordBloc extends Bloc<WordEvent, WordState> {
       _onLaterLoadWords,
       transformer: throttleRestartable(),
     );
+
+    on<GeminiFailureWordEvent>((event, emit) {
+      emit(GeminiFailureWordState(errorMessage: event.errorMessage));
+    });
 
 
 

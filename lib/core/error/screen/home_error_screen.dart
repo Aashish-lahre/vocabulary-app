@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../../app_restart_widget.dart';
 import '../../../features/homeScreen/presentation/utility/home_error_types_enum.dart';
 
 
@@ -27,8 +26,7 @@ class HomeErrorScreen extends StatelessWidget {
                 data: Theme.of(context).copyWith(textTheme: GoogleFonts.eaterTextTheme()),
                 child: Text('Oops!', style: Theme.of(context).textTheme.headlineLarge!.copyWith(fontSize: 70, color: Theme.of(context).colorScheme.onSurface),)),
             Text(errorData.errorMessage, style: Theme.of(context).textTheme.bodyLarge!.copyWith(color: Theme.of(context).colorScheme.onSurface),),
-            if(HomeErrorType.internet == errorData.homeErrorType)
-            FilledButton(onPressed: () => AppRestartWidget.restartApp(context), child: Text('Retry'))
+
           ],
         ),
       ),

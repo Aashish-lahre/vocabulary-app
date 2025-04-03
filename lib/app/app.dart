@@ -3,7 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_improve_vocabulary/core/network/internet_bloc.dart';
 import 'package:flutter_improve_vocabulary/core/theme/color_theme.dart';
 import 'package:flutter_improve_vocabulary/core/theme/cubit/theme_cubit.dart';
-import 'package:flutter_improve_vocabulary/core/theme/cubit/theme_cubit.dart';
+import 'package:flutter_improve_vocabulary/features/gemini_ai/bloc/gemini_bloc.dart';
+import 'package:flutter_improve_vocabulary/features/gemini_ai/repository/gemini_ai_repository.dart';
 import 'package:flutter_improve_vocabulary/features/homeScreen/presentation/screens/home_screen.dart';
 import 'package:flutter_improve_vocabulary/features/settings/blocs/LaterWordFetchBloc/later_word_fetch_bloc.dart';
 import 'package:flutter_improve_vocabulary/features/word/bloc/word_bloc.dart';
@@ -32,16 +33,21 @@ class VocabularyApp extends StatelessWidget {
           ),
 
           BlocProvider(
+            lazy: false,
+              create: (_) => GeminiBloc(repository: GeminiRepository())),
+
+          BlocProvider(
               lazy: false,
-              create: (_) => LaterWordFetchBloc(laterWordFetchLimit: 3)..add(InitialLaterWordFetchCount(count: initialLaterWordFetchLimit))
-          
-          ),
+              // create: (_) => LaterWordFetchBloc(laterWordFetchLimit: 3)..add(InitialLaterWordFetchCount(count: initialLaterWordFetchLimit))
+    create: (_) => LaterWordFetchBloc(laterWordFetchLimit: initialLaterWordFetchLimit)
+
+    ),
 
           BlocProvider(create: (_) => InternetBloc(), lazy: false,),
 
           BlocProvider(
             // create: (context) => WordCubit(dictionary_repository:  context.read<DictionaryRepository>()),
-            create: (context) => WordBloc(repository: context.read<DictionaryRepository>())..add(LoadWords(noOfWordToSearch: initialWordFetchLimit)),
+            create: (context) => WordBloc(geminiBloc: context.read<GeminiBloc>(), repository: context.read<DictionaryRepository>()),
             lazy: false,
 
           ),

@@ -45,7 +45,5 @@ app.*.map.json
 /android/app/release
 
 # Added by me
-
-.metadata
-android
-ios
+api_key.json
+devtools_options.yaml

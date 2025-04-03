@@ -42,3 +42,15 @@ class LoadSingleWordInOrder extends WordEvent {
   @override
   List<Object?> get props => [];
 }
+
+
+class GeminiFailureWordEvent extends WordEvent {
+  
+  final String errorMessage;
+  
+  const GeminiFailureWordEvent({required this.errorMessage});
+  
+  @override
+  List<Object?> get props => [errorMessage];
+  
+}

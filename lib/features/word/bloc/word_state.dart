@@ -35,7 +35,7 @@ final class WordSearchLoadSuccess extends WordState {
 
 final class FetchedSingleWordState extends WordState {
 
-  final Word word;
+  final BaseWord word;
 
   const FetchedSingleWordState({required this.word});
 
@@ -100,20 +100,16 @@ final class HomeErrorScreenState extends WordState {
 
 }
 
-// final class LaterInternetFailureState extends WordState {
-//
-//   final int wordNotSearched;
-//   final int wordRetrived;
-//   final int wordSkipped;
-//
-//   const LaterInternetFailureState({required this.wordNotSearched, required this.wordSkipped, required this.wordRetrived});
-//
-//
-//
-//   @override
-//   List<Object?> get props => [wordSkipped, wordRetrived, wordNotSearched];
-//
-// }
+final class GeminiFailureWordState extends WordState {
+
+  final String errorMessage;
+
+  const GeminiFailureWordState({required this.errorMessage});
+
+  @override
+  List<Object?> get props => [errorMessage];
+
+}
 
 final class UnexpectedState extends WordState {
   final String errorMessage;

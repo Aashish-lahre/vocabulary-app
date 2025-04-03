@@ -5,6 +5,7 @@ import 'package:flutter_improve_vocabulary/core/theme/color_theme.dart';
 import 'package:gap/gap.dart';
 
 import '../../../../core/theme/cubit/theme_cubit.dart';
+import '../../../gemini_ai/bloc/gemini_bloc.dart';
 import '../../blocs/LaterWordFetchBloc/later_word_fetch_bloc.dart';
 
 
@@ -85,7 +86,7 @@ final ValueNotifier<int> _laterWordFetchCountController = ValueNotifier<int>(1);
                    ),
                  ),
 
-                 // LaterFetchWord Slider container
+                 // LaterFetchWord Slider container and Gemini Ai Switch
                  Container(
                    width: constraints.maxWidth,
                    padding: EdgeInsets.all(15),
@@ -101,7 +102,9 @@ final ValueNotifier<int> _laterWordFetchCountController = ValueNotifier<int>(1);
                      children: [
                        _LaterWordFetchSliderWidget(constraints: constraints, laterWordFetchCountController: _laterWordFetchCountController,),
 
-                       _TextAnimationWidget(constraints: constraints)
+                       _TextAnimationWidget(constraints: constraints),
+
+                       _GeminiAiSwitch(),
 
                      ],
                    ),
@@ -502,6 +505,43 @@ class _TextAnimationWidgetState extends State<_TextAnimationWidget> {
 
 
       ],
+    );
+  }
+}
+
+
+class _GeminiAiSwitch extends StatefulWidget {
+
+  const _GeminiAiSwitch({super.key});
+
+  @override
+  State<_GeminiAiSwitch> createState() => _GeminiAiSwitchState();
+}
+
+class _GeminiAiSwitchState extends State<_GeminiAiSwitch> {
+  late bool _isOn;
+  @override
+  void initState() {
+    _isOn = context.read<GeminiBloc>().isAiWordsGenerationOn;
+    super.initState();
+  }
+  @override
+  Widget build(BuildContext context) {
+    return SwitchListTile(
+      title: Row(
+        children: [
+          Icon(Icons.psychology_rounded), // Leading icon
+          SizedBox(width: 10), // Spacing
+          Text("Gemini AI"), // Title text
+        ],
+      ),
+      value: _isOn,
+      onChanged: (bool value) {
+        setState(() {
+          _isOn = value;
+          context.read<GeminiBloc>().add(ToggleGenerateWordsWithAiSwitchEvent(isOn: _isOn));
+        });
+      },
     );
   }
 }

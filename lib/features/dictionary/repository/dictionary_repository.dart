@@ -1,5 +1,7 @@
-import 'package:dictionary_api/dictionary_api.dart';
+import '../data/dictionary_api_client.dart';
 import 'package:flutter_improve_vocabulary/core/utility/result.dart';
+import '../data/dictionary_failures.dart';
+import '../models/word.dart';
 import '../utility/get_random_words.dart';
 import 'package:flutter/material.dart';
 
