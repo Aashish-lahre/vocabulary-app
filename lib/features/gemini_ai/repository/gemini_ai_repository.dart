@@ -2,11 +2,12 @@ import 'dart:convert';
 
 import 'package:flutter_improve_vocabulary/core/utility/result.dart';
 import 'package:flutter_improve_vocabulary/features/gemini_ai/configuration/configuration.dart';
+import 'package:flutter_improve_vocabulary/features/gemini_ai/prompts/prompts.dart';
 import 'package:flutter_improve_vocabulary/features/gemini_ai/repository/gemini_errors.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:flutter_improve_vocabulary/api_key.dart';
 
-import '../model/ai_word.dart';
+import '../data_model/ai_word.dart';
 
 
 
@@ -26,14 +27,10 @@ class GeminiRepository {
 
 
 
-  final model = GenerativeModel(
-    model: 'gemini-2.5-pro-exp-03-25',
-    apiKey: apiKey,
-
-  );
 
 
-  Future<Result<List<AiWord>, GeminiError>> generateWords(String prompt) async {
+
+  Future<Result<List<AiWord>, GeminiError>> generateWords(String prompt, GenerativeModel  model) async {
 
     final List<Content> content = [Content.text(prompt)];
     late Result<List<AiWord>, GeminiError> response;
@@ -41,7 +38,61 @@ class GeminiRepository {
 
     final generateContentResponse = await model.generateContent(content, generationConfig: configurationForWords);
 
-    response = processResponse(generateContentResponse.text!);
+    response = processResponseForWords(generateContentResponse.text!);
+
+    } on GenerativeAIException catch(err) {
+      // GenerativeAiException is a super type of all gemini exception,
+      // so we don't require to handle other types of gemini exceptions because GenerativeAIException handles all of them.
+      return Result(failure: GeminiGenerativeAiException(errorMessage: err.message));
+    } catch (err) {
+      // some unexpected exception
+      return Result(failure: GeminiUnexpectedFailure(errorMessage: err.toString()));
+    }
+
+
+
+
+
+    return response;
+  }
+
+
+  Future<Result<List<String>, GeminiError>> generateExamples(String word, int limit, List<String> filterOut, GenerativeModel  model) async {
+
+    final List<Content> content = [Content.text(promptForExample(word, limit, filterOut))];
+    late Result<List<String>, GeminiError> response;
+    try {
+
+      final generateContentResponse = await model.generateContent(content, generationConfig: configurationForExample);
+
+      response = processResponseForExamples(generateContentResponse.text!);
+
+    } on GenerativeAIException catch(err) {
+      // GenerativeAiException is a super type of all gemini exception,
+      // so we don't require to handle other types of gemini exceptions because GenerativeAIException handles all of them.
+      return Result(failure: GeminiGenerativeAiException(errorMessage: err.message));
+    } catch (err) {
+      // some unexpected exception
+      return Result(failure: GeminiUnexpectedFailure(errorMessage: err.toString()));
+    }
+
+
+
+
+
+    return response;
+  }
+
+
+  Future<Result<List<String>, GeminiError>> generateSynonyms(String word, int limit, List<String> filterOut, GenerativeModel  model) async {
+
+    final List<Content> content = [Content.text(promptForSynonyms(word, limit, filterOut))];
+    late Result<List<String>, GeminiError> response;
+    try {
+
+      final generateContentResponse = await model.generateContent(content, generationConfig: configurationForSynonyms);
+
+      response = processResponseForSynonymsAndAntonyms(generateContentResponse.text!);
 
     } on GenerativeAIException catch(err) {
       // GenerativeAiException is a super type of all gemini exception,
@@ -61,38 +112,38 @@ class GeminiRepository {
 
 
 
+  Future<Result<List<String>, GeminiError>> generateAntonyms(String word, int limit, List<String> filterOut, GenerativeModel  model) async {
+
+    final List<Content> content = [Content.text(promptForAntonyms(word, limit, filterOut))];
+    late Result<List<String>, GeminiError> response;
+    try {
+
+      final generateContentResponse = await model.generateContent(content, generationConfig: configurationForAntonyms);
+
+      response = processResponseForSynonymsAndAntonyms(generateContentResponse.text!);
+
+    } on GenerativeAIException catch(err) {
+      // GenerativeAiException is a super type of all gemini exception,
+      // so we don't require to handle other types of gemini exceptions because GenerativeAIException handles all of them.
+      return Result(failure: GeminiGenerativeAiException(errorMessage: err.message));
+    } catch (err) {
+      // some unexpected exception
+      return Result(failure: GeminiUnexpectedFailure(errorMessage: err.toString()));
+    }
+
+
+
+
+
+    return response;
+  }
 
 
 }
 
 
-// Result<List<AiWord>, GeminiError> processResponse(String text) {
-//    List<AiWord> aiWords = [];
-//   try {
-//     // Attempt to parse the text as JSON
-//     final dynamic jsonData = jsonDecode(text);
-//
-//     // Check if it's a List and contains only Maps
-//     if (jsonData is List && jsonData.every((item) => item is Map<String, dynamic>)) {
-//       // Loop through each object
-//       for (Map<String, dynamic> jsonObj in jsonData) {
-//
-//         aiWords.add(AiWord.fromJson(jsonObj));
-//       }
-//     } else {
-//       return Result(failure: GeminiResponseFormatException(errorMessage: 'Response is not in the expected JSON array format.'));
-//
-//     }
-//   } catch (e) {
-//     return Result(failure: GeminiResponseFormatException(errorMessage: 'Invalid JSON format: $e'));
-//
-//   }
-//
-//   return Result(data: aiWords);
-// }
 
-
-Result<List<AiWord>, GeminiError> processResponse(String text) {
+Result<List<AiWord>, GeminiError> processResponseForWords(String text) {
   // Check if the response is empty
   if (text.trim().isEmpty) {
     return Result(
@@ -137,3 +188,71 @@ Result<List<AiWord>, GeminiError> processResponse(String text) {
     );
   }
 }
+
+Result<List<String>, GeminiError> processResponseForExamples(String text) {
+  // Check if the response is empty
+  if (text.trim().isEmpty) {
+    return Result(
+      failure: GeminiResponseFormatException(errorMessage: 'Response is empty.'),
+    );
+  }
+
+  try {
+    // Attempt to parse JSON
+    final jsonData = jsonDecode(text)  as List<dynamic>;
+
+    final condition = !jsonData.every((item) => item is String);
+    if (condition) {
+      return Result(
+        failure: GeminiResponseFormatException(
+          errorMessage: 'Example items are not String.',
+        ),
+      );
+    }
+
+    final List<String> examples = jsonData.map((item) => item as String).toList();
+
+    return Result(data: examples);
+  } catch (e) {
+    return Result(
+      failure: GeminiResponseFormatException(
+        errorMessage: 'Invalid JSON format: ${e.toString()}',
+      ),
+    );
+  }
+}
+
+Result<List<String>, GeminiError> processResponseForSynonymsAndAntonyms(String text) {
+  // Check if the response is empty
+  if (text.trim().isEmpty) {
+    return Result(
+      failure: GeminiResponseFormatException(errorMessage: 'Response is empty.'),
+    );
+  }
+
+  try {
+    // Attempt to parse JSON
+    final jsonData = jsonDecode(text)  as List<dynamic>;
+
+    final condition = !jsonData.every((item) => item is String);
+    if (condition) {
+      return Result(
+        failure: GeminiResponseFormatException(
+          errorMessage: 'items are not String.',
+        ),
+      );
+    }
+
+    final List<String> items = jsonData.map((item) => item as String).toList();
+
+    return Result(data: items);
+  } catch (e) {
+    return Result(
+      failure: GeminiResponseFormatException(
+        errorMessage: 'Invalid JSON format: ${e.toString()}',
+      ),
+    );
+  }
+}
+
+

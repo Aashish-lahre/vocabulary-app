@@ -14,7 +14,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/network/internet_bloc.dart';
 import '../../../../core/utility/word_slider.dart';
 import '../../../dictionary/models/word.dart';
-import '../../../gemini_ai/model/ai_word.dart';
+import '../../../gemini_ai/data_model/ai_word.dart';
 import '../../../word/bloc/word_bloc.dart';
 import '../../../../core/utility/above_banner.dart';
 
@@ -368,10 +368,17 @@ class _HomeScreenState extends State<HomeScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         onPressed: () {
           Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => BlocProvider.value(
+              builder: (context) => MultiBlocProvider(
+  providers: [
+    BlocProvider.value(
                     value: BlocProvider.of<LaterWordFetchBloc>(context),
-                    child: SettingScreen(),
-                  )));
+),
+    BlocProvider(
+      create: (context) => BlocProvider.of<GeminiBloc>(context),
+    ),
+  ],
+  child: SettingScreen(),
+)));
         },
         child: Icon(
           Icons.settings,

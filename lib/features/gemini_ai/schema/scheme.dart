@@ -31,14 +31,14 @@ items: schemaForWord,
 
 );
 
-final schemaForSynonyms = Schema(SchemaType.array, format: '[stringItem, stringItem, stringItem, stringItem]', description: 'array of synonyms string with up to 4 items', items: Schema(SchemaType.string), nullable: false);
+final schemaForSynonyms = Schema(SchemaType.array,  description: 'array of synonyms string.', items: Schema(SchemaType.string), nullable: false);
 
 
-final schemaForAntonyms = Schema(SchemaType.array, format: '[stringItem, stringItem, stringItem, stringItem]', description: 'array of antonyms string with up to 4 items', items: Schema(SchemaType.string), nullable: false);
+final schemaForAntonyms = Schema(SchemaType.array, description: 'array of antonyms strings.', items: Schema(SchemaType.string), nullable: false);
 
-final schemaForDefinition = Schema(SchemaType.array, format: '[String, String, String]', description: 'array of definition strings with up to 3 items', nullable: false, items: Schema(SchemaType.string));
+final schemaForDefinition = Schema(SchemaType.array, description: 'array of definition strings.', nullable: false, items: Schema(SchemaType.string));
 
-final schemaForExample = Schema(SchemaType.array, format: '[example1, example2, example3, example4]', description: 'array of example strings with up to 4 items', items: Schema(SchemaType.string), nullable: false);
+final schemaForExample = Schema(SchemaType.array, description: 'array of example strings.', items: Schema(SchemaType.string), nullable: false);
 
 
 

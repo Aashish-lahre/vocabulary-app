@@ -115,6 +115,13 @@ class WordBloc extends Bloc<WordEvent, WordState> {
 
     on<LoadSingleWordInOrder>((event, emit) {
       if(++wordIndex < allWords.length) {
+        geminiBloc.examples.clear();
+        geminiBloc.antonyms.clear();
+        geminiBloc.synonyms.clear();
+        print('antonyms : ${geminiBloc.antonyms}');
+        print('synonyms : ${geminiBloc.synonyms}');
+        print('example : ${geminiBloc.examples}');
+
         emit(FetchedSingleWordState(word: allWords[wordIndex]));
       } else {
         // index for words exceeds allWords items

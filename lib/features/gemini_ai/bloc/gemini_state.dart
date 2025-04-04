@@ -66,3 +66,54 @@ final class NoMoreAiWordsAvailableState extends GeminiState {
   List<Object?> get props => [];
 
 }
+
+
+final class ExamplesLoadingState extends GeminiState {
+
+  @override
+  List<Object?> get props => [];
+
+}
+
+
+final class ExamplesLoadedState extends GeminiState {
+
+  final List<String> examples;
+
+  const ExamplesLoadedState({required this.examples});
+
+  @override
+  List<Object?> get props => [examples];
+
+}
+
+
+final class SynonymsLoadingState extends GeminiState {
+  @override
+  List<Object?> get props => [];
+}
+
+
+final class SynonymsLoadedState extends GeminiState {
+  final List<String> synonyms;
+
+  const SynonymsLoadedState({required this.synonyms});
+  @override
+  List<Object?> get props => [synonyms];
+}
+
+
+
+final class AntonymsLoadingState extends GeminiState {
+  @override
+  List<Object?> get props => [];
+}
+
+final class AntonymsLoadedState extends GeminiState {
+  final List<String> antonyms;
+
+  const AntonymsLoadedState({required this.antonyms});
+  @override
+  List<Object?> get props => [antonyms];
+}
+

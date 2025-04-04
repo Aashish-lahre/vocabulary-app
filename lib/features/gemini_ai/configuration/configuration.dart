@@ -9,3 +9,28 @@ final configurationForWords = GenerationConfig(
   topP: .5,
   responseSchema: schemaForWords,
 );
+
+
+final configurationForExample = GenerationConfig(
+  candidateCount: 1,
+  responseMimeType: 'application/json',
+  topP: .5,
+  responseSchema: schemaForExample,
+);
+
+
+final configurationForSynonyms = GenerationConfig(
+  candidateCount: 1,
+  responseMimeType: 'application/json',
+  topP: .5,
+  responseSchema: schemaForSynonyms,
+);
+
+final configurationForAntonyms = GenerationConfig(
+  candidateCount: 1,
+  responseMimeType: 'application/json',
+  topP: .5,
+  responseSchema: schemaForAntonyms,
+);
+
+

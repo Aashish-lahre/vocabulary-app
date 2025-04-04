@@ -1,8 +1,8 @@
-import 'package:easy_radio/easy_radio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_improve_vocabulary/core/shared_preference/word_fetch_limit.dart';
 import 'package:flutter_improve_vocabulary/core/theme/color_theme.dart';
+import 'package:flutter_improve_vocabulary/features/gemini_ai/gemini_models/gemini_models.dart';
 import 'package:flutter_improve_vocabulary/features/gemini_ai/shared_Preference/gemini_status_storage.dart';
 import 'package:gap/gap.dart';
 
@@ -13,49 +13,23 @@ import '../../blocs/LaterWordFetchBloc/later_word_fetch_bloc.dart';
 
 
 
-enum AccentColor {
-  blue(color: Colors.blue),
-  yellow(color: Colors.yellow),
-  green(color: Colors.green),
-  purple(color: Colors.purple),
-  red(color: Colors.red);
-
-  const AccentColor({required this.color}); // Correct constructor
-  final Color color;
-}
-
-enum AnimationType {
-  rotate,
-  fade,
-  typer,
-  typewriter,
-  scale,
-  colorize,
-  textLiquidFill,
-  wavy,
-  flicker
-}
-
-
-
-
-List<AccentColor> _accentColors = [AccentColor.blue, AccentColor.yellow, AccentColor.green, AccentColor.purple, AccentColor.red];
-
 class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
 
   @override
   State<SettingScreen> createState() => _SettingScreenState();
 }
-
-class _SettingScreenState extends State<SettingScreen> {
+class _SettingScreenState extends State<SettingScreen> with SingleTickerProviderStateMixin {
 
 late final ValueNotifier<int> _laterWordFetchCountController;
+ final ValueNotifier<bool> isGeminiAiOn = ValueNotifier(false);
 
 @override
   void initState() {
     int limit = context.read<LaterWordFetchBloc>().laterWordFetchLimit;
     _laterWordFetchCountController  = ValueNotifier<int>(limit);
+    isGeminiAiOn.value = context.read<GeminiBloc>().isAiWordsGenerationOn;
+
     super.initState();
   }
   @override
@@ -96,39 +70,46 @@ late final ValueNotifier<int> _laterWordFetchCountController;
                  ),
 
                  // LaterFetchWord Slider container and Gemini Ai Switch
-                 Container(
-                   width: constraints.maxWidth,
-                   padding: EdgeInsets.all(15),
-                   decoration: BoxDecoration(
-                     borderRadius: BorderRadius.circular(20),
-                     color: Theme.of(context).colorScheme.surfaceContainer,
-                     // color: Colors.pink.shade200,
+                 ValueListenableBuilder<bool>(
+                   valueListenable: isGeminiAiOn,
+                   builder: (context, isOn, _) {
+                     return AnimatedSize(
+                       duration: Duration(milliseconds: 500),
+                       curve: Curves.easeInOut,
+                       alignment: Alignment.topCenter,
+                       child: Container(
 
-                   ),
-                   child: Column(
-                     spacing: 30,
-                     mainAxisSize: MainAxisSize.min,
-                     children: [
-                       _LaterWordFetchSliderWidget(constraints: constraints, laterWordFetchCountController: _laterWordFetchCountController,),
+                         width: constraints.maxWidth,
+                         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
+                         decoration: BoxDecoration(
+                           borderRadius: BorderRadius.circular(20),
+                           color: Theme.of(context).colorScheme.surfaceContainer,
+                         ),
 
-                       _TextAnimationWidget(constraints: constraints),
+                         child: Column(
+                           spacing: 40,
+                           mainAxisSize: MainAxisSize.min,
+                           mainAxisAlignment: MainAxisAlignment.start,
+                           children: [
 
-                       _GeminiAiSwitch(),
+                             _LaterWordFetchSliderWidget(
+                               constraints: constraints,
+                               laterWordFetchCountController: _laterWordFetchCountController,
+                             ),
+                             _GeminiAiSwitch(isGeminiAiOn: isGeminiAiOn),
 
-                     ],
-                   ),
+                             if(isOn)
+                               _GeminiModelsWidget(constraints: constraints),
+
+
+                           ],
+                         ),
+                       ),
+                     );
+                   },
                  ),
-                 // Row(
-                 //   mainAxisAlignment: MainAxisAlignment.end,
-                 //   children: [
-                 //     FilledButton(
-                 //
-                 //         onPressed: () {
-                 //       context.read<LaterWordFetchBloc>().add(ChangeLaterWordFetchCount(changedCount: _laterWordFetchCountController.value));
-                 //       Navigator.of(context).pop();
-                 //     }, child: Text('Save'))
-                 //   ],
-                 // ),
+
+
                ],
              );
            }
@@ -138,10 +119,14 @@ late final ValueNotifier<int> _laterWordFetchCountController;
 
 
   }
+
 }
 
+
+
+
 class _Appbar extends StatelessWidget implements PreferredSizeWidget{
-  const _Appbar({super.key});
+  const _Appbar();
 
   @override
   Widget build(BuildContext context) {
@@ -173,14 +158,15 @@ class _Appbar extends StatelessWidget implements PreferredSizeWidget{
 }
 
 
+
+
 class _AppearanceWidget extends StatefulWidget {
   final BoxConstraints constraints;
-  const _AppearanceWidget({required this.constraints, super.key});
+  const _AppearanceWidget({required this.constraints});
 
   @override
   State<_AppearanceWidget> createState() => _AppearanceWidgetState();
 }
-
 class _AppearanceWidgetState extends State<_AppearanceWidget> {
 
   String  themeModeLabel(int index) {
@@ -259,76 +245,15 @@ class _AppearanceWidgetState extends State<_AppearanceWidget> {
 
 
 
-class _TextSizeSliderWidget extends StatefulWidget {
-  final BoxConstraints constraints;
-  const _TextSizeSliderWidget({required this.constraints, super.key});
-
-  @override
-  State<_TextSizeSliderWidget> createState() => _TextSizeSliderWidgetState();
-}
-
-class _TextSizeSliderWidgetState extends State<_TextSizeSliderWidget> {
-
-  double _textSize = 12;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        SizedBox(
-          width: widget.constraints.maxWidth * .3,
-          child: Row(
-            // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            spacing: 10,
-            children: [
-              Icon(Icons.text_fields_rounded),
-              Text('Text size')
-            ],
-          ),
-        ),
-        Expanded(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('A', style: Theme.of(context).textTheme.bodyMedium,),
-              SliderTheme(
-                data: SliderTheme.of(context).copyWith(
-                  overlayShape: RoundSliderOverlayShape(overlayRadius: 8.0), ),// Default is 24.0
-                child: Slider.adaptive(
-
-                    value: _textSize,
-                  min: 12,
-                  max: 18,
-                  divisions: 3,
-                  label: _textSize.toString(),
-                    onChanged: (changedValue) {
-                  setState(() {
-                    _textSize = changedValue;
-                  });
-                },
-
-
-                ),
-              ),
-              Text('A', style: Theme.of(context).textTheme.bodyLarge,)
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 
 class _LaterWordFetchSliderWidget extends StatefulWidget {
   final BoxConstraints constraints;
   final ValueNotifier<int> laterWordFetchCountController;
-  const _LaterWordFetchSliderWidget({required this.constraints, required this.laterWordFetchCountController, super.key});
+  const _LaterWordFetchSliderWidget({required this.constraints, required this.laterWordFetchCountController});
 
   @override
   State<_LaterWordFetchSliderWidget> createState() => _LaterWordFetchSliderWidgetState();
 }
-
 class _LaterWordFetchSliderWidgetState extends State<_LaterWordFetchSliderWidget> {
 
 @override
@@ -393,36 +318,78 @@ class _LaterWordFetchSliderWidgetState extends State<_LaterWordFetchSliderWidget
 }
 
 
-class _TextAnimationWidget extends StatefulWidget {
-  final BoxConstraints constraints;
-  const _TextAnimationWidget({required this.constraints, super.key});
+
+
+class _GeminiAiSwitch extends StatefulWidget {
+  final ValueNotifier<bool> isGeminiAiOn;
+  const _GeminiAiSwitch({required this.isGeminiAiOn});
 
   @override
-  State<_TextAnimationWidget> createState() => _TextAnimationWidgetState();
+  State<_GeminiAiSwitch> createState() => _GeminiAiSwitchState();
+}
+class _GeminiAiSwitchState extends State<_GeminiAiSwitch> {
+  late bool _isOn;
+  @override
+  void initState() {
+    _isOn = context.read<GeminiBloc>().isAiWordsGenerationOn;
+    super.initState();
+  }
+  @override
+  Widget build(BuildContext context) {
+    return SwitchListTile(
+      contentPadding: EdgeInsets.only(left: 0, right: 20),
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Icon(Icons.psychology_rounded), // Leading icon
+          SizedBox(width: 10), // Spacing
+          Text("Gemini AI"), // Title text
+        ],
+      ),
+      value: _isOn,
+      onChanged: (bool value) {
+        setState(() {
+          _isOn = value;
+          widget.isGeminiAiOn.value = value;
+          context.read<GeminiBloc>().add(ToggleGenerateWordsWithAiSwitchEvent(isOn: value));
+          GeminiStatusStorage().changeGeminiStatus(value);
+        });
+      },
+    );
+  }
 }
 
-class _TextAnimationWidgetState extends State<_TextAnimationWidget> {
 
 
-  List<DropdownMenuItem<AnimationType>> _animationType(BuildContext context) {
+class _GeminiModelsWidget extends StatefulWidget {
+  final BoxConstraints constraints;
+  const _GeminiModelsWidget({required this.constraints});
+
+  @override
+  State<_GeminiModelsWidget> createState() => _GeminiModelsWidgetState();
+}
+class _GeminiModelsWidgetState extends State<_GeminiModelsWidget> {
+
+
+  List<DropdownMenuItem<GeminiModels>> _geminiModelType(BuildContext context) {
     TextStyle textStyle = Theme.of(context).textTheme.bodyMedium!.copyWith(color: Theme.of(context).colorScheme.onSecondaryContainer);
 
-    return [
-      DropdownMenuItem(value: AnimationType.rotate,child: Text('Rotate', style: textStyle,),),
-      DropdownMenuItem(value: AnimationType.fade,child: Text('Fade', style: textStyle,),),
-      DropdownMenuItem(value: AnimationType.typer,child: Text('Typer', style: textStyle,),),
-      DropdownMenuItem(value: AnimationType.typewriter,child: Text('Typewriter', style: textStyle,),),
-      DropdownMenuItem(value: AnimationType.scale,child: Text('Scale', style: textStyle,),),
-      DropdownMenuItem(value: AnimationType.colorize,child: Text('Colorize', style: textStyle,),),
-      DropdownMenuItem(value: AnimationType.textLiquidFill,child: Text('TextLiquidFill', style: textStyle,),),
-      DropdownMenuItem(value: AnimationType.wavy,child: Text('Wavy', style: textStyle,),),
-      DropdownMenuItem(value: AnimationType.flicker,child: Text('Flicker', style: textStyle,),),
+    return List.generate(GeminiModels.values.length, (index) {
+      return DropdownMenuItem(value: GeminiModels.values[index], child: Text(GeminiModels.values[index].label, style: textStyle),);
+    });
 
 
-    ];
   }
 
-  AnimationType? _selectedAnimationType = AnimationType.typer;
+  GeminiModels? _selectedGeminiModelType;
+
+  @override
+  void initState() {
+    _selectedGeminiModelType  = context.read<GeminiBloc>().defaultModel;
+    super.initState();
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -434,63 +401,27 @@ class _TextAnimationWidgetState extends State<_TextAnimationWidget> {
             child: Row(
               spacing: 10,
               children: [
-          Icon(Icons.animation),
-          Text('Text animation', style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Theme.of(context).colorScheme.onSecondaryContainer),),
-        ],)),
+                Icon(Icons.animation),
+                Text('Gemini Models', style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Theme.of(context).colorScheme.onSecondaryContainer),),
+              ],)),
 
         Expanded(
             child: DropdownButton(
-                items: _animationType(context),
-                value: _selectedAnimationType,
-                onChanged: (changedType) {
-                  setState(() {
-                    _selectedAnimationType = changedType;
-                  });
-                },)
+              items: _geminiModelType(context),
+              value: _selectedGeminiModelType,
+              onChanged: (changedType) {
+                setState(() {
+                  _selectedGeminiModelType = changedType;
+                  if(changedType != null) {
+                    context.read<GeminiBloc>().add(ChangeGeminiModelEvent(modelType: changedType));
+                  }
+                });
+              },)
         ),
 
 
 
       ],
-    );
-  }
-}
-
-
-class _GeminiAiSwitch extends StatefulWidget {
-
-  const _GeminiAiSwitch({super.key});
-
-  @override
-  State<_GeminiAiSwitch> createState() => _GeminiAiSwitchState();
-}
-
-class _GeminiAiSwitchState extends State<_GeminiAiSwitch> {
-  late bool _isOn;
-  @override
-  void initState() {
-    _isOn = context.read<GeminiBloc>().isAiWordsGenerationOn;
-    super.initState();
-  }
-  @override
-  Widget build(BuildContext context) {
-    return SwitchListTile(
-      title: Row(
-        children: [
-          Icon(Icons.psychology_rounded), // Leading icon
-          SizedBox(width: 10), // Spacing
-          Text("Gemini AI"), // Title text
-        ],
-      ),
-      value: _isOn,
-      onChanged: (bool value) {
-        setState(() {
-          _isOn = value;
-
-          context.read<GeminiBloc>().add(ToggleGenerateWordsWithAiSwitchEvent(isOn: _isOn));
-          GeminiStatusStorage().changeGeminiStatus(_isOn);
-        });
-      },
     );
   }
 }
