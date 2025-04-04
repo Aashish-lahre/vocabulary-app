@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_improve_vocabulary/features/gemini_ai/bloc/gemini_bloc.dart';
 import 'package:flutter_improve_vocabulary/features/gemini_ai/data_model/ai_word.dart';
 import 'package:gap/gap.dart';
+import 'package:shimmer/shimmer.dart';
 
 
 class AiWordDetailsScreen extends StatefulWidget {
@@ -193,24 +194,9 @@ class AiSynonymsWidget extends StatefulWidget {
   State<AiSynonymsWidget> createState() => _AiSynonymsWidgetState();
 }
 
-class _AiSynonymsWidgetState extends State<AiSynonymsWidget> with SingleTickerProviderStateMixin {
+class _AiSynonymsWidgetState extends State<AiSynonymsWidget> {
   late bool generateMoreWithAi;
   int synonymsLimit = 4;
-  late AnimationController _animationController;
-
-  @override
-  void initState() {
-    _animationController = AnimationController(vsync: this, duration: Duration(milliseconds: 500));
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    debugPrint('dispose called in synonyms widget');
-    _animationController..stop()..dispose();
-    super.dispose();
-  }
-
 
   @override
   Widget build(BuildContext context) {
@@ -225,7 +211,7 @@ class _AiSynonymsWidgetState extends State<AiSynonymsWidget> with SingleTickerPr
     return [SynonymsLoadedState, SynonymsLoadingState].contains(currentState.runtimeType);
   },
   builder: (context, state) {
-    generateMoreWithAi = (widget.synonyms.length + context.read<GeminiBloc>().synonyms.length) <= 3;
+    generateMoreWithAi = ((widget.synonyms.length + context.read<GeminiBloc>().synonyms.length) <= 3) && state is! SynonymsLoadingState;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Column(
@@ -278,10 +264,13 @@ class _AiSynonymsWidgetState extends State<AiSynonymsWidget> with SingleTickerPr
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: List.generate(loadingCount, (index) {
-          return AnimatedSkeleton(listenable: _animationController..forward()..repeat(), child: Padding(
+          return Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Container(width: 100, height: 50,  decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainer, borderRadius: BorderRadius.circular(10)),),
-          ),);
+            child: Shimmer.fromColors(
+                baseColor: Theme.of(context).colorScheme.surfaceContainer,
+                highlightColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+                child: Container(width: 100, height: 50,  decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainer, borderRadius: BorderRadius.circular(10)),)),
+          );
 
         }),
 
@@ -314,24 +303,10 @@ class AiAntonymsWidget extends StatefulWidget {
   State<AiAntonymsWidget> createState() => _AiAntonymsWidgetState();
 }
 
-class _AiAntonymsWidgetState extends State<AiAntonymsWidget> with SingleTickerProviderStateMixin{
+class _AiAntonymsWidgetState extends State<AiAntonymsWidget>{
   late bool generateMoreWithAi;
   int antonymsLimit = 4;
-  late AnimationController _animationController;
 
-  @override
-  void initState() {
-    _animationController = AnimationController(vsync: this, duration: Duration(milliseconds: 500));
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    debugPrint('dispose called in synonyms widget');
-    _animationController..stop()..dispose();
-    super.dispose();
-  }
-  
 
   @override
   Widget build(BuildContext context) {
@@ -346,7 +321,7 @@ class _AiAntonymsWidgetState extends State<AiAntonymsWidget> with SingleTickerPr
         return [AntonymsLoadedState, AntonymsLoadingState].contains(currentState.runtimeType);
       },
   builder: (context, state) {
-    generateMoreWithAi = (widget.antonyms.length + context.read<GeminiBloc>().antonyms.length) <= 3;
+    generateMoreWithAi = ((widget.antonyms.length + context.read<GeminiBloc>().antonyms.length) <= 3) && state is! AntonymsLoadingState;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -399,10 +374,13 @@ class _AiAntonymsWidgetState extends State<AiAntonymsWidget> with SingleTickerPr
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: List.generate(loadingCount, (index) {
-          return AnimatedSkeleton(listenable: _animationController..forward()..repeat(), child: Padding(
+          return Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Container(width: 100, height: 50,  decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainer, borderRadius: BorderRadius.circular(10)),),
-          ),);
+            child: Shimmer.fromColors(
+                baseColor: Theme.of(context).colorScheme.surfaceContainer,
+                highlightColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+                child: Container(width: 100, height: 50,  decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainer, borderRadius: BorderRadius.circular(10)),)),
+          );
 
         }),
 
@@ -482,7 +460,23 @@ class _AiExampleWidgetState extends State<AiExampleWidget> {
                   );
 
                 case ExamplesLoadingState _ :
-                  return CircularProgressIndicator();
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    spacing: 10,
+                    children: [
+                      ...List.generate(context.read<GeminiBloc>().examples.length, (index) {
+                        return _buildExampleContainer(context, context.read<GeminiBloc>().examples[index]);
+                      }),
+
+
+                      ...List.generate(3, (index) {
+                        return Shimmer.fromColors(
+                            baseColor: Theme.of(context).colorScheme.surfaceContainer,
+                            highlightColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+                            child: Container(width: double.infinity, height: 30, decoration: BoxDecoration(color: colorScheme.surfaceContainer, borderRadius: BorderRadius.circular(10)),));
+                      }),
+                    ],
+                  );
                 case GeminiFailureState _ :
                   return SizedBox(
                     width: double.infinity,

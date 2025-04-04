@@ -2,6 +2,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_improve_vocabulary/core/shared_preference/word_fetch_limit.dart';
+import 'package:flutter_improve_vocabulary/core/theme/color_theme.dart';
+import 'package:flutter_improve_vocabulary/core/theme/theme_storage.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -23,8 +25,9 @@ void main() async {
 
   // flutter run --dart-define-from-file=api_key.dart
   int wordFetchLimit = await WordFetchLimit().getWordFetchLimit;
+  ThemeType themeType = await ThemeStorage().getThemeType();
 
-  runApp(VocabularyApp(wordFetchLimit));
+  runApp(VocabularyApp(wordFetchLimit, themeType));
 
 }
 

@@ -5,11 +5,10 @@ import 'package:flutter_improve_vocabulary/core/theme/theme_storage.dart';
 import '../color_theme.dart';
 
 
-class ThemeCubit extends Cubit<ThemeType?> {
+class ThemeCubit extends Cubit<ThemeType> {
 
-  ThemeCubit() : super(null) {
-    loadThemeType();
-  }
+  ThemeType themeType;
+  ThemeCubit({required this.themeType}) : super(themeType);
 
 
   Future<void> changeThemeType(ThemeType changeThemeType) async {

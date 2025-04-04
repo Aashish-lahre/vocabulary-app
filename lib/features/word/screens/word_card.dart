@@ -18,7 +18,7 @@ class WordCard extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
-      onDoubleTap: () {
+      onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => BlocProvider.value(

@@ -373,8 +373,8 @@ class _HomeScreenState extends State<HomeScreen> {
     BlocProvider.value(
                     value: BlocProvider.of<LaterWordFetchBloc>(context),
 ),
-    BlocProvider(
-      create: (context) => BlocProvider.of<GeminiBloc>(context),
+    BlocProvider.value(
+      value:  BlocProvider.of<GeminiBloc>(context),
     ),
   ],
   child: SettingScreen(),

@@ -20,7 +20,7 @@ class GeminiBloc extends Bloc<GeminiEvent, GeminiState> {
   List<String> examples = [];
   List<String> synonyms = [];
   List<String> antonyms = [];
-  GeminiModels defaultModel = GeminiModels.Gemini20Flash;
+  GeminiModels defaultModel = GeminiModels.Gemini15Flash;
 
   EventTransformer<E> throttleRestartable<E>() {
     return (events, mapper) {

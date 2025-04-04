@@ -211,7 +211,7 @@ class SynonymsWidget extends StatefulWidget {
   State<SynonymsWidget> createState() => _SynonymsWidgetState();
 }
 
-class _SynonymsWidgetState extends State<SynonymsWidget> with SingleTickerProviderStateMixin {
+class _SynonymsWidgetState extends State<SynonymsWidget>{
   late bool generateMoreWithAi;
   int synonymsLimit = 4;
 
@@ -228,7 +228,7 @@ class _SynonymsWidgetState extends State<SynonymsWidget> with SingleTickerProvid
         return [SynonymsLoadedState, SynonymsLoadingState].contains(currentState.runtimeType);
       },
       builder: (context, state) {
-        generateMoreWithAi = ((widget.synonyms.length + context.read<GeminiBloc>().synonyms.length) <= 3) && state is! SynonymsLoadedState;
+        generateMoreWithAi = ((widget.synonyms.length + context.read<GeminiBloc>().synonyms.length) <= 3) && state is! SynonymsLoadingState;
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
           child: Column(
@@ -254,16 +254,16 @@ class _SynonymsWidgetState extends State<SynonymsWidget> with SingleTickerProvid
                   _buildSynonymsFromAi(state, synonymsLimit - widget.synonyms.length),
 
 
-                  if(state is! GeminiFailureState)
+
                   if (generateMoreWithAi)
                     ElevatedButton(
                       style: ButtonStyle(shape: WidgetStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)))),
                       onPressed: () {
                         context.read<GeminiBloc>().add(LoadSynonymsEvent(word: widget.wordName, limit: (synonymsLimit - widget.synonyms.length), filterOut: widget.synonyms));
 
-                      setState(() {
-                        generateMoreWithAi = false;
-                      });
+                      // setState(() {
+                      //   generateMoreWithAi = false;
+                      // });
 
                       },
                       child: Text(
@@ -334,7 +334,7 @@ class AntonymsWidget extends StatefulWidget {
   State<AntonymsWidget> createState() => _AntonymsWidgetState();
 }
 
-class _AntonymsWidgetState extends State<AntonymsWidget> with SingleTickerProviderStateMixin{
+class _AntonymsWidgetState extends State<AntonymsWidget>{
   late bool generateMoreWithAi;
   int antonymsLimit = 4;
 
@@ -353,7 +353,7 @@ class _AntonymsWidgetState extends State<AntonymsWidget> with SingleTickerProvid
         return [AntonymsLoadedState, AntonymsLoadingState].contains(currentState.runtimeType);
       },
       builder: (context, state) {
-        generateMoreWithAi = ((widget.antonyms.length + context.read<GeminiBloc>().antonyms.length) <= 3) && state is! AntonymsLoadingState ;
+        generateMoreWithAi = ((widget.antonyms.length + context.read<GeminiBloc>().antonyms.length) <= 3) && state is! AntonymsLoadingState;
 
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -381,7 +381,7 @@ class _AntonymsWidgetState extends State<AntonymsWidget> with SingleTickerProvid
 
                   _buildAntonymsFromAi(state, antonymsLimit - widget.antonyms.length),
 
-                  if(state is! GeminiFailureState)
+
                   if (generateMoreWithAi)
                     ElevatedButton(
                       style: ButtonStyle(shape: WidgetStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)))),
@@ -457,22 +457,8 @@ final String wordName;
   State<ExampleWidget> createState() => _ExampleWidgetState();
 }
 
-class _ExampleWidgetState extends State<ExampleWidget> with SingleTickerProviderStateMixin{
+class _ExampleWidgetState extends State<ExampleWidget>{
 
-  late AnimationController _animationController;
-
-  @override
-  void initState() {
-    _animationController = AnimationController(vsync: this, duration: Duration(milliseconds: 800))..forward()..repeat();
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    debugPrint('dispose called in synonyms widget');
-    _animationController..stop()..dispose();
-    super.dispose();
-  }
 
 
   @override
