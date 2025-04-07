@@ -1,4 +1,6 @@
+
 part of 'later_word_fetch_bloc.dart';
+
 
 sealed class LaterWordFetchEvent extends Equatable {
   const LaterWordFetchEvent();

@@ -4,11 +4,11 @@ sealed class DictionaryFailure {}
 
 
 final class NoInternetFailure extends DictionaryFailure {
-  final int wordsRetrived;
+  final int wordsRetrieved;
   final int wordsSkipped;
   final int wordsNotSearched;
 
-  NoInternetFailure({this.wordsRetrived = 0, this.wordsSkipped = 0, this.wordsNotSearched = 0});
+  NoInternetFailure({this.wordsRetrieved = 0, this.wordsSkipped = 0, this.wordsNotSearched = 0});
 }
 
 // when api is unable to provide the valid data for the word you searched because the api does not have that word.

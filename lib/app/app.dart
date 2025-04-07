@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_improve_vocabulary/core/network/internet_bloc.dart';
+import 'package:flutter_improve_vocabulary/core/blocs/network_bloc/internet_bloc.dart';
 import 'package:flutter_improve_vocabulary/core/theme/color_theme.dart';
 import 'package:flutter_improve_vocabulary/core/theme/cubit/theme_cubit.dart';
 import 'package:flutter_improve_vocabulary/features/gemini_ai/bloc/gemini_bloc.dart';
 import 'package:flutter_improve_vocabulary/features/gemini_ai/repository/gemini_ai_repository.dart';
 import 'package:flutter_improve_vocabulary/features/homeScreen/presentation/screens/home_screen.dart';
-import 'package:flutter_improve_vocabulary/features/settings/blocs/LaterWordFetchBloc/later_word_fetch_bloc.dart';
+import '../core/blocs/later_word_fetch_bloc/later_word_fetch_bloc.dart';
 import 'package:flutter_improve_vocabulary/features/word/bloc/word_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -80,6 +80,7 @@ class VocabularyAppView extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
             colorScheme: themes[state],
+
             appBarTheme: const AppBarTheme(
               backgroundColor: Colors.transparent,
               elevation: 0,

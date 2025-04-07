@@ -67,7 +67,7 @@ class WordBloc extends Bloc<WordEvent, WordState> {
 
           if(failure is NoInternetFailure) {
             allWords.addAll(receivedWords.data ?? []);
-            emit(InternetFailureState(wordNotSearched: failure.wordsNotSearched, wordSkipped: failure.wordsSkipped, wordRetrived: failure.wordsRetrived));
+            emit(InternetFailureState(wordNotSearched: failure.wordsNotSearched, wordSkipped: failure.wordsSkipped, wordRetrived: failure.wordsRetrieved));
 
 
           }
@@ -118,10 +118,6 @@ class WordBloc extends Bloc<WordEvent, WordState> {
         geminiBloc.examples.clear();
         geminiBloc.antonyms.clear();
         geminiBloc.synonyms.clear();
-        print('antonyms : ${geminiBloc.antonyms}');
-        print('synonyms : ${geminiBloc.synonyms}');
-        print('example : ${geminiBloc.examples}');
-
         emit(FetchedSingleWordState(word: allWords[wordIndex]));
       } else {
         // index for words exceeds allWords items
@@ -136,7 +132,7 @@ class WordBloc extends Bloc<WordEvent, WordState> {
   void _mapFailuresToStates(DictionaryFailure failure, Emitter<WordState> emit) {
     switch(failure) {
       case NoInternetFailure _:
-        emit(InternetFailureState(wordRetrived: failure.wordsRetrived, wordNotSearched: failure.wordsNotSearched, wordSkipped: failure.wordsSkipped));
+        emit(InternetFailureState(wordRetrived: failure.wordsRetrieved, wordNotSearched: failure.wordsNotSearched, wordSkipped: failure.wordsSkipped));
         break;
       case WordNotFoundFailure _:
         emit(WordSearchUnavailabilityState());
@@ -163,16 +159,13 @@ class WordBloc extends Bloc<WordEvent, WordState> {
         emit(LaterWordsLoadingSuccess());
 
       } else {
-print('entered in else block');
         if(receivedWords.failure!.runtimeType == PartialDataFailure) {
           allWords.addAll(receivedWords.data!);
         }
 
         if(receivedWords.failure!.runtimeType == NoInternetFailure) {
-          print('internet failure received words addled');
           allWords.addAll(receivedWords.data!);
-          print('allwords length : ${allWords.length}');
-          print('allwords : $allWords');
+
         }
 
         _mapFailuresToStates(receivedWords.failure!, emit);

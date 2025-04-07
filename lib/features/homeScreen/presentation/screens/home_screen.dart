@@ -7,11 +7,11 @@ import 'package:flutter_improve_vocabulary/features/gemini_ai/screens/ai_word_ca
 import 'package:flutter_improve_vocabulary/features/homeScreen/presentation/utility/home_error_types_enum.dart';
 import 'package:flutter_improve_vocabulary/features/word/screens/word_card.dart';
 import 'package:flutter_improve_vocabulary/core/utility/loading_widget.dart';
-import 'package:flutter_improve_vocabulary/features/settings/blocs/LaterWordFetchBloc/later_word_fetch_bloc.dart';
+import '../../../../core/blocs/later_word_fetch_bloc/later_word_fetch_bloc.dart';
 import 'package:flutter_improve_vocabulary/features/settings/presentation/screens/settings.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../../../core/network/internet_bloc.dart';
+import '../../../../core/blocs/network_bloc/internet_bloc.dart';
 import '../../../../core/utility/word_slider.dart';
 import '../../../dictionary/models/word.dart';
 import '../../../gemini_ai/data_model/ai_word.dart';

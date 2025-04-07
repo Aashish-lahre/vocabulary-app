@@ -5,7 +5,6 @@ import 'package:flutter_improve_vocabulary/features/gemini_ai/configuration/conf
 import 'package:flutter_improve_vocabulary/features/gemini_ai/prompts/prompts.dart';
 import 'package:flutter_improve_vocabulary/features/gemini_ai/repository/gemini_errors.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
-import 'package:flutter_improve_vocabulary/api_key.dart';
 
 import '../data_model/ai_word.dart';
 

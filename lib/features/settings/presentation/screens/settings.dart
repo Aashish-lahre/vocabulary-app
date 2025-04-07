@@ -6,9 +6,10 @@ import 'package:flutter_improve_vocabulary/features/gemini_ai/gemini_models/gemi
 import 'package:flutter_improve_vocabulary/features/gemini_ai/shared_Preference/gemini_status_storage.dart';
 import 'package:gap/gap.dart';
 
+// import '../../../../core/blocs/later_word_fetch_bloc/later_word_fetch_event.dart';
 import '../../../../core/theme/cubit/theme_cubit.dart';
 import '../../../gemini_ai/bloc/gemini_bloc.dart';
-import '../../blocs/LaterWordFetchBloc/later_word_fetch_bloc.dart';
+import '../../../../core/blocs/later_word_fetch_bloc//later_word_fetch_bloc.dart';
 
 
 

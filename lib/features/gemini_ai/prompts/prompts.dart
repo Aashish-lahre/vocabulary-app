@@ -22,11 +22,11 @@ String promptForExample(String word, int limit, List<String> filterOut) {
 
 
 String promptForSynonyms(String word, int limit, List<String> filterOut) {
-  final excludedWords = filterOut.isNotEmpty ? " other than: ${filterOut.join(', ')}" : "";
-  return "Generate $limit synonyms for the word '$word'$excludedWords.";
+  final excludedSynonyms = filterOut.isNotEmpty ? " other than: ${filterOut.join(', ')}" : "";
+  return "Generate $limit synonyms for the word '$word'$excludedSynonyms.";
 }
 
 String promptForAntonyms(String word, int limit, List<String> filterOut) {
-  final excludedWords = filterOut.isNotEmpty ? " other than: ${filterOut.join(', ')}" : "";
-  return "Generate $limit antonyms for the word '$word'$excludedWords.";
+  final excludedAntonyms = filterOut.isNotEmpty ? " other than: ${filterOut.join(', ')}" : "";
+  return "Generate $limit antonyms for the word '$word'$excludedAntonyms.";
 }
