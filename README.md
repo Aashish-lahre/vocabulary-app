@@ -1,16 +1,15 @@
-# flutter_improve_vocabulary
+🧠 Vocabulary App
+A sleek and interactive vocabulary builder built with Flutter and BLoC architecture. This app fetches rich word data from both a public Dictionary API and Gemini AI, offering definitions, examples, and more.
 
-A new Flutter project.
+Swipe through a beautifully animated draggable slider to explore new words—each swipe refreshes the list with fresh vocabulary to help you expand your English skills effortlessly.
 
-## Getting Started
+🚀 Features:
+📖 Fetch words from Dictionary API + Gemini AI
 
-This project is a starting point for a Flutter application.
+🔄 Swipe to refresh and reveal new vocabulary
 
-A few resources to get you started if this is your first Flutter project:
+🎯 Built with clean architecture using BLoC for state management
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+📱 Flutter-powered for a smooth, cross-platform experience
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Ideal for learners who want to build their vocabulary one swipe at a time.
