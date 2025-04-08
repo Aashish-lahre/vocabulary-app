@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_improve_vocabulary/core/theme/color_theme.dart';
+import 'package:flutter_improve_vocabulary/core/theme/cubit/theme_cubit.dart';
 import 'package:flutter_improve_vocabulary/features/word/screens/word_details_screen.dart';
 import 'package:gap/gap.dart';
 
@@ -28,11 +30,15 @@ class WordCard extends StatelessWidget {
           ),
         );
       },
-      child: Container(
+      child: BlocBuilder<ThemeCubit, ThemeType>(
+  builder: (context, state) {
+    return Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           color: colorScheme.primaryContainer,
-          boxShadow: [
+          gradient: themes[state]!.containerGradient,
+
+        boxShadow: [
             BoxShadow(
                 offset: Offset(0, 4),
                 blurRadius: 8,
@@ -68,7 +74,7 @@ class WordCard extends StatelessWidget {
               ),
               Gap(20),
 
-              // black banner container
+              // banner container
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(5),
@@ -98,7 +104,9 @@ class WordCard extends StatelessWidget {
             ],
           ),
         ),
-      ),
+      );
+  },
+),
     );
   }
 }
@@ -106,7 +114,9 @@ class WordCard extends StatelessWidget {
 Widget _buildDefinitionContainer(BuildContext context, Definition definition) {
   final textTheme = Theme.of(context).textTheme;
   final colorScheme = Theme.of(context).colorScheme;
-  return Container(
+  return BlocBuilder<ThemeCubit, ThemeType>(
+  builder: (context, state) {
+    return Container(
     padding: EdgeInsets.all(8),
     margin: EdgeInsets.all(8),
     // alignment: Alignment.center,
@@ -126,6 +136,8 @@ Widget _buildDefinitionContainer(BuildContext context, Definition definition) {
       style: textTheme.bodyMedium?.copyWith(color: colorScheme.onPrimaryFixed),
     ),
   );
+  },
+);
 }
 
 class Definitions extends StatelessWidget {

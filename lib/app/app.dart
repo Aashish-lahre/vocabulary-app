@@ -78,9 +78,25 @@ class VocabularyAppView extends StatelessWidget {
       builder: (context, state) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-            colorScheme: themes[state],
 
+          builder: (context, child) {
+            if(themes[state]!.backgroundGradient != null) {
+              return Container(
+                decoration: BoxDecoration(
+                  gradient: themes[state]!.backgroundGradient
+                ),
+                child: child,
+              );
+            } else {
+              return child!;
+            }
+          },
+
+
+
+          theme: ThemeData(
+            colorScheme: themes[state]!.colorScheme,
+            scaffoldBackgroundColor: themes[state]!.backgroundGradient != null ? Colors.transparent : themes[state]!.colorScheme.surface,
             appBarTheme: const AppBarTheme(
               backgroundColor: Colors.transparent,
               elevation: 0,
