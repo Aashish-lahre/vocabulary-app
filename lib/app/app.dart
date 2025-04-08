@@ -6,7 +6,7 @@ import 'package:flutter_improve_vocabulary/core/theme/cubit/theme_cubit.dart';
 import 'package:flutter_improve_vocabulary/features/gemini_ai/bloc/gemini_bloc.dart';
 import 'package:flutter_improve_vocabulary/features/gemini_ai/repository/gemini_ai_repository.dart';
 import 'package:flutter_improve_vocabulary/features/homeScreen/presentation/screens/home_screen.dart';
-import '../core/blocs/later_word_fetch_bloc/later_word_fetch_bloc.dart';
+import 'package:flutter_improve_vocabulary/core/blocs/later_word_fetch_bloc/later_word_fetch_bloc.dart';
 import 'package:flutter_improve_vocabulary/features/word/bloc/word_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -17,7 +17,7 @@ class VocabularyApp extends StatelessWidget {
 
   final ThemeType themeType;
   final int wordFetchLimit;
-  final int initialWordFetchLimit = 10;
+  final int initialWordFetchLimit = 2;
 
   const VocabularyApp(this.wordFetchLimit, this.themeType, {super.key});
 
@@ -43,12 +43,12 @@ class VocabularyApp extends StatelessWidget {
             BlocProvider(
                 lazy: false,
                 // create: (_) => LaterWordFetchBloc(laterWordFetchLimit: 3)..add(InitialLaterWordFetchCount(count: initialLaterWordFetchLimit))
-                create: (_) =>
-                    LaterWordFetchBloc(laterWordFetchLimit: wordFetchLimit)
+                create: (context) =>
+                    LaterWordFetchBloc(laterWordFetchLimit: 2)
 
             ),
 
-            BlocProvider(create: (_) => InternetBloc(), lazy: false,),
+            BlocProvider(create: (context) => InternetBloc(), lazy: false,),
 
             BlocProvider(
               // create: (context) => WordCubit(dictionary_repository:  context.read<DictionaryRepository>()),
@@ -80,12 +80,14 @@ class VocabularyAppView extends StatelessWidget {
           debugShowCheckedModeBanner: false,
 
           builder: (context, child) {
+            print('later word bloc checking : ${context.read<LaterWordFetchBloc>().laterWordFetchLimit}');
+
             if(themes[state]!.backgroundGradient != null) {
               return Container(
                 decoration: BoxDecoration(
                   gradient: themes[state]!.backgroundGradient
                 ),
-                child: child,
+                child: child!,
               );
             } else {
               return child!;
@@ -102,7 +104,7 @@ class VocabularyAppView extends StatelessWidget {
               elevation: 0,
             ),
           ).copyWith(textTheme: GoogleFonts.akatabTextTheme()),
-          home: HomeScreen(initialWordFetchLimit: initialWordFetchLimit),
+          home: HomeScreen(initialWordFetchLimit: initialWordFetchLimit,),
         );
       },
     );

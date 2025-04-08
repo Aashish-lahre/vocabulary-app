@@ -6,6 +6,10 @@ String promptForWords(int noOfWords) {
   return 'Generate $noOfWords english words with the given schema';
 }
 
+String promptForSingleWord(String wordName) {
+  return "generate data for english word = $wordName using provided schema.";
+}
+
 String promptForExample(String word, int limit, List<String> filterOut) {
   String filterClause = filterOut.isNotEmpty
       ? " Avoid using the following examples that have already been used: ${filterOut.join(', ')}."

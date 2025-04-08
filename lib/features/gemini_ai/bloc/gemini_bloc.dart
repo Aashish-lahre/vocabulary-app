@@ -57,9 +57,23 @@ class GeminiBloc extends Bloc<GeminiEvent, GeminiState> {
 
           emit(AiWordsLoadedState(aiWords: response.data!));
         } else {
-          emit(GeminiFailureState(errorMessage: response.failure!.errorMessage));
+          emit(GeminiWordsLoadFailureState(errorMessage: response.failure!.errorMessage));
         }
 
+
+    });
+
+
+    on<SearchWordWithAiEvent>((event, emit) async {
+        emit(SingleAiWordLoadingState());
+
+        final response = await repository.generateSingleWord(event.wordName, model);
+
+        if(response.isSuccess) {
+          emit(SingleAiWordFetchedState(word: response.data!));
+        } else {
+          emit(GeminiSingleWordLoadFailureState(errorMessage: response.failure!.errorMessage));
+        }
 
     });
 

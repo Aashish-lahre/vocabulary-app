@@ -55,6 +55,28 @@ class GeminiRepository {
     return response;
   }
 
+  Future<Result<AiWord, GeminiError>> generateSingleWord(String wordName, GenerativeModel  model) async {
+
+    final List<Content> content = [Content.text(promptForSingleWord(wordName))];
+    late Result<AiWord, GeminiError> response;
+    try {
+
+      final generateContentResponse = await model.generateContent(content, generationConfig: configurationForSingleWord);
+
+      response = processResponseForWord(generateContentResponse.text!);
+
+    } on GenerativeAIException catch(err) {
+      // GenerativeAiException is a super type of all gemini exception,
+      // so we don't require to handle other types of gemini exceptions because GenerativeAIException handles all of them.
+      return Result(failure: GeminiGenerativeAiException(errorMessage: err.message));
+    } catch (err) {
+      // some unexpected exception
+      return Result(failure: GeminiUnexpectedFailure(errorMessage: err.toString()));
+    }
+
+    return response;
+  }
+
 
   Future<Result<List<String>, GeminiError>> generateExamples(String word, int limit, List<String> filterOut, GenerativeModel  model) async {
 
@@ -179,6 +201,52 @@ Result<List<AiWord>, GeminiError> processResponseForWords(String text) {
 
     }).toList();
     return Result(data: aiWords);
+  } catch (e) {
+    return Result(
+      failure: GeminiResponseFormatException(
+        errorMessage: 'Invalid JSON format: ${e.toString()}',
+      ),
+    );
+  }
+}
+
+Result<AiWord, GeminiError> processResponseForWord(String text) {
+  // Check if the response is empty
+  if (text.trim().isEmpty) {
+    return Result(
+      failure: GeminiResponseFormatException(errorMessage: 'Response is empty.'),
+    );
+  }
+
+  try {
+    // Attempt to parse JSON
+    final jsonData = jsonDecode(text)  as Map<String, dynamic>;
+    // final jsonData = jsonDecode(text)  as dynamic;
+
+    // Ensure jsonData is a List
+    // if (jsonData is! List) {
+    //   return Result(
+    //     failure: GeminiResponseFormatException(
+    //       errorMessage: 'Expected a JSON array but got ${jsonData.runtimeType}.',
+    //     ),
+    //   );
+    // }
+
+    // Ensure every item in the list is a Map<String, dynamic>
+    // final condition = !(jsonData is Map<String, dynamic>);
+    // if (condition) {
+    //   return Result(
+    //     failure: GeminiResponseFormatException(
+    //       errorMessage: 'List contains non-object elements.',
+    //     ),
+    //   );
+    // }
+
+    // Parse all items into AiWord objects
+    final AiWord aiWord = AiWord.fromJson(jsonData);
+
+
+    return Result(data: aiWord);
   } catch (e) {
     return Result(
       failure: GeminiResponseFormatException(

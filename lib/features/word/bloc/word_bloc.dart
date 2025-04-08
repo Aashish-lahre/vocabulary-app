@@ -47,7 +47,7 @@ class WordBloc extends Bloc<WordEvent, WordState> {
         }
       }
 
-      if(state is GeminiFailureState) {
+      if(state is GeminiWordsLoadFailureState) {
           add(GeminiFailureWordEvent(errorMessage: state.errorMessage));
       }
     });

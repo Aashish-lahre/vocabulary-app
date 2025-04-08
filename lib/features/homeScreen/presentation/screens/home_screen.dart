@@ -5,18 +5,21 @@ import 'package:flutter_improve_vocabulary/core/error/screen/home_error_screen.d
 import 'package:flutter_improve_vocabulary/features/gemini_ai/bloc/gemini_bloc.dart';
 import 'package:flutter_improve_vocabulary/features/gemini_ai/screens/ai_word_card.dart';
 import 'package:flutter_improve_vocabulary/features/homeScreen/presentation/utility/home_error_types_enum.dart';
+import 'package:flutter_improve_vocabulary/features/search/presentation/screens/search_page.dart';
 import 'package:flutter_improve_vocabulary/features/word/screens/word_card.dart';
 import 'package:flutter_improve_vocabulary/core/utility/loading_widget.dart';
-import '../../../../core/blocs/later_word_fetch_bloc/later_word_fetch_bloc.dart';
+// import 'package:flutter_improve_vocabulary/core/blocs/later_word_fetch_bloc//later_word_fetch_bloc.dart';
 import 'package:flutter_improve_vocabulary/features/settings/presentation/screens/settings.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/blocs/network_bloc/internet_bloc.dart';
+import '../../../../core/utility/error_widget.dart';
 import '../../../../core/utility/word_slider.dart';
 import '../../../dictionary/models/word.dart';
 import '../../../gemini_ai/data_model/ai_word.dart';
 import '../../../word/bloc/word_bloc.dart';
 import '../../../../core/utility/above_banner.dart';
+import '../../../../core/blocs/later_word_fetch_bloc/later_word_fetch_bloc.dart';
 
 class HomeScreen extends StatefulWidget {
   final int initialWordFetchLimit;
@@ -34,20 +37,23 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     final isAiWordGenerationIsOn =  context.read<GeminiBloc>().isAiWordsGenerationOn;
     if(isAiWordGenerationIsOn) {
-      context.read<GeminiBloc>().add(LoadAiWordsEvent(noOfAiWordsToLoad: 5));
+      context.read<GeminiBloc>().add(LoadAiWordsEvent(noOfAiWordsToLoad: widget.initialWordFetchLimit));
     } else {
-      context.read<WordBloc>().add(LoadWords(noOfWordToSearch: 5));
+      context.read<WordBloc>().add(LoadWords(noOfWordToSearch: widget.initialWordFetchLimit));
     }
     super.initState();
   }
 
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext homeContext) {
+    // print('internet bloc check : ${homeContext.read<InternetBloc>().state}');
+    print('later word bloc checking in homescreen : ${homeContext.read<LaterWordFetchBloc>().laterWordFetchLimit}');
     return Scaffold(
 
       body: Builder(
         builder: (scaffoldContext) {
+
           return SizedBox.expand(
             child: MultiBlocListener(
   listeners: [
@@ -108,9 +114,6 @@ class _HomeScreenState extends State<HomeScreen> {
   ],
   child: Stack(
                 children: [
-
-
-
                     BlocConsumer<WordBloc, WordState>(
                     listener: (context, state) {
                       if (state is NoMoreWordAvailableState) {
@@ -304,48 +307,20 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           );
                         case GeminiFailureWordState() :
+                          // <editor-fold>
+                          ElevatedButton button = ElevatedButton(
+                      onPressed: () {
+                      final isAiWordGenerationIsOn =  context.read<GeminiBloc>().isAiWordsGenerationOn;
+                      if(isAiWordGenerationIsOn) {
+                      context.read<GeminiBloc>().add(LoadAiWordsEvent(noOfAiWordsToLoad: 5));
+                      } else {
+                      context.read<WordBloc>().add(LoadWords(noOfWordToSearch: 5));
+                      }
+                      },
+                      child: Text('Retry'));
+                          // </editor-fold>
                           return Positioned.fill(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              spacing: 20,
-                              children: [
-                                Text(
-                                  'Oops!',
-                                  style: Theme.of(context)
-                                      .copyWith(
-                                      textTheme:
-                                      GoogleFonts.eaterTextTheme())
-                                      .textTheme
-                                      .displayLarge!
-                                      .copyWith(
-                                      fontSize: 70,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurface),
-                                ),
-                                Text(
-                                  state.errorMessage,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyLarge!
-                                      .copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurface),
-                                ),
-                                ElevatedButton(
-                                    onPressed: () {
-                                      final isAiWordGenerationIsOn =  context.read<GeminiBloc>().isAiWordsGenerationOn;
-                                      if(isAiWordGenerationIsOn) {
-                                        context.read<GeminiBloc>().add(LoadAiWordsEvent(noOfAiWordsToLoad: 5));
-                                      } else {
-                                        context.read<WordBloc>().add(LoadWords(noOfWordToSearch: 5));
-                                      }
-                                    },
-                                    child: Text('Retry')),
-                              ],
-                            ),
+                            child: errorWidget(context, state.errorMessage, button)
                           );
 
                         default:
@@ -354,38 +329,75 @@ class _HomeScreenState extends State<HomeScreen> {
                       }
                     },
                   )
-
-
-
-
                 ],
               ),
 ),
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Theme.of(context).colorScheme.primaryFixedDim,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        onPressed: () {
-          Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => MultiBlocProvider(
-  providers: [
-    BlocProvider.value(
-                    value: BlocProvider.of<LaterWordFetchBloc>(context),
-),
-    BlocProvider.value(
-      value:  BlocProvider.of<GeminiBloc>(context),
-    ),
-  ],
-  child: SettingScreen(),
-)));
-        },
-        child: Icon(
-          Icons.settings,
-          color: Theme.of(context).colorScheme.onPrimaryFixed,
-        ),
-),
+
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            heroTag: null,
+            backgroundColor: Theme.of(context).colorScheme.primaryFixedDim,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            onPressed: () {
+              _navigateToSearchScreen(homeContext);
+            },
+            child: Icon(Icons.search,
+              color: Theme.of(context).colorScheme.onPrimaryFixed,
+            ),
+
+          ),
+          SizedBox(height: 12),
+          FloatingActionButton(
+            heroTag: null,
+            backgroundColor: Theme.of(context).colorScheme.primaryFixedDim,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            onPressed: () {
+              _navigateToSettingsScreen(homeContext);
+            },
+            child: Icon(
+              Icons.settings,
+              color: Theme.of(context).colorScheme.onPrimaryFixed,
+            ),
+          ),
+        ],
+      ),
     );
+  }
+
+
+
+  void _navigateToSettingsScreen(BuildContext context) {
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (_) => MultiBlocProvider(
+      providers: [
+        BlocProvider.value(
+              value: BlocProvider.of<LaterWordFetchBloc>(context),
+    ),
+        BlocProvider.value(
+          value:  BlocProvider.of<GeminiBloc>(context),
+        ),
+      ],
+      child: SettingScreen(),
+    )));
+  }
+  void _navigateToSearchScreen(BuildContext context) {
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => MultiBlocProvider(
+          providers: [
+            BlocProvider.value(
+              value: BlocProvider.of<WordBloc>(context),
+            ),
+            BlocProvider.value(
+              value:  BlocProvider.of<GeminiBloc>(context),
+            ),
+          ],
+          child: SearchPage(),
+        )));
   }
 }

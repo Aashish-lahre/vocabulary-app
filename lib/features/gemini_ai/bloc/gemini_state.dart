@@ -52,6 +52,15 @@ final class SingleAiWordFetchedState extends GeminiState {
 
 }
 
+
+final class SingleAiWordLoadingState extends GeminiState {
+
+
+  @override
+  List<Object?> get props => [];
+
+}
+
 final class GeminiFailureState extends GeminiState {
   final String errorMessage;
 
@@ -60,6 +69,29 @@ final class GeminiFailureState extends GeminiState {
   @override
   List<Object?> get props => [errorMessage];
 }
+
+
+final class GeminiWordsLoadFailureState extends GeminiState {
+  final String errorMessage;
+
+  const GeminiWordsLoadFailureState({required this.errorMessage});
+
+  @override
+  List<Object?> get props => [errorMessage];
+}
+
+
+final class GeminiSingleWordLoadFailureState extends GeminiState {
+  final String errorMessage;
+
+  const GeminiSingleWordLoadFailureState({required this.errorMessage});
+
+  @override
+  List<Object?> get props => [errorMessage];
+}
+
+
+
 
 final class NoMoreAiWordsAvailableState extends GeminiState {
   @override

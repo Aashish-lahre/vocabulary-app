@@ -8,13 +8,13 @@ final schemaForWord = Schema(SchemaType.object,
   properties: {
 
   'wordName' : Schema(SchemaType.string, description: 'word name'),
-  'partOfSpeech': Schema(SchemaType.array, description: 'array of partOfSpeech strings for the "wordName" with up to 3 items',
+  'partOfSpeech': Schema(SchemaType.array, description: 'array of partOfSpeech strings for the "wordName". ',
                   nullable: false, items: Schema(SchemaType.string)
                   ),
-  'definition': Schema(SchemaType.array, description: 'array of definition string with up to 3 items', nullable: false, items: Schema(SchemaType.string)),
-  'synonyms': Schema(SchemaType.array, description: 'array of synonym strings for the "wordName" with up to 4 items', items: Schema(SchemaType.string), nullable: false),
-  'antonyms': Schema(SchemaType.array, description: 'array of antonym strings for the "wordName" with up to 4 items', items: Schema(SchemaType.string), nullable: false),
-  'example': Schema(SchemaType.array, description: 'array of example strings for the "wordName" with up to 4 items', items: Schema(SchemaType.string), nullable: false),
+  'definition': Schema(SchemaType.array, description: 'array of definition string.', nullable: false, items: Schema(SchemaType.string)),
+  'synonyms': Schema(SchemaType.array, description: 'array of synonym strings for the "wordName". ', items: Schema(SchemaType.string), nullable: false),
+  'antonyms': Schema(SchemaType.array, description: 'array of antonym strings for the "wordName". ', items: Schema(SchemaType.string), nullable: false),
+  'example': Schema(SchemaType.array, description: 'array of example strings for the "wordName". ', items: Schema(SchemaType.string), nullable: false),
 
   },
   requiredProperties: [

@@ -53,9 +53,9 @@ class DictionaryApiClient implements DictionaryServices {
   @override
   Future<Word> searchWord(String word) async {
     try {
-      final uri = Uri.parse('\$url/\$word');
+      final uri = Uri.parse('$url/$word');
       final response = await client.get(uri).timeout(const Duration(seconds: 10));
-      debugPrint('Response status: \${response.statusCode}');
+      debugPrint('Response status: ${response.statusCode}');
 
       if (response.statusCode == 404) {
         // Word not found.
@@ -68,7 +68,7 @@ class DictionaryApiClient implements DictionaryServices {
         throw Exception('Server error. Please try again later.');
       } else if (response.statusCode != 200) {
         // Unexpected status code.
-        throw Exception('Unexpected API response: \${response.statusCode}');
+        throw Exception('Unexpected API response: ${response.statusCode}');
       }
 
       // Parse the response body as JSON array.
@@ -92,7 +92,7 @@ class DictionaryApiClient implements DictionaryServices {
       // Rethrow so caller can handle missing word.
       rethrow;
     } on http.ClientException catch (e) {
-      debugPrint('HTTP client error: \${e.message}');
+      debugPrint('HTTP client error: ${e.message}');
       if (e.message == 'Connection reset by peer') {
         // Treat as no internet.
         throw NoInternetFailure();
@@ -101,7 +101,7 @@ class DictionaryApiClient implements DictionaryServices {
       }
     } catch (err, stack) {
       // Any other error: log and wrap.
-      debugPrint('Unexpected error in API client: \$err');
+      debugPrint('Unexpected error in API client: $err');
       debugPrintStack(stackTrace: stack);
       throw UnexpectedFailure(errorMessage: err.toString());
     }

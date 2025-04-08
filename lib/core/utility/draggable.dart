@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_improve_vocabulary/features/gemini_ai/bloc/gemini_bloc.dart';
-import '../blocs/later_word_fetch_bloc/later_word_fetch_bloc.dart';
+import 'package:flutter_improve_vocabulary/core/blocs/later_word_fetch_bloc/later_word_fetch_bloc.dart';
 import 'package:flutter_improve_vocabulary/features/word/bloc/word_bloc.dart';
 
 class DraggableSlider extends StatefulWidget {

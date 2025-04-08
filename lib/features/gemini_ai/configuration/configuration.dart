@@ -10,6 +10,13 @@ final configurationForWords = GenerationConfig(
   responseSchema: schemaForWords,
 );
 
+final configurationForSingleWord = GenerationConfig(
+  candidateCount: 1,
+  responseMimeType: 'application/json',
+  topP: .5,
+  responseSchema: schemaForWord,
+);
+
 
 final configurationForExample = GenerationConfig(
   candidateCount: 1,

@@ -1,5 +1,11 @@
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_improve_vocabulary/core/utility/error_widget.dart';
+import 'package:flutter_improve_vocabulary/features/gemini_ai/screens/ai_word_details_screen.dart';
+import 'package:gap/gap.dart';
+
+import '../../../gemini_ai/bloc/gemini_bloc.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -35,28 +41,71 @@ class _SearchPageState extends State<SearchPage> {
     if (!_isSearchControllerDisposed) {
       _searchController.closeView(null);
     }
-
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: kToolbarHeight + 50,
-        title: _buildSearchBar(),
-      ),
-      body: const SizedBox.expand(),
+    return BlocConsumer<GeminiBloc, GeminiState>(
+      listenWhen: (_, currentState) {
+
+        return [SingleAiWordFetchedState].contains(currentState.runtimeType);
+      },
+      listener: (context, state) {
+          if(state is SingleAiWordFetchedState) {
+            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => AiWordDetailsScreen(word: state.word)));
+          }
+      },
+      buildWhen: (_, currentState) {
+        return [GeminiSingleWordLoadFailureState, SingleAiWordLoadingState].contains(
+            currentState.runtimeType);
+      },
+      builder: (context, state) {
+        return Scaffold(
+          appBar: AppBar(
+            toolbarHeight: kToolbarHeight + 50,
+            title: _buildSearchBar(state),
+          ),
+          body: switch (state) {
+
+            GeminiSingleWordLoadFailureState() =>
+                errorWidget(
+                  context, state.errorMessage, ElevatedButton(onPressed: () {
+                  Navigator.of(context).pop();
+                }, child: Text('Home'),),),
+
+            SingleAiWordLoadingState() =>
+                SizedBox.expand(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text('Loading word from Gemini AI'),
+                      Gap(10),
+                      SizedBox(
+                        width: 50,
+                        height: 50,
+                        child: CircularProgressIndicator(),),
+                    ],
+                  ),
+                ),
+          _ => SizedBox.shrink(),
+          },
+        );
+      },
     );
   }
 
-  Widget _buildSearchBar() {
+  Widget _buildSearchBar(GeminiState state) {
     return SearchAnchor(
       searchController: _searchController,
       viewLeading: IconButton(
         onPressed: _handlePop,
         icon: const Icon(Icons.arrow_back_rounded),
       ),
-      viewBackgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+      viewBackgroundColor: Theme
+          .of(context)
+          .colorScheme
+          .surfaceContainer,
       builder: (context, controller) {
         if (_isSearchControllerDisposed) return const SizedBox.shrink();
 
@@ -67,7 +116,10 @@ class _SearchPageState extends State<SearchPage> {
           leading: const Icon(Icons.search),
           hintText: 'Search word',
           backgroundColor: WidgetStatePropertyAll(
-              Theme.of(context).colorScheme.surfaceContainer),
+              Theme
+                  .of(context)
+                  .colorScheme
+                  .surfaceContainer),
           trailing: [
             IconButton(
               onPressed: () {
@@ -99,7 +151,25 @@ class _SearchPageState extends State<SearchPage> {
             .where((word) => word.toLowerCase().startsWith(query))
             .toList();
 
-        return words.map((word) {
+        return [
+          if(controller.text.isNotEmpty)
+        ListTile(
+          leading: const Icon(Icons.search),
+          trailing: Transform.rotate(
+            angle: -45 * 3.1415926535897932 / 180,
+            child: const Icon(Icons.arrow_upward_rounded),
+          ),
+          title: Text(controller.text),
+          onTap: () {
+            if (!_isSearchControllerDisposed && context.mounted) {
+              controller.closeView(controller.text);
+
+              context.read<GeminiBloc>().add(
+                  SearchWordWithAiEvent(wordName: controller.text));
+            }
+          },
+        ),
+        ...words.map((word) {
           return ListTile(
             leading: const Icon(Icons.search),
             trailing: Transform.rotate(
@@ -111,11 +181,17 @@ class _SearchPageState extends State<SearchPage> {
               if (!_isSearchControllerDisposed && context.mounted) {
                 controller.closeView(word);
                 controller.text = word;
+                context.read<GeminiBloc>().add(
+                    SearchWordWithAiEvent(wordName: controller.text));
               }
             },
           );
-        });
+        }),
+        ];
       },
     );
   }
+
+
+
 }

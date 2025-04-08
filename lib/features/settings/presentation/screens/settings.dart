@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_improve_vocabulary/core/shared_preference/word_fetch_limit.dart';
 import 'package:flutter_improve_vocabulary/core/theme/color_theme.dart';
 import 'package:flutter_improve_vocabulary/features/gemini_ai/gemini_models/gemini_models.dart';
 import 'package:flutter_improve_vocabulary/features/gemini_ai/shared_Preference/gemini_status_storage.dart';
 import 'package:gap/gap.dart';
 
-// import '../../../../core/blocs/later_word_fetch_bloc/later_word_fetch_event.dart';
 import '../../../../core/theme/cubit/theme_cubit.dart';
 import '../../../gemini_ai/bloc/gemini_bloc.dart';
-import '../../../../core/blocs/later_word_fetch_bloc//later_word_fetch_bloc.dart';
+import '../../../../core/blocs/later_word_fetch_bloc/later_word_fetch_bloc.dart';
 
 
 
@@ -315,7 +313,7 @@ class _LaterWordFetchSliderWidgetState extends State<_LaterWordFetchSliderWidget
                                 setState(() {
                                   widget.laterWordFetchCountController.value = changedValue.toInt();
                                   context.read<LaterWordFetchBloc>().add(ChangeLaterWordFetchCount(changedCount: changedValue.toInt()));
-                                  WordFetchLimit().changeWordFetchLimit(changedValue.toInt());
+
                                 });
                               },
                 

@@ -26,9 +26,15 @@ final class LoadAiWordsEvent extends GeminiEvent {
 
 }
 
-final class LoadSingleAiWordEvent extends GeminiEvent {
+final class SearchWordWithAiEvent extends GeminiEvent {
+
+  final String wordName;
+
+  const SearchWordWithAiEvent({required this.wordName});
+
+
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [wordName];
 
 }
 
