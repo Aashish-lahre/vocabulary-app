@@ -1,127 +1,164 @@
 import 'package:flutter/material.dart';
 
 
-enum ThemeType {
-  light, dark, auto, pinkSaruka, Jangle, darkPurple,
+
+class AppTheme {
+
+  final ColorScheme colorScheme;
+  final Gradient? backgroundGradient;
+  final Gradient? containerGradient;
+
+  AppTheme({required this.colorScheme, this.backgroundGradient, this.containerGradient});
 }
 
 
-Map<ThemeType, ColorScheme> themes = {
+
+
+
+
+enum ThemeType {
+  light(label: 'Light'),
+  dark(label: 'Dark'),
+  auto(label: 'Auto'),
+  pinkSaruka(label: 'Pink Saruka'),
+  jangle(label: 'Jangle'),
+  darkPurple(label: 'Dark Purple'),
+  blurpleMidnight(label : "Blurple Midnight"),
+  aurora(label: 'Aurora'),
+  chromaGlow(label : "Chroma Glow");
+  final String label;
+  const ThemeType({ required this.label });
+}
+
+
+
+Map<ThemeType, AppTheme> themes = {
   ThemeType.light : light,
   ThemeType.dark : dark,
   ThemeType.auto : getSystemThemeMode(),
   ThemeType.pinkSaruka : pinkSakura,
-  ThemeType.Jangle : jangle,
+  ThemeType.jangle : jangle,
   ThemeType.darkPurple : darkPurple,
+  ThemeType.blurpleMidnight : blurpleMidnight,
+  ThemeType.aurora : aurora,
+  ThemeType.chromaGlow : chromaGlow,
 };
 
-ColorScheme getSystemThemeMode() {
+AppTheme getSystemThemeMode() {
   return WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.light ? light : dark;
 }
 
 
 
-const ColorScheme light = ColorScheme(
-  brightness: Brightness.light,
-  primary: Color(0xFF485D92),
-  onPrimary: Color(0xFFFFFFFF),
-  primaryContainer: Color(0xFFDAE2FF),
-  onPrimaryContainer: Color(0xFF001947),
-  primaryFixed: Color(0xFFDAE2FF),
-  primaryFixedDim: Color(0xFFB1C5FF),
-  onPrimaryFixed: Color(0xFF001947),
-  onPrimaryFixedVariant: Color(0xFF304578),
-  secondary: Color(0xFF585E71),
-  onSecondary: Color(0xFFFFFFFF),
-  secondaryContainer: Color(0xFFDCE2F9),
-  onSecondaryContainer: Color(0xFF151B2C),
-  secondaryFixed: Color(0xFFDCE2F9),
-  secondaryFixedDim: Color(0xFFC0C6DC),
-  onSecondaryFixed: Color(0xFF151B2C),
-  onSecondaryFixedVariant: Color(0xFF404659),
-  tertiary: Color(0xFF735572),
-  onTertiary: Color(0xFFFFFFFF),
-  tertiaryContainer: Color(0xFFFED7F9),
-  onTertiaryContainer: Color(0xFF2A122C),
-  tertiaryFixed: Color(0xFFFED7F9),
-  tertiaryFixedDim: Color(0xFFE0BBDD),
-  onTertiaryFixed: Color(0xFF2A122C),
-  onTertiaryFixedVariant: Color(0xFF593D59),
-  error: Color(0xFFBA1A1A),
-  onError: Color(0xFFFFFFFF),
-  errorContainer: Color(0xFFFFDAD6),
-  onErrorContainer: Color(0xFF410002),
-  surface: Color(0xFFFAF8FF),
-  onSurface: Color(0xFF1A1B21),
-  surfaceDim: Color(0xFFDAD9E0),
-  surfaceBright: Color(0xFFFAF8FF),
-  surfaceContainerLowest: Color(0xFFFFFFFF),
-  surfaceContainerLow: Color(0xFFF4F3FA),
-  surfaceContainer: Color(0xFFEEEDF4),
-  surfaceContainerHigh: Color(0xFFE8E7EF),
-  surfaceContainerHighest: Color(0xFFE2E2E9),
-  onSurfaceVariant: Color(0xFF44464F),
-  outline: Color(0xFF757780),
-  outlineVariant: Color(0xFFC5C6D0),
-  shadow: Color(0xFF000000),
-  scrim: Color(0xFF000000),
-  inverseSurface: Color(0xFF2F3036),
-  onInverseSurface: Color(0xFFF1F0F7),
-  inversePrimary: Color(0xFFB1C5FF),
-  surfaceTint: Color(0xFF485D92),
+ AppTheme light = AppTheme(
+  backgroundGradient: null,
+  colorScheme: ColorScheme(
+    brightness: Brightness.light,
+    primary: Color(0xFF485D92),
+    onPrimary: Color(0xFFFFFFFF),
+    primaryContainer: Color(0xFFDAE2FF),
+    onPrimaryContainer: Color(0xFF001947),
+    primaryFixed: Color(0xFFDAE2FF),
+    primaryFixedDim: Color(0xFFB1C5FF),
+    onPrimaryFixed: Color(0xFF001947),
+    onPrimaryFixedVariant: Color(0xFF304578),
+    secondary: Color(0xFF585E71),
+    onSecondary: Color(0xFFFFFFFF),
+    secondaryContainer: Color(0xFFDCE2F9),
+    onSecondaryContainer: Color(0xFF151B2C),
+    secondaryFixed: Color(0xFFDCE2F9),
+    secondaryFixedDim: Color(0xFFC0C6DC),
+    onSecondaryFixed: Color(0xFF151B2C),
+    onSecondaryFixedVariant: Color(0xFF404659),
+    tertiary: Color(0xFF735572),
+    onTertiary: Color(0xFFFFFFFF),
+    tertiaryContainer: Color(0xFFFED7F9),
+    onTertiaryContainer: Color(0xFF2A122C),
+    tertiaryFixed: Color(0xFFFED7F9),
+    tertiaryFixedDim: Color(0xFFE0BBDD),
+    onTertiaryFixed: Color(0xFF2A122C),
+    onTertiaryFixedVariant: Color(0xFF593D59),
+    error: Color(0xFFBA1A1A),
+    onError: Color(0xFFFFFFFF),
+    errorContainer: Color(0xFFFFDAD6),
+    onErrorContainer: Color(0xFF410002),
+    surface: Color(0xFFFAF8FF),
+    onSurface: Color(0xFF1A1B21),
+    surfaceDim: Color(0xFFDAD9E0),
+    surfaceBright: Color(0xFFFAF8FF),
+    surfaceContainerLowest: Color(0xFFFFFFFF),
+    surfaceContainerLow: Color(0xFFF4F3FA),
+    surfaceContainer: Color(0xFFEEEDF4),
+    surfaceContainerHigh: Color(0xFFE8E7EF),
+    surfaceContainerHighest: Color(0xFFE2E2E9),
+    onSurfaceVariant: Color(0xFF44464F),
+    outline: Color(0xFF757780),
+    outlineVariant: Color(0xFFC5C6D0),
+    shadow: Color(0xFF000000),
+    scrim: Color(0xFF000000),
+    inverseSurface: Color(0xFF2F3036),
+    onInverseSurface: Color(0xFFF1F0F7),
+    inversePrimary: Color(0xFFB1C5FF),
+    surfaceTint: Color(0xFF485D92),
+  ),
+
 );
 
-const ColorScheme dark = ColorScheme(
-  brightness: Brightness.dark,
-  primary: Color(0xFFB1C5FF),
-  onPrimary: Color(0xFF172E60),
-  primaryContainer: Color(0xFF304578),
-  onPrimaryContainer: Color(0xFFDAE2FF),
-  primaryFixed: Color(0xFFDAE2FF),
-  primaryFixedDim: Color(0xFFB1C5FF),
-  onPrimaryFixed: Color(0xFF001947),
-  onPrimaryFixedVariant: Color(0xFF304578),
-  secondary: Color(0xFFC0C6DC),
-  onSecondary: Color(0xFF2A3042),
-  secondaryContainer: Color(0xFF404659),
-  onSecondaryContainer: Color(0xFFDCE2F9),
-  secondaryFixed: Color(0xFFDCE2F9),
-  secondaryFixedDim: Color(0xFFC0C6DC),
-  onSecondaryFixed: Color(0xFF151B2C),
-  onSecondaryFixedVariant: Color(0xFF404659),
-  tertiary: Color(0xFFE0BBDD),
-  onTertiary: Color(0xFF412742),
-  tertiaryContainer: Color(0xFF593D59),
-  onTertiaryContainer: Color(0xFFFED7F9),
-  tertiaryFixed: Color(0xFFFED7F9),
-  tertiaryFixedDim: Color(0xFFE0BBDD),
-  onTertiaryFixed: Color(0xFF2A122C),
-  onTertiaryFixedVariant: Color(0xFF593D59),
-  error: Color(0xFFFFB4AB),
-  onError: Color(0xFF690005),
-  errorContainer: Color(0xFF93000A),
-  onErrorContainer: Color(0xFFFFDAD6),
-  surface: Color(0xFF121318),
-  onSurface: Color(0xFFE2E2E9),
-  surfaceDim: Color(0xFF121318),
-  surfaceBright: Color(0xFF38393F),
-  surfaceContainerLowest: Color(0xFF0D0E13),
-  surfaceContainerLow: Color(0xFF1A1B21),
-  surfaceContainer: Color(0xFF1E1F25),
-  surfaceContainerHigh: Color(0xFF282A2F),
-  surfaceContainerHighest: Color(0xFF33343A),
-  onSurfaceVariant: Color(0xFFC5C6D0),
-  outline: Color(0xFF8F9099),
-  outlineVariant: Color(0xFF44464F),
-  shadow: Color(0xFF000000),
-  scrim: Color(0xFF000000),
-  inverseSurface: Color(0xFFE2E2E9),
-  onInverseSurface: Color(0xFF2F3036),
-  inversePrimary: Color(0xFF485D92),
-  surfaceTint: Color(0xFFB1C5FF),
-);
 
-const ColorScheme pinkSakura = ColorScheme(
+AppTheme dark = AppTheme(
+  backgroundGradient: null,
+  colorScheme: ColorScheme(
+    brightness: Brightness.dark,
+    primary: Color(0xFFB1C5FF),
+    onPrimary: Color(0xFF172E60),
+    primaryContainer: Color(0xFF304578),
+    onPrimaryContainer: Color(0xFFDAE2FF),
+    primaryFixed: Color(0xFFDAE2FF),
+    primaryFixedDim: Color(0xFFB1C5FF),
+    onPrimaryFixed: Color(0xFF001947),
+    onPrimaryFixedVariant: Color(0xFF304578),
+    secondary: Color(0xFFC0C6DC),
+    onSecondary: Color(0xFF2A3042),
+    secondaryContainer: Color(0xFF404659),
+    onSecondaryContainer: Color(0xFFDCE2F9),
+    secondaryFixed: Color(0xFFDCE2F9),
+    secondaryFixedDim: Color(0xFFC0C6DC),
+    onSecondaryFixed: Color(0xFF151B2C),
+    onSecondaryFixedVariant: Color(0xFF404659),
+    tertiary: Color(0xFFE0BBDD),
+    onTertiary: Color(0xFF412742),
+    tertiaryContainer: Color(0xFF593D59),
+    onTertiaryContainer: Color(0xFFFED7F9),
+    tertiaryFixed: Color(0xFFFED7F9),
+    tertiaryFixedDim: Color(0xFFE0BBDD),
+    onTertiaryFixed: Color(0xFF2A122C),
+    onTertiaryFixedVariant: Color(0xFF593D59),
+    error: Color(0xFFFFB4AB),
+    onError: Color(0xFF690005),
+    errorContainer: Color(0xFF93000A),
+    onErrorContainer: Color(0xFFFFDAD6),
+    surface: Color(0xFF121318),
+    onSurface: Color(0xFFE2E2E9),
+    surfaceDim: Color(0xFF121318),
+    surfaceBright: Color(0xFF38393F),
+    surfaceContainerLowest: Color(0xFF0D0E13),
+    surfaceContainerLow: Color(0xFF1A1B21),
+    surfaceContainer: Color(0xFF1E1F25),
+    surfaceContainerHigh: Color(0xFF282A2F),
+    surfaceContainerHighest: Color(0xFF33343A),
+    onSurfaceVariant: Color(0xFFC5C6D0),
+    outline: Color(0xFF8F9099),
+    outlineVariant: Color(0xFF44464F),
+    shadow: Color(0xFF000000),
+    scrim: Color(0xFF000000),
+    inverseSurface: Color(0xFFE2E2E9),
+    onInverseSurface: Color(0xFF2F3036),
+    inversePrimary: Color(0xFF485D92),
+    surfaceTint: Color(0xFFB1C5FF),
+  ),);
+
+
+AppTheme pinkSakura = AppTheme(colorScheme: ColorScheme(
   brightness: Brightness.dark,
   primary: Color(0xFFFFB1C0),
   onPrimary: Color(0xFF551D2C),
@@ -169,59 +206,57 @@ const ColorScheme pinkSakura = ColorScheme(
   onInverseSurface: Color(0xFF382E2F),
   inversePrimary: Color(0xFF8D4959),
   surfaceTint: Color(0xFFFFB1C0),
-);
-
-const ColorScheme jangle = ColorScheme(
-  brightness: Brightness.light,
-  primary: Color(0xFF3A693B),
-  onPrimary: Color(0xFFFFFFFF),
-  primaryContainer: Color(0xFFBBF0B6),
-  onPrimaryContainer: Color(0xFF002105),
-  primaryFixed: Color(0xFFBBF0B6),
-  primaryFixedDim: Color(0xFFA0D49B),
-  onPrimaryFixed: Color(0xFF002105),
-  onPrimaryFixedVariant: Color(0xFF225025),
-  secondary: Color(0xFF52634F),
-  onSecondary: Color(0xFFFFFFFF),
-  secondaryContainer: Color(0xFFD5E8CF),
-  onSecondaryContainer: Color(0xFF101F10),
-  secondaryFixed: Color(0xFFD5E8CF),
-  secondaryFixedDim: Color(0xFFB9CCB4),
-  onSecondaryFixed: Color(0xFF101F10),
-  onSecondaryFixedVariant: Color(0xFF3B4B39),
-  tertiary: Color(0xFF39656B),
-  onTertiary: Color(0xFFFFFFFF),
-  tertiaryContainer: Color(0xFFBCEBF1),
-  onTertiaryContainer: Color(0xFF001F23),
-  tertiaryFixed: Color(0xFFBCEBF1),
-  tertiaryFixedDim: Color(0xFFA1CED5),
-  onTertiaryFixed: Color(0xFF001F23),
-  onTertiaryFixedVariant: Color(0xFF1F4D53),
-  error: Color(0xFFBA1A1A),
-  onError: Color(0xFFFFFFFF),
-  errorContainer: Color(0xFFFFDAD6),
-  onErrorContainer: Color(0xFF410002),
-  surface: Color(0xFFF7FBF1),
-  onSurface: Color(0xFF181D17),
-  surfaceDim: Color(0xFFD7DBD2),
-  surfaceBright: Color(0xFFF7FBF1),
-  surfaceContainerLowest: Color(0xFFFFFFFF),
-  surfaceContainerLow: Color(0xFFF1F5EC),
-  surfaceContainer: Color(0xFFEBEFE6),
-  surfaceContainerHigh: Color(0xFFE6E9E0),
-  surfaceContainerHighest: Color(0xFFE0E4DB),
-  onSurfaceVariant: Color(0xFF424940),
-  outline: Color(0xFF72796F),
-  outlineVariant: Color(0xFFC2C9BD),
-  shadow: Color(0xFF000000),
-  scrim: Color(0xFF000000),
-  inverseSurface: Color(0xFF2D322C),
-  onInverseSurface: Color(0xFFEEF2E9),
-  inversePrimary: Color(0xFFA0D49B),
-  surfaceTint: Color(0xFF3A693B),
-);
-
-const ColorScheme darkPurple = ColorScheme(
+));
+AppTheme jangle = AppTheme(colorScheme: ColorScheme(
+      brightness: Brightness.light,
+      primary: Color(0xFF3A693B),
+      onPrimary: Color(0xFFFFFFFF),
+      primaryContainer: Color(0xFFBBF0B6),
+      onPrimaryContainer: Color(0xFF002105),
+      primaryFixed: Color(0xFFBBF0B6),
+      primaryFixedDim: Color(0xFFA0D49B),
+      onPrimaryFixed: Color(0xFF002105),
+      onPrimaryFixedVariant: Color(0xFF225025),
+      secondary: Color(0xFF52634F),
+      onSecondary: Color(0xFFFFFFFF),
+      secondaryContainer: Color(0xFFD5E8CF),
+      onSecondaryContainer: Color(0xFF101F10),
+      secondaryFixed: Color(0xFFD5E8CF),
+      secondaryFixedDim: Color(0xFFB9CCB4),
+      onSecondaryFixed: Color(0xFF101F10),
+      onSecondaryFixedVariant: Color(0xFF3B4B39),
+      tertiary: Color(0xFF39656B),
+      onTertiary: Color(0xFFFFFFFF),
+      tertiaryContainer: Color(0xFFBCEBF1),
+      onTertiaryContainer: Color(0xFF001F23),
+      tertiaryFixed: Color(0xFFBCEBF1),
+      tertiaryFixedDim: Color(0xFFA1CED5),
+      onTertiaryFixed: Color(0xFF001F23),
+      onTertiaryFixedVariant: Color(0xFF1F4D53),
+      error: Color(0xFFBA1A1A),
+      onError: Color(0xFFFFFFFF),
+      errorContainer: Color(0xFFFFDAD6),
+      onErrorContainer: Color(0xFF410002),
+      surface: Color(0xFFF7FBF1),
+      onSurface: Color(0xFF181D17),
+      surfaceDim: Color(0xFFD7DBD2),
+      surfaceBright: Color(0xFFF7FBF1),
+      surfaceContainerLowest: Color(0xFFFFFFFF),
+      surfaceContainerLow: Color(0xFFF1F5EC),
+      surfaceContainer: Color(0xFFEBEFE6),
+      surfaceContainerHigh: Color(0xFFE6E9E0),
+      surfaceContainerHighest: Color(0xFFE0E4DB),
+      onSurfaceVariant: Color(0xFF424940),
+      outline: Color(0xFF72796F),
+      outlineVariant: Color(0xFFC2C9BD),
+      shadow: Color(0xFF000000),
+      scrim: Color(0xFF000000),
+      inverseSurface: Color(0xFF2D322C),
+      onInverseSurface: Color(0xFFEEF2E9),
+      inversePrimary: Color(0xFFA0D49B),
+      surfaceTint: Color(0xFF3A693B),
+    ));
+AppTheme darkPurple = AppTheme(colorScheme: ColorScheme(
   brightness: Brightness.dark,
   primary: Color(0xFFCCBEFF),
   onPrimary: Color(0xFF33275E),
@@ -269,5 +304,128 @@ const ColorScheme darkPurple = ColorScheme(
   onInverseSurface: Color(0xFF312F35),
   inversePrimary: Color(0xFF625690),
   surfaceTint: Color(0xFFCCBEFF),
+));
+
+
+
+
+// const Color darkBlurple = Color(0xFF404EED);
+// const Color blurple     = Color(0xFF5865F2);
+const Color containerDarkBlurple = Color(0xFF0f0b29);
+const Color containerBlurple     = Color(0xFF0b103f);
+
+const Color backgroundDarkBlurple = Color(0xFF070315);
+const Color backgroundBlurple     = Color(0xFF070924);
+AppTheme blurpleMidnight = AppTheme(
+    colorScheme: ColorScheme.fromSeed(seedColor: backgroundBlurple, brightness: Brightness.dark),
+    backgroundGradient: LinearGradient(
+      colors: [backgroundDarkBlurple, backgroundBlurple],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    ),
+  containerGradient: LinearGradient(
+    colors: [containerDarkBlurple, containerBlurple],
+    begin: Alignment.topRight,
+    end: Alignment.bottomLeft,
+  ),
+
+);
+
+
+
+
+// const Color containerFirst = Color(0xFFbdc3c7);
+// const Color containerSecond = Color(0xFF2c3e50);
+//
+// const Color backgroundFirst = Color(0xff8e9296);
+// const Color backgroundSecond = Color(0xff1f2d38);
+//
+//
+// AppTheme zinc = AppTheme(colorScheme: ColorScheme.fromSeed(seedColor: containerFirst, brightness: Brightness.dark),
+//   backgroundGradient: LinearGradient(
+//     colors: [backgroundFirst, backgroundSecond],
+//     begin: Alignment.topLeft,
+//     end: Alignment.bottomRight,
+//   ),
+//
+//   containerGradient: LinearGradient(
+//     colors: [containerFirst, containerSecond],
+//     begin: Alignment.topRight,
+//     end: Alignment.bottomLeft,
+//   ),
+// );
+
+
+
+
+// const Color backgroundContainerFirst = Color(0xff49456c);
+// const Color backgroundContainerSecond = Color(0xff394f41);
+// const Color containerFirst = Color(0xFF34317B);
+// const Color containerSecond = Color(0xffDDB8B0);
+//
+// AppTheme eagle = AppTheme(
+//   colorScheme: ColorScheme.fromSeed(seedColor: containerFirst, brightness: Brightness.dark),
+//   backgroundGradient: LinearGradient(
+//     colors: [backgroundContainerFirst, backgroundContainerSecond],
+//     begin: Alignment.topLeft,
+//     end: Alignment.bottomRight,
+//   ),
+//   containerGradient: LinearGradient(
+//     colors: [containerFirst, containerSecond],
+//     begin: Alignment.topRight,
+//     end: Alignment.bottomLeft,
+//   ),
+//
+// );
+
+
+
+const Color backgroundContainerFirst = Color(0xff00060c);
+const Color backgroundContainerSecond = Color(0xff011514);
+const Color containerFirst = Color(0xFF00091a);
+const Color containerSecond = Color(0xff070937);
+const Color containerThird = Color(0xFF002a28);
+const Color containerFourth = Color(0xff000514);
+
+AppTheme aurora = AppTheme(
+  colorScheme: ColorScheme.fromSeed(seedColor: containerFirst, brightness: Brightness.dark),
+  backgroundGradient: LinearGradient(
+    colors: [backgroundContainerFirst, backgroundContainerSecond],
+    begin: Alignment.topRight,
+    end: Alignment.bottomLeft,
+  ),
+  containerGradient: LinearGradient(
+    colors: [containerFirst, containerSecond, containerThird, containerFourth],
+    begin: Alignment.topRight,
+    end: Alignment.bottomLeft,
+  ),
+
+);
+
+
+
+const Color backgroundChromaGlowContainerFirst = Color(0xff001c1c);
+const Color backgroundChromaGlowContainerSecond = Color(0xff180824);
+const Color backgroundChromaGlowContainerThird = Color(0xff031725);
+const Color chromaGlowContainerFirst = Color(0xff014356);
+const Color chromaGlowContainerSecond = Color(0xff24116e);
+const Color chromaGlowContainerThird = Color(0xFF4c075a);
+const Color chromaGlowContainerFourth = Color(0xff462374);
+const Color chromaGlowContainerFive = Color(0xFF00426d);
+
+
+AppTheme chromaGlow = AppTheme(
+  colorScheme: ColorScheme.fromSeed(seedColor: chromaGlowContainerFirst, brightness: Brightness.dark),
+  backgroundGradient: LinearGradient(
+    colors: [backgroundChromaGlowContainerFirst, backgroundChromaGlowContainerSecond, backgroundChromaGlowContainerThird],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  ),
+  containerGradient: LinearGradient(
+    colors: [chromaGlowContainerFirst, chromaGlowContainerSecond, chromaGlowContainerThird, chromaGlowContainerFourth, chromaGlowContainerFive],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  ),
+
 );
 

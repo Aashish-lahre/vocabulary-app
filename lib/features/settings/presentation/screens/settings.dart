@@ -37,7 +37,7 @@ late final ValueNotifier<int> _laterWordFetchCountController;
     return
 
      Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      // backgroundColor: Theme.of(context).colorScheme.surface,
        appBar: _Appbar(),
        body: Padding(
          padding: const EdgeInsets.all(8.0),
@@ -52,7 +52,9 @@ late final ValueNotifier<int> _laterWordFetchCountController;
                    padding: EdgeInsets.all(15),
                    decoration: BoxDecoration(
                      borderRadius: BorderRadius.circular(20),
+                     border: Border.all(style: BorderStyle.solid, color: Theme.of(context).colorScheme.outline, width: 1,),
                      color: Theme.of(context).colorScheme.surfaceContainer,
+                     gradient: themes[context.read<ThemeCubit>().themeType]!.containerGradient,
                    ),
                    // height: 200,
                    child: Column(
@@ -82,8 +84,11 @@ late final ValueNotifier<int> _laterWordFetchCountController;
                          width: constraints.maxWidth,
                          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
                          decoration: BoxDecoration(
+                           border: Border.all(style: BorderStyle.solid, color: Theme.of(context).colorScheme.outline, width: .5,),
                            borderRadius: BorderRadius.circular(20),
                            color: Theme.of(context).colorScheme.surfaceContainer,
+                           gradient: themes[context.read<ThemeCubit>().themeType]!.containerGradient,
+
                          ),
 
                          child: Column(
@@ -177,7 +182,14 @@ class _AppearanceWidgetState extends State<_AppearanceWidget> {
     }[index] ?? 'Light';
   }
 
-  int _selectedIndex = 0;
+  late int _selectedIndex;
+
+  @override
+  void initState() {
+    _selectedIndex = themes.keys.toList().indexOf(context.read<ThemeCubit>().themeType);
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -208,6 +220,7 @@ class _AppearanceWidgetState extends State<_AppearanceWidget> {
                     _selectedIndex = index;
                   });
 
+
                 },
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -216,10 +229,11 @@ class _AppearanceWidgetState extends State<_AppearanceWidget> {
                     Container(
                       clipBehavior: Clip.antiAlias,
                       decoration: BoxDecoration(
-                        color: themes[themes.keys.toList()[index]]!.primary,
+                        color: themes[themes.keys.toList()[index]]!.colorScheme.primary,
+                        gradient: themes[themes.keys.toList()[index]]!.containerGradient,
                         borderRadius: BorderRadius.circular(10),
                         border:
-                         _selectedIndex == index ? Border.all(color: Theme.of(context).colorScheme.onPrimary, style: BorderStyle.solid, width: 4) : null,
+                         _selectedIndex == index ? Border.all(color: Color(0xFF6666FF), style: BorderStyle.solid, width: 4) : null,
                       ),
 
                       width: widget.constraints.maxWidth * 0.28,
@@ -230,7 +244,7 @@ class _AppearanceWidgetState extends State<_AppearanceWidget> {
                       //     borderRadius: BorderRadius.circular(5),
                       //     child: Image.asset('assets/images/mode_$index.png', fit: BoxFit.cover,)),
                     ),
-                    Text(themes.keys.toList()[index].name, style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Theme.of(context).colorScheme.onSecondaryContainer),)
+                    Text(themes.keys.toList()[index].label, style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Theme.of(context).colorScheme.onSecondaryContainer),)
                   ],
                 ),
               ),

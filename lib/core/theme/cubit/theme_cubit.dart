@@ -12,6 +12,7 @@ class ThemeCubit extends Cubit<ThemeType> {
 
 
   Future<void> changeThemeType(ThemeType changeThemeType) async {
+    themeType = changeThemeType;
         emit(changeThemeType);
         await ThemeStorage.instance.saveThemeType(changeThemeType);
   }
