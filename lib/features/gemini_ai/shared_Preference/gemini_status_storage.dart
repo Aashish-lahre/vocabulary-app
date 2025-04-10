@@ -9,7 +9,6 @@ class GeminiStatusStorage {
 
       static final instance = GeminiStatusStorage._();
 
-      factory GeminiStatusStorage() => instance;
 
 
 

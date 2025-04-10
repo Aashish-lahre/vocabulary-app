@@ -6,7 +6,7 @@ class ThemeStorage {
 
   ThemeStorage._();
   static final instance = ThemeStorage._();
-  factory ThemeStorage() => instance;
+
 
   SharedPreferencesAsync prefsAsync = SharedPreferencesAsync();
 

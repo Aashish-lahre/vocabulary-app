@@ -18,8 +18,9 @@ class VocabularyApp extends StatelessWidget {
   final ThemeType themeType;
   final int wordFetchLimit;
   final int initialWordFetchLimit = 2;
+  final bool isAiWordGenerationOn;
 
-  const VocabularyApp(this.wordFetchLimit, this.themeType, {super.key});
+  const VocabularyApp(this.wordFetchLimit, this.themeType, this.isAiWordGenerationOn, {super.key});
 
 
   @override
@@ -38,7 +39,7 @@ class VocabularyApp extends StatelessWidget {
 
             BlocProvider(
                 lazy: false,
-                create: (_) => GeminiBloc(repository: GeminiRepository())),
+                create: (_) => GeminiBloc(repository: GeminiRepository(), isAiWordsGenerationOn : isAiWordGenerationOn)),
 
             BlocProvider(
                 lazy: false,

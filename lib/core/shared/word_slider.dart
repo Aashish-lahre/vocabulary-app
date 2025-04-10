@@ -1,10 +1,8 @@
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_improve_vocabulary/features/gemini_ai/bloc/gemini_bloc.dart';
-import 'package:flutter_improve_vocabulary/core/utility/draggable.dart';
+import './draggable.dart';
 import 'package:flutter_improve_vocabulary/core/screens/word_card_shimmer.dart';
 import 'package:flutter_improve_vocabulary/features/word/bloc/word_bloc.dart';
 

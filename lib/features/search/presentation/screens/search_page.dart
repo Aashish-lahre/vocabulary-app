@@ -1,8 +1,9 @@
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_improve_vocabulary/core/utility/error_widget.dart';
+import 'package:flutter_improve_vocabulary/core/shared/error_widget.dart';
 import 'package:flutter_improve_vocabulary/features/gemini_ai/screens/ai_word_details_screen.dart';
+import 'package:flutter_improve_vocabulary/features/search/presentation/screens/searched_word_detail_screen.dart';
 import 'package:gap/gap.dart';
 
 import '../../../gemini_ai/bloc/gemini_bloc.dart';
@@ -47,16 +48,21 @@ class _SearchPageState extends State<SearchPage> {
   Widget build(BuildContext context) {
     return BlocConsumer<GeminiBloc, GeminiState>(
       listenWhen: (_, currentState) {
-
         return [SingleAiWordFetchedState].contains(currentState.runtimeType);
       },
       listener: (context, state) {
-          if(state is SingleAiWordFetchedState) {
-            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => AiWordDetailsScreen(word: state.word)));
-          }
+        if (state is SingleAiWordFetchedState) {
+          Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) =>
+                  BlocProvider.value(
+                    value: context.read<GeminiBloc>(),
+                    child: SearchedWordDetailScreen(word: state.word)
+                  )));
+        }
       },
       buildWhen: (_, currentState) {
-        return [GeminiSingleWordLoadFailureState, SingleAiWordLoadingState].contains(
+        return [GeminiSingleWordLoadFailureState, SingleAiWordLoadingState]
+            .contains(
             currentState.runtimeType);
       },
       builder: (context, state) {
@@ -88,7 +94,7 @@ class _SearchPageState extends State<SearchPage> {
                     ],
                   ),
                 ),
-          _ => SizedBox.shrink(),
+            _ => SizedBox.shrink(),
           },
         );
       },
@@ -153,45 +159,44 @@ class _SearchPageState extends State<SearchPage> {
 
         return [
           if(controller.text.isNotEmpty)
-        ListTile(
-          leading: const Icon(Icons.search),
-          trailing: Transform.rotate(
-            angle: -45 * 3.1415926535897932 / 180,
-            child: const Icon(Icons.arrow_upward_rounded),
-          ),
-          title: Text(controller.text),
-          onTap: () {
-            if (!_isSearchControllerDisposed && context.mounted) {
-              controller.closeView(controller.text);
+            ListTile(
+              leading: const Icon(Icons.search),
+              trailing: Transform.rotate(
+                angle: -45 * 3.1415926535897932 / 180,
+                child: const Icon(Icons.arrow_upward_rounded),
+              ),
+              title: Text(controller.text),
+              onTap: () {
+                if (!_isSearchControllerDisposed && context.mounted) {
+                  controller.closeView(controller.text);
 
-              context.read<GeminiBloc>().add(
-                  SearchWordWithAiEvent(wordName: controller.text));
-            }
-          },
-        ),
-        ...words.map((word) {
-          return ListTile(
-            leading: const Icon(Icons.search),
-            trailing: Transform.rotate(
-              angle: -45 * 3.1415926535897932 / 180,
-              child: const Icon(Icons.arrow_upward_rounded),
+                  context.read<GeminiBloc>().add(
+                      SearchWordWithAiEvent(wordName: controller.text));
+                }
+              },
             ),
-            title: Text(word),
-            onTap: () {
-              if (!_isSearchControllerDisposed && context.mounted) {
-                controller.closeView(word);
-                controller.text = word;
-                context.read<GeminiBloc>().add(
-                    SearchWordWithAiEvent(wordName: controller.text));
-              }
-            },
-          );
-        }),
+          ...words.map((word) {
+            return ListTile(
+              leading: const Icon(Icons.search),
+              trailing: Transform.rotate(
+                angle: -45 * 3.1415926535897932 / 180,
+                child: const Icon(Icons.arrow_upward_rounded),
+              ),
+              title: Text(word),
+              onTap: () {
+                if (!_isSearchControllerDisposed && context.mounted) {
+                  controller.closeView(word);
+                  controller.text = word;
+                  context.read<GeminiBloc>().add(
+                      SearchWordWithAiEvent(wordName: controller.text));
+                }
+              },
+            );
+          }),
         ];
       },
     );
   }
-
 
 
 }

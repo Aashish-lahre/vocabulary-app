@@ -10,6 +10,8 @@ import '../../dictionary/repository/dictionary_repository.dart';
 import 'package:equatable/equatable.dart';
 import 'package:rxdart/rxdart.dart';
 
+import '../../gemini_ai/data_model/ai_word.dart';
+
 
 part 'word_event.dart';
 part 'word_state.dart';
@@ -32,6 +34,15 @@ class WordBloc extends Bloc<WordEvent, WordState> {
     };
   }
 
+  // void _updateWord(BaseWord word, void Function(BaseWord word) updater) {
+  //   final index = allWords.indexOf(word);
+  //   if (index != -1) {
+  //     updater(word);
+  //     allWords[index] = word;
+  //   }
+  // }
+
+
 
 
 
@@ -39,18 +50,49 @@ class WordBloc extends Bloc<WordEvent, WordState> {
   WordBloc({ required this.repository, required this.geminiBloc}) : super(WordInitial()) {
 
     geminiBloc.stream.listen((state) {
-      if(state is AiWordsLoadedState) {
+      if (state is AiWordsLoadedState) {
         allWords.addAll(state.aiWords);
-        if(wordIndex == 0) {
+        if (wordIndex == 0) {
           wordIndex = -1;
           add(LoadSingleWordInOrder());
         }
       }
 
-      if(state is GeminiWordsLoadFailureState) {
-          add(GeminiFailureWordEvent(errorMessage: state.errorMessage));
+      if (state is GeminiWordsLoadFailureState) {
+        add(GeminiFailureWordEvent(errorMessage: state.errorMessage));
       }
+
+      // if (state is SynonymsLoadedState) {
+      //   _updateWord(state.word, (word) {
+      //     if (word is AiWord) {
+      //       word.synonyms.addAll(state.synonyms);
+      //     } else if (word is Word) {
+      //       word.allSynonyms.addAll(state.synonyms);
+      //     }
+      //   });
+      // }
+      //
+      // if (state is AntonymsLoadedState) {
+      //   _updateWord(state.word, (word) {
+      //     if (word is AiWord) {
+      //       word.antonyms.addAll(state.antonyms);
+      //     } else if (word is Word) {
+      //       word.allAntonyms.addAll(state.antonyms);
+      //     }
+      //   });
+      // }
+      //
+      // if (state is ExamplesLoadedState) {
+      //   _updateWord(state.word, (word) {
+      //     if (word is AiWord) {
+      //       word.example.addAll(state.examples);
+      //     } else if (word is Word) {
+      //       word.allExamples.addAll(state.examples);
+      //     }
+      //   });
+      // }
     });
+
 
     on<LoadWords>((event, emit) async {
 
@@ -115,9 +157,6 @@ class WordBloc extends Bloc<WordEvent, WordState> {
 
     on<LoadSingleWordInOrder>((event, emit) {
       if(++wordIndex < allWords.length) {
-        geminiBloc.examples.clear();
-        geminiBloc.antonyms.clear();
-        geminiBloc.synonyms.clear();
         emit(FetchedSingleWordState(word: allWords[wordIndex]));
       } else {
         // index for words exceeds allWords items

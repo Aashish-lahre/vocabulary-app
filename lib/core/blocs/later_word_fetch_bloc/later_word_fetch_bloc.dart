@@ -22,7 +22,7 @@ class LaterWordFetchBloc extends Bloc<LaterWordFetchEvent, LaterWordFetchState> 
     on<ChangeLaterWordFetchCount>((event, emit) {
 
       laterWordFetchLimit = event.changedCount;
-      WordFetchLimit().changeWordFetchLimit(laterWordFetchLimit);
+      WordFetchLimit.instance.changeWordFetchLimit(laterWordFetchLimit);
       emit(LaterWordFetchCountChanged(count: event.changedCount));
     });
   }

@@ -365,7 +365,7 @@ class _GeminiAiSwitchState extends State<_GeminiAiSwitch> {
           _isOn = value;
           widget.isGeminiAiOn.value = value;
           context.read<GeminiBloc>().add(ToggleGenerateWordsWithAiSwitchEvent(isOn: value));
-          GeminiStatusStorage().changeGeminiStatus(value);
+
         });
       },
     );

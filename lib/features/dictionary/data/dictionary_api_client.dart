@@ -20,9 +20,73 @@ abstract class DictionaryServices {
   Future<Word> searchWord(String word);
 }
 
+
+mixin DictionaryUtilsMixin {
+
+
+  Map<String, dynamic> transformWordJson(Map<String, dynamic> wordData) {
+
+
+    final word = wordData['word'];
+    final meanings = wordData['meanings'] as List<dynamic>;
+
+    final allDefinitions = <String>[];
+    final allSynonyms = <String>{};
+    final allAntonyms = <String>{};
+    final allExamples = <String>[];
+
+    for (final meaning in meanings) {
+      final definitions = meaning['definitions'] as List<dynamic>;
+      for (final def in definitions) {
+        allDefinitions.add(def['definition']);
+
+        if (def['synonyms'] != null) {
+          allSynonyms.addAll(List<String>.from(def['synonyms']));
+        }
+
+        if (def['antonyms'] != null) {
+          allAntonyms.addAll(List<String>.from(def['antonyms']));
+        }
+
+        if (def['example'] != null) {
+          allExamples.add(def['example']);
+        }
+      }
+
+      // Add synonyms/antonyms from meaning level
+      if (meaning['synonyms'] != null) {
+        allSynonyms.addAll(List<String>.from(meaning['synonyms']));
+      }
+
+      if (meaning['antonyms'] != null) {
+        allAntonyms.addAll(List<String>.from(meaning['antonyms']));
+      }
+    }
+
+    final transformed = [
+      {
+        'word': word,
+        'meanings': meanings,
+        'allDefinitions': allDefinitions,
+        'allSynonyms': allSynonyms.toList(),
+        'allAntonyms': allAntonyms.toList(),
+        'allExamples': allExamples,
+      }
+    ];
+
+    return transformed.first;
+  }
+
+}
+
+
+
+
+
+
 /// Uses the free dictionary API to fetch word data.
 /// Implements [DictionaryServices].
-class DictionaryApiClient implements DictionaryServices {
+class DictionaryApiClient with DictionaryUtilsMixin implements DictionaryServices  {
   /// HTTP client used for network calls.
   final http.Client client;
 
@@ -80,8 +144,10 @@ class DictionaryApiClient implements DictionaryServices {
         throw WordNotFoundFailure();
       }
 
+      final transformedJson = transformWordJson(jsonMap);
+
       // Convert JSON map to Word object.
-      return Word.fromJson(jsonMap);
+      return Word.fromJson(transformedJson);
     } on SocketException {
       // No network connection.
       throw NoInternetFailure();

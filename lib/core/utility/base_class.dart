@@ -1,5 +1,3 @@
 
 
-abstract class BaseWord {
-  BaseWord();
-}
+abstract class BaseWord {}

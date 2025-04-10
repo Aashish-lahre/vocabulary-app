@@ -21,4 +21,9 @@ Meaning _$MeaningFromJson(Map<String, dynamic> json) => Meaning(
           [],
     );
 
-
+// Map<String, dynamic> _$MeaningToJson(Meaning instance) => <String, dynamic>{
+//       'partOfSpeech': instance.partOfSpeech,
+//       'definitions': instance.definitions.map((e) => e.toJson()).toList(),
+//       'synonyms': instance.synonyms,
+//       'antonyms': instance.antonyms,
+//     };

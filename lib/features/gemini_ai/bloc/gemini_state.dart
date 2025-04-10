@@ -10,6 +10,7 @@ final class GeminiInitial extends GeminiState {
 }
 
 
+/// when Gemini Ai switch in settings page gets toggled.
 final class AiWordsSwitchChangedState extends GeminiState {
 
   final bool isOn;
@@ -21,7 +22,7 @@ final class AiWordsSwitchChangedState extends GeminiState {
 }
 
 
-
+/// loading state for initial words fetch.
 final class AiWordsLoadingState extends GeminiState {
   @override
   List<Object?> get props => [];
@@ -29,6 +30,7 @@ final class AiWordsLoadingState extends GeminiState {
 }
 
 
+/// loaded state for initial words fetch, brings list of AiWords
 final class AiWordsLoadedState extends GeminiState {
 
   final List<AiWord> aiWords;
@@ -41,6 +43,7 @@ final class AiWordsLoadedState extends GeminiState {
 }
 
 
+/// state emitted when searched for a single word.
 final class SingleAiWordFetchedState extends GeminiState {
 
   final AiWord word;
@@ -61,6 +64,8 @@ final class SingleAiWordLoadingState extends GeminiState {
 
 }
 
+
+/// General Gemini Failure
 final class GeminiFailureState extends GeminiState {
   final String errorMessage;
 
@@ -71,6 +76,7 @@ final class GeminiFailureState extends GeminiState {
 }
 
 
+/// state emitted when fetching of multiple words failed.
 final class GeminiWordsLoadFailureState extends GeminiState {
   final String errorMessage;
 
@@ -80,7 +86,7 @@ final class GeminiWordsLoadFailureState extends GeminiState {
   List<Object?> get props => [errorMessage];
 }
 
-
+/// state emitted when failure occurred when searching for a single word.
 final class GeminiSingleWordLoadFailureState extends GeminiState {
   final String errorMessage;
 
@@ -91,8 +97,7 @@ final class GeminiSingleWordLoadFailureState extends GeminiState {
 }
 
 
-
-
+/// state emitted when i swiped out all the AiWords from screen.
 final class NoMoreAiWordsAvailableState extends GeminiState {
   @override
   List<Object?> get props => [];
@@ -110,12 +115,13 @@ final class ExamplesLoadingState extends GeminiState {
 
 final class ExamplesLoadedState extends GeminiState {
 
+  final BaseWord word;
   final List<String> examples;
 
-  const ExamplesLoadedState({required this.examples});
+  const ExamplesLoadedState({required this.examples, required this.word});
 
   @override
-  List<Object?> get props => [examples];
+  List<Object?> get props => [examples, word];
 
 }
 
@@ -127,11 +133,13 @@ final class SynonymsLoadingState extends GeminiState {
 
 
 final class SynonymsLoadedState extends GeminiState {
+  final BaseWord word;
+
   final List<String> synonyms;
 
-  const SynonymsLoadedState({required this.synonyms});
+  const SynonymsLoadedState({required this.synonyms, required this.word});
   @override
-  List<Object?> get props => [synonyms];
+  List<Object?> get props => [synonyms, word];
 }
 
 
@@ -142,10 +150,11 @@ final class AntonymsLoadingState extends GeminiState {
 }
 
 final class AntonymsLoadedState extends GeminiState {
+  final BaseWord word;
   final List<String> antonyms;
 
-  const AntonymsLoadedState({required this.antonyms});
+  const AntonymsLoadedState({required this.antonyms, required this.word});
   @override
-  List<Object?> get props => [antonyms];
+  List<Object?> get props => [antonyms, word];
 }
 

@@ -4,6 +4,8 @@ sealed class GeminiEvent extends Equatable {
   const GeminiEvent();
 }
 
+/// event fired when user toggles the gemini AI switch in settings page to make
+/// to generate words using gemini AI.
 final class ToggleGenerateWordsWithAiSwitchEvent extends GeminiEvent {
 
   final bool isOn;
@@ -16,6 +18,7 @@ final class ToggleGenerateWordsWithAiSwitchEvent extends GeminiEvent {
 
 }
 
+/// Initial event fired to fetch [noOfAiWordsToLoad] words from Gemini AI.
 final class LoadAiWordsEvent extends GeminiEvent {
 
   final int noOfAiWordsToLoad;
@@ -26,6 +29,8 @@ final class LoadAiWordsEvent extends GeminiEvent {
 
 }
 
+
+/// Fetch single word from Gemini AI.
 final class SearchWordWithAiEvent extends GeminiEvent {
 
   final String wordName;
@@ -39,34 +44,26 @@ final class SearchWordWithAiEvent extends GeminiEvent {
 }
 
 
-final class LaterLoadAiWordsEvent extends GeminiEvent {
-
-  final laterLoadAiWordsCount;
-
-  const LaterLoadAiWordsEvent({required this.laterLoadAiWordsCount});
-
-  @override
-  List<Object?> get props => [laterLoadAiWordsCount];
-
-}
-
+/// fetches examples for a [word]
 final class LoadExamplesEvent extends GeminiEvent {
 
-  final String wordName;
+  final BaseWord word;
   final int limit;
   final List<String> filterOut;
 
-  const LoadExamplesEvent({required this.wordName, required this.limit, required this.filterOut});
+  const LoadExamplesEvent({required this.word, required this.limit, required this.filterOut});
 
   @override
-  List<Object?> get props => [limit, wordName, filterOut];
+  List<Object?> get props => [limit, word, filterOut];
 
 }
 
+
+/// fetches Synonyms for a [word]
 final class LoadSynonymsEvent extends GeminiEvent {
 
 
-  final String word;
+  final BaseWord word;
   final int limit;
   final List<String> filterOut;
 
@@ -78,10 +75,12 @@ final class LoadSynonymsEvent extends GeminiEvent {
 
 }
 
+
+/// fetches Antonyms for a [word]
 final class LoadAntonymsEvent extends GeminiEvent {
 
 
-  final String word;
+  final BaseWord word;
   final int limit;
   final List<String> filterOut;
 
@@ -93,6 +92,8 @@ final class LoadAntonymsEvent extends GeminiEvent {
 
 }
 
+
+/// Gemini API provides multiple ai models to select from.
 final class ChangeGeminiModelEvent extends GeminiEvent {
 
   final GeminiModels modelType;

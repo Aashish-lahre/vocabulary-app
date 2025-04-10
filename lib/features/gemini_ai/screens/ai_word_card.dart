@@ -5,6 +5,8 @@ import 'package:flutter_improve_vocabulary/features/gemini_ai/bloc/gemini_bloc.d
 import 'package:flutter_improve_vocabulary/features/gemini_ai/screens/ai_word_details_screen.dart';
 import 'package:gap/gap.dart';
 
+import '../../../core/theme/color_theme.dart';
+import '../../../core/theme/cubit/theme_cubit.dart';
 import '../data_model/ai_word.dart';
 
 class AiWordCard extends StatelessWidget {
@@ -24,10 +26,13 @@ class AiWordCard extends StatelessWidget {
           );
         },),);
       },
-      child: Container(
+      child: BlocBuilder<ThemeCubit, ThemeType>(
+  builder: (context, state) {
+    return Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           color: colorScheme.primaryContainer,
+          gradient: themes[state]!.containerGradient,
           boxShadow: [
             BoxShadow(offset: Offset(0, 4), blurRadius: 8, spreadRadius: 3, color: Color(0x40000000)),
           ],
@@ -91,7 +96,9 @@ class AiWordCard extends StatelessWidget {
             ],
           ),
         ),
-      ),
+      );
+  },
+),
     );
   }
 }

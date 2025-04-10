@@ -6,7 +6,7 @@ class WordFetchLimit {
   WordFetchLimit._();
   static final instance = WordFetchLimit._();
 
-  factory WordFetchLimit() => instance;
+  // factory WordFetchLimit() => instance;
 
 
   SharedPreferencesAsync prefs = SharedPreferencesAsync();
