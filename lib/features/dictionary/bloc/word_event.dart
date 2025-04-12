@@ -7,10 +7,11 @@ sealed class WordEvent extends Equatable {
 class LoadWords extends WordEvent {
 
   final int noOfWordToSearch;
-  const LoadWords({required this.noOfWordToSearch});
+  final bool autoLoad;
+  const LoadWords({required this.noOfWordToSearch, required this.autoLoad});
 
   @override
-  List<Object?> get props => [noOfWordToSearch];
+  List<Object?> get props => [noOfWordToSearch, autoLoad];
 }
 
 class LaterLoadWords extends WordEvent {
@@ -38,7 +39,7 @@ class SearchWord extends WordEvent {
 
 }
 
-class LoadSingleWordInOrder extends WordEvent {
+class LoadSingleWordInOrderEvent extends WordEvent {
   @override
   List<Object?> get props => [];
 }

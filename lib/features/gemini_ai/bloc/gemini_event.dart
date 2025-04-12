@@ -22,12 +22,21 @@ final class ToggleGenerateWordsWithAiSwitchEvent extends GeminiEvent {
 final class LoadAiWordsEvent extends GeminiEvent {
 
   final int noOfAiWordsToLoad;
-  const LoadAiWordsEvent({required this.noOfAiWordsToLoad});
+  final bool autoLoad;
+  const LoadAiWordsEvent({required this.noOfAiWordsToLoad, required this.autoLoad});
 
   @override
   List<Object?> get props =>[noOfAiWordsToLoad];
 
 }
+
+final class LoadSingleAiWordInOrderEvent extends GeminiEvent {
+  @override
+  List<Object?> get props => [];
+
+}
+
+
 
 
 /// Fetch single word from Gemini AI.
@@ -47,7 +56,7 @@ final class SearchWordWithAiEvent extends GeminiEvent {
 /// fetches examples for a [word]
 final class LoadExamplesEvent extends GeminiEvent {
 
-  final BaseWord word;
+  final Word word;
   final int limit;
   final List<String> filterOut;
 
@@ -63,7 +72,7 @@ final class LoadExamplesEvent extends GeminiEvent {
 final class LoadSynonymsEvent extends GeminiEvent {
 
 
-  final BaseWord word;
+  final Word word;
   final int limit;
   final List<String> filterOut;
 
@@ -80,7 +89,7 @@ final class LoadSynonymsEvent extends GeminiEvent {
 final class LoadAntonymsEvent extends GeminiEvent {
 
 
-  final BaseWord word;
+  final Word word;
   final int limit;
   final List<String> filterOut;
 

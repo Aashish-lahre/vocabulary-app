@@ -1,6 +1,5 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter_improve_vocabulary/core/utility/base_class.dart';
 import 'package:flutter_improve_vocabulary/features/gemini_ai/gemini_models/gemini_models.dart';
 import 'package:flutter_improve_vocabulary/features/gemini_ai/prompts/prompts.dart';
 import 'package:flutter_improve_vocabulary/features/gemini_ai/repository/gemini_ai_repository.dart';
@@ -9,8 +8,9 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../../api_key.dart';
-import '../../dictionary/models/word.dart';
-import '../data_model/ai_word.dart';
+import '../../../core/models/word.dart';
+import '../../../core/utility/result.dart';
+import '../repository/gemini_errors.dart';
 
 part 'gemini_event.dart';
 part 'gemini_state.dart';
@@ -19,9 +19,8 @@ class GeminiBloc extends Bloc<GeminiEvent, GeminiState> {
 
   bool isAiWordsGenerationOn;
   final GeminiRepository repository;
-  // List<String> examples = [];
-  // List<String> synonyms = [];
-  // List<String> antonyms = [];
+  int wordIndex = 0;
+  final List<Word> allWords = [];
   GeminiModels defaultModel = GeminiModels.Gemini15Flash;
 
   EventTransformer<E> throttleRestartable<E>() {
@@ -32,13 +31,13 @@ class GeminiBloc extends Bloc<GeminiEvent, GeminiState> {
     };
   }
 
-  String getWordName(BaseWord word) {
-    return switch(word) {
-    Word _ => word.word,
-    AiWord _ => word.wordName,
-    _ =>  throw UnimplementedError('Unknown subclass of BaseWord'),
-    };
-  }
+  // String getWordName(BaseWord word) {
+  //   return switch(word) {
+  //   // Word _ => word.word,
+  //   AiWord _ => word.wordName,
+  //   _ =>  throw UnimplementedError('Unknown subclass of BaseWord'),
+  //   };
+  // }
 
 
 
@@ -60,10 +59,24 @@ class GeminiBloc extends Bloc<GeminiEvent, GeminiState> {
     on<LoadAiWordsEvent>(transformer: throttleRestartable(), (event, emit) async {
 
         emit(AiWordsLoadingState());
-        final response = await repository.generateWords(promptForWords(event.noOfAiWordsToLoad), model);
+        final Result<List<Word>, GeminiError> response = await repository.generateWords(promptForWords(event.noOfAiWordsToLoad), model);
         if(response.isSuccess) {
+          allWords.addAll(response.data!);
+          emit(AiWordsLoadedState(words: response.data!));
+          if(event.autoLoad) {
+            print('GeminiBloc event autoLoad');
 
-          emit(AiWordsLoadedState(aiWords: response.data!));
+            emit(SingleAiWordFetchState(word: allWords[wordIndex]));
+          } else {
+            print('GeminiBloc event not autoLoad');
+
+            if(wordIndex == 0) {
+              wordIndex = -1;
+
+            }
+          }
+
+
         } else {
           emit(GeminiWordsLoadFailureState(errorMessage: response.failure!.errorMessage));
         }
@@ -72,13 +85,25 @@ class GeminiBloc extends Bloc<GeminiEvent, GeminiState> {
     });
 
 
+    on<LoadSingleAiWordInOrderEvent>((event, emit) {
+      if(++wordIndex < allWords.length) {
+        emit(SingleAiWordFetchState(word: allWords[wordIndex]));
+      } else {
+        // index for words exceeds allWords items
+        emit(NoMoreAiWordsAvailableState());
+      }
+    });
+
+
+
+
     on<SearchWordWithAiEvent>((event, emit) async {
-        emit(SingleAiWordLoadingState());
+        emit(AiWordSearchingState());
 
         final response = await repository.generateSingleWord(event.wordName, model);
 
         if(response.isSuccess) {
-          emit(SingleAiWordFetchedState(word: response.data!));
+          emit(AiWordSearchCompleteState(word: response.data!));
         } else {
           emit(GeminiSingleWordLoadFailureState(errorMessage: response.failure!.errorMessage));
         }
@@ -89,16 +114,14 @@ class GeminiBloc extends Bloc<GeminiEvent, GeminiState> {
     on<LoadExamplesEvent>((event, emit) async {
       emit(ExamplesLoadingState());
       final response = await repository.generateExamples(
-          getWordName(event.word), event.limit, event.filterOut, model);
+          event.word.wordName, event.limit, event.filterOut, model);
 
       if(response.isSuccess) {
-        BaseWord word = event.word;
-        var updatedWord = switch(word) {
-          Word _ => word..allExamples.addAll(response.data!),
-          AiWord _ => word..example.addAll(response.data!),
-          _ => word,
-        };
-        emit(ExamplesLoadedState(examples: response.data!, word: updatedWord));
+        Word word = event.word;
+        word.examples.addAll(response.data!);
+
+
+        emit(ExamplesLoadedState(examples: response.data!, word: word));
       } else {
         emit(GeminiFailureState(errorMessage: response.failure!.errorMessage));
       }
@@ -110,17 +133,14 @@ class GeminiBloc extends Bloc<GeminiEvent, GeminiState> {
     on<LoadSynonymsEvent>((event, emit) async {
       emit(SynonymsLoadingState());
       final response = await repository.generateSynonyms(
-          getWordName(event.word), event.limit, event.filterOut, model);
+          event.word.wordName, event.limit, event.filterOut, model);
 
       if(response.isSuccess) {
-        BaseWord word = event.word;
-        var updatedWord = switch(word) {
-          Word _ => word..allSynonyms.addAll(response.data!),
-          AiWord _ => word..synonyms.addAll(response.data!),
-          _ => word,
-        };
+        Word word = event.word;
+        word.synonyms.addAll(response.data!);
 
-        emit(SynonymsLoadedState(synonyms: response.data!, word: updatedWord));
+
+        emit(SynonymsLoadedState(synonyms: response.data!, word: word));
       } else {
         emit(GeminiFailureState(errorMessage: response.failure!.errorMessage));
       }
@@ -132,17 +152,14 @@ class GeminiBloc extends Bloc<GeminiEvent, GeminiState> {
     on<LoadAntonymsEvent>((event, emit) async {
       emit(AntonymsLoadingState());
       final response = await repository.generateAntonyms(
-          getWordName(event.word), event.limit, event.filterOut, model);
+          event.word.wordName, event.limit, event.filterOut, model);
 
       if(response.isSuccess) {
-        BaseWord word = event.word;
-        var updatedWord = switch(word) {
-          Word _ => word..allAntonyms.addAll(response.data!),
-          AiWord _ => word..antonyms.addAll(response.data!),
-          _ => word,
-        };
+        Word word = event.word;
+        word.antonyms.addAll(response.data!);
 
-        emit(AntonymsLoadedState(antonyms: response.data!, word: updatedWord));
+
+        emit(AntonymsLoadedState(antonyms: response.data!, word: word));
       } else {
         emit(GeminiFailureState(errorMessage: response.failure!.errorMessage));
       }
@@ -159,4 +176,22 @@ class GeminiBloc extends Bloc<GeminiEvent, GeminiState> {
     });
 
   }
+
+  // void _mapFailuresToStates(GeminiError failure, Emitter<GeminiState> emit) {
+  //   switch(failure) {
+  //     case GeminiGenerativeAiException _:
+  //       emit(InternetFailureState(wordRetrived: failure.wordsRetrieved, wordNotSearched: failure.wordsNotSearched, wordSkipped: failure.wordsSkipped));
+  //       break;
+  //     case WordNotFoundFailure _:
+  //       emit(WordSearchUnavailabilityState());
+  //       break;
+  //     case PartialDataFailure _:
+  //       emit(PartialDataState(wordFailedCount: failure.failedWordsCount, wordFetchedCount: failure.fetchedWordCount));
+  //       break;
+  //     case UnexpectedFailure _:
+  //
+  //       emit(UnexpectedState(errorMessage: failure.errorMessage));
+  //       break;
+  //   }
+  // }
 }

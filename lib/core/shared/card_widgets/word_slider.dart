@@ -2,16 +2,19 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../features/gemini_ai/bloc/gemini_bloc.dart';
+import '../../blocs/ViewSwitcherCubit/view_switcher_cubit.dart';
+import '../../blocs/later_word_fetch_bloc/later_word_fetch_bloc.dart';
 import './draggable.dart';
 import 'package:flutter_improve_vocabulary/core/shared/word_card_shimmer.dart';
 import 'package:flutter_improve_vocabulary/features/dictionary/bloc/word_bloc.dart';
 
 class WordSlider extends StatefulWidget {
   final Widget wordWidget;
-  final int wordsLength;
+
 
   const WordSlider(
-      {required this.wordWidget, required this.wordsLength, super.key});
+      {required this.wordWidget, super.key});
 
   @override
   State<WordSlider> createState() => _WordSliderState();
@@ -60,6 +63,8 @@ class _WordSliderState extends State<WordSlider>
 
   void slideOut(
       {required double angleInDegree, required Offset endOffset, required Offset startOffset, required int direction}) {
+
+    print('reached slideOUt in wordSlider');
     setState(() {
       _angleInDegree = angleInDegree;
       _endOffset = endOffset;
@@ -125,12 +130,31 @@ class _WordSliderState extends State<WordSlider>
 
   void animationListener() {
     if (_slideMoveController.isCompleted) {
+      print('animation completed');
       setState(() {
         _angleInDegree = 0;
         _startOffset = Offset.zero;
         _endOffset = Offset.zero;
 
-        context.read<WordBloc>().add(LoadSingleWordInOrder());
+        if (context.read<ViewSwitcherCubit>().viewMode == ViewMode.geminiAi) {
+
+print('about to call update viewmode...');
+context.read<ViewSwitcherCubit>().updateViewMode(ViewMode.geminiAi);
+print('fetching single word from gemini ai');
+            context.read<GeminiBloc>().add(LoadSingleAiWordInOrderEvent());
+
+
+
+        } else {
+
+    print('fetching single word from api');
+
+            context.read<WordBloc>().add(LoadSingleWordInOrderEvent());
+
+    context.read<ViewSwitcherCubit>().updateViewMode(ViewMode.dictionaryApi);
+
+
+        }
 
       });
     }
@@ -157,36 +181,30 @@ class _WordSliderState extends State<WordSlider>
 
   @override
   Widget build(BuildContext context) {
-    print("word slider : ${context.watch<WordBloc>().allWords}");
-    return BlocListener<WordBloc, WordState>(
-      listener: (context, state) {
-        print('word slider listener called');
-        print('state is : ${state.runtimeType}');
-      },
-      child: AnimatedBuilder(
-        animation: _slideMoveController,
-        builder: (context, _) =>
-            Stack(
-              fit: StackFit.expand,
-              alignment: Alignment.center,
-              children: List.generate(2, (index) {
-                // final int wordIndex = (_index + 1 - index).toInt();
-                return Transform.translate(
-                  offset: getOffset(index),
-                  child: Transform.scale(
-                    scale: getScale(index),
-                    child: Container(
-                        child:
-                        index == 0 ? WordCardShimmer() : DraggableSlider(
-                            allWordsLength: widget.wordsLength,
-                            widget: widget.wordWidget, slideOut: slideOut)
-                    ),
-                  ),
-                );
-              }),
-            ),
 
-      ),
+    return AnimatedBuilder(
+      animation: _slideMoveController,
+      builder: (context, _) =>
+          Stack(
+            fit: StackFit.expand,
+            alignment: Alignment.center,
+            children: List.generate(2, (index) {
+              // final int wordIndex = (_index + 1 - index).toInt();
+              return Transform.translate(
+                offset: getOffset(index),
+                child: Transform.scale(
+                  scale: getScale(index),
+                  child: Container(
+                      child:
+                      index == 0 ? WordCardShimmer() : DraggableSlider(
+
+                          widget: widget.wordWidget, slideOut: slideOut)
+                  ),
+                ),
+              );
+            }),
+          ),
+
     );
   }
 

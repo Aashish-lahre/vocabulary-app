@@ -6,7 +6,8 @@ import 'package:flutter_improve_vocabulary/features/gemini_ai/prompts/prompts.da
 import 'package:flutter_improve_vocabulary/features/gemini_ai/repository/gemini_errors.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
-import '../data_model/ai_word.dart';
+import '../../../core/models/word.dart';
+
 
 
 
@@ -29,10 +30,10 @@ class GeminiRepository {
 
 
 
-  Future<Result<List<AiWord>, GeminiError>> generateWords(String prompt, GenerativeModel  model) async {
+  Future<Result<List<Word>, GeminiError>> generateWords(String prompt, GenerativeModel  model) async {
 
     final List<Content> content = [Content.text(prompt)];
-    late Result<List<AiWord>, GeminiError> response;
+    late Result<List<Word>, GeminiError> response;
     try {
 
     final generateContentResponse = await model.generateContent(content, generationConfig: configurationForWords);
@@ -55,10 +56,10 @@ class GeminiRepository {
     return response;
   }
 
-  Future<Result<AiWord, GeminiError>> generateSingleWord(String wordName, GenerativeModel  model) async {
+  Future<Result<Word, GeminiError>> generateSingleWord(String wordName, GenerativeModel  model) async {
 
     final List<Content> content = [Content.text(promptForSingleWord(wordName))];
-    late Result<AiWord, GeminiError> response;
+    late Result<Word, GeminiError> response;
     try {
 
       final generateContentResponse = await model.generateContent(content, generationConfig: configurationForSingleWord);
@@ -164,7 +165,7 @@ class GeminiRepository {
 
 
 
-Result<List<AiWord>, GeminiError> processResponseForWords(String text) {
+Result<List<Word>, GeminiError> processResponseForWords(String text) {
   // Check if the response is empty
   if (text.trim().isEmpty) {
     return Result(
@@ -175,14 +176,7 @@ Result<List<AiWord>, GeminiError> processResponseForWords(String text) {
   try {
     // Attempt to parse JSON
     final jsonData = jsonDecode(text)  as List<dynamic>;
-    // Ensure jsonData is a List
-    // if (jsonData is! List) {
-    //   return Result(
-    //     failure: GeminiResponseFormatException(
-    //       errorMessage: 'Expected a JSON array but got ${jsonData.runtimeType}.',
-    //     ),
-    //   );
-    // }
+
 
     // Ensure every item in the list is a Map<String, dynamic>
     final condition = !jsonData.every((item) => item is Map<String, dynamic>);
@@ -194,13 +188,13 @@ Result<List<AiWord>, GeminiError> processResponseForWords(String text) {
       );
     }
 
-    // Parse all items into AiWord objects
-    final List<AiWord> aiWords = jsonData.map((jsonObj) {
+    // Parse all items into Word objects
+    final List<Word> words = jsonData.map((jsonObj) {
 
-      return AiWord.fromJson(jsonObj as Map<String, dynamic> );
+      return Word.fromJson(jsonObj as Map<String, dynamic> );
 
     }).toList();
-    return Result(data: aiWords);
+    return Result(data: words);
   } catch (e) {
     return Result(
       failure: GeminiResponseFormatException(
@@ -210,7 +204,7 @@ Result<List<AiWord>, GeminiError> processResponseForWords(String text) {
   }
 }
 
-Result<AiWord, GeminiError> processResponseForWord(String text) {
+Result<Word, GeminiError> processResponseForWord(String text) {
   // Check if the response is empty
   if (text.trim().isEmpty) {
     return Result(
@@ -242,11 +236,13 @@ Result<AiWord, GeminiError> processResponseForWord(String text) {
     //   );
     // }
 
-    // Parse all items into AiWord objects
-    final AiWord aiWord = AiWord.fromJson(jsonData);
+    print(jsonData);
+
+    // Parse all items into Word objects
+    final Word word = Word.fromJson(jsonData);
 
 
-    return Result(data: aiWord);
+    return Result(data: word);
   } catch (e) {
     return Result(
       failure: GeminiResponseFormatException(

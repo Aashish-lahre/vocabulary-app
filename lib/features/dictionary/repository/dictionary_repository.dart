@@ -1,7 +1,7 @@
 import '../data/dictionary_api_client.dart';
 import 'package:flutter_improve_vocabulary/core/utility/result.dart';
 import '../data/dictionary_failures.dart';
-import '../models/word.dart';
+import '../../../core/models/word.dart';
 import '../utility/get_random_words.dart';
 import 'package:flutter/material.dart';
 
@@ -151,6 +151,7 @@ class DictionaryRepository {
             );
           } on UnexpectedFailure catch (err) {
             // Some other error happened: stop and return.
+            print('entered here in unexpected error');
             return Result(
               data: receivedWords,
               failure: UnexpectedFailure(errorMessage: err.errorMessage),

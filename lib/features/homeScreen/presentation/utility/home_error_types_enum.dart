@@ -1,4 +1,0 @@
-enum HomeErrorType {
-  internet,
-  unexpected
-}

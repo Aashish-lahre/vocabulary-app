@@ -18,7 +18,7 @@ part 'word_state.dart';
 class WordBloc extends Bloc<WordEvent, WordState> {
 
   final DictionaryRepository repository;
-  final GeminiBloc geminiBloc;
+
 
   // this word will be shown on homeScreen first, than as "wordIndex" increments, following words will be shown.
   int wordIndex = 0;
@@ -33,64 +33,16 @@ class WordBloc extends Bloc<WordEvent, WordState> {
     };
   }
 
-  // void _updateWord(BaseWord word, void Function(BaseWord word) updater) {
-  //   final index = allWords.indexOf(word);
-  //   if (index != -1) {
-  //     updater(word);
-  //     allWords[index] = word;
-  //   }
-  // }
 
 
 
 
 
 
-  WordBloc({ required this.repository, required this.geminiBloc}) : super(WordInitial()) {
 
-    // geminiBloc.stream.listen((state) {
-    //   if (state is AiWordsLoadedState) {
-    //     allWords.addAll(state.aiWords);
-    //     if (wordIndex == 0) {
-    //       wordIndex = -1;
-    //       add(LoadSingleWordInOrder());
-    //     }
-    //   }
-    //
-    //   if (state is GeminiWordsLoadFailureState) {
-    //     add(GeminiFailureWordEvent(errorMessage: state.errorMessage));
-    //   }
+  WordBloc({ required this.repository}) : super(WordInitial()) {
 
-      // if (state is SynonymsLoadedState) {
-      //   _updateWord(state.word, (word) {
-      //     if (word is AiWord) {
-      //       word.synonyms.addAll(state.synonyms);
-      //     } else if (word is Word) {
-      //       word.allSynonyms.addAll(state.synonyms);
-      //     }
-      //   });
-      // }
-      //
-      // if (state is AntonymsLoadedState) {
-      //   _updateWord(state.word, (word) {
-      //     if (word is AiWord) {
-      //       word.antonyms.addAll(state.antonyms);
-      //     } else if (word is Word) {
-      //       word.allAntonyms.addAll(state.antonyms);
-      //     }
-      //   });
-      // }
-      //
-      // if (state is ExamplesLoadedState) {
-      //   _updateWord(state.word, (word) {
-      //     if (word is AiWord) {
-      //       word.example.addAll(state.examples);
-      //     } else if (word is Word) {
-      //       word.allExamples.addAll(state.examples);
-      //     }
-      //   });
-      // }
-    // });
+
 
 
     on<LoadWords>((event, emit) async {
@@ -99,15 +51,23 @@ class WordBloc extends Bloc<WordEvent, WordState> {
         final Result<List<Word>, DictionaryFailure> receivedWords = await repository.fetchRandomWords(event.noOfWordToSearch);
 
         if(receivedWords.isSuccess) {
-          // allWords.addAll(receivedWords.data!);
-          if(wordIndex == 0) {
+          allWords.addAll(receivedWords.data!);
+          if(event.autoLoad) {
+            print('wordBloc event autoLoad');
             emit(FetchedSingleWordState(word: allWords[wordIndex]));
+          } else {
+            print('wordBloc event not autoLoad');
+
+            if(wordIndex == 0) {
+              wordIndex = -1;
+
+            }
           }
         } else {
           final failure = receivedWords.failure!;
 
           if(failure is NoInternetFailure) {
-            // allWords.addAll(receivedWords.data ?? []);
+            allWords.addAll(receivedWords.data ?? []);
             emit(InternetFailureState(wordNotSearched: failure.wordsNotSearched, wordSkipped: failure.wordsSkipped, wordRetrived: failure.wordsRetrieved));
 
 
@@ -154,11 +114,13 @@ class WordBloc extends Bloc<WordEvent, WordState> {
     });
 
 
-    on<LoadSingleWordInOrder>((event, emit) {
+    on<LoadSingleWordInOrderEvent>((event, emit) {
       if(++wordIndex < allWords.length) {
+        print('emitting fetchedsingle word state....');
         emit(FetchedSingleWordState(word: allWords[wordIndex]));
       } else {
         // index for words exceeds allWords items
+        print('emitting no words available state state....');
         emit(NoMoreWordAvailableState());
       }
     });
@@ -193,16 +155,16 @@ class WordBloc extends Bloc<WordEvent, WordState> {
 
 
       if(receivedWords.isSuccess) {
-        // allWords.addAll(receivedWords.data!);
+        allWords.addAll(receivedWords.data!);
         emit(LaterWordsLoadingSuccess());
 
       } else {
         if(receivedWords.failure!.runtimeType == PartialDataFailure) {
-          // allWords.addAll(receivedWords.data!);
+          allWords.addAll(receivedWords.data!);
         }
 
         if(receivedWords.failure!.runtimeType == NoInternetFailure) {
-          // allWords.addAll(receivedWords.data!);
+          allWords.addAll(receivedWords.data!);
 
         }
 

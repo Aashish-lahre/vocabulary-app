@@ -3,24 +3,33 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_improve_vocabulary/core/utility/syno_anto_shimmer.dart';
 
 import '../../../features/gemini_ai/bloc/gemini_bloc.dart';
-import '../../utility/base_class.dart';
+import '../../models/word.dart';
 
 class SynonymsWidget extends StatefulWidget {
-  final List<String> synonyms;
-  final BaseWord word;
 
-  const SynonymsWidget({required this.synonyms, required this.word, super.key});
+  final Word word;
+
+  const SynonymsWidget({required this.word, super.key});
 
   @override
   State<SynonymsWidget> createState() => _SynonymsWidgetState();
 }
 
 class _SynonymsWidgetState extends State<SynonymsWidget> {
+  late Word word;
   late bool generateMoreWithAi;
   int synonymsLimit = 4;
 
   @override
+  void initState() {
+    word = widget.word;
+    super.initState();
+  }
+
+
+  @override
   Widget build(BuildContext context) {
+
     final textTheme = Theme
         .of(context)
         .textTheme;
@@ -28,7 +37,7 @@ class _SynonymsWidgetState extends State<SynonymsWidget> {
         .of(context)
         .colorScheme;
 
-    generateMoreWithAi = widget.synonyms.length < synonymsLimit ;
+    generateMoreWithAi = word.synonyms.length < synonymsLimit ;
 
     return BlocBuilder<GeminiBloc, GeminiState>(
       buildWhen: (_, currentState) {
@@ -40,7 +49,7 @@ class _SynonymsWidgetState extends State<SynonymsWidget> {
         }
 
         if(state is SynonymsLoadedState) {
-          generateMoreWithAi = (widget.synonyms.length + state.synonyms.length) < synonymsLimit;
+          generateMoreWithAi = word.synonyms.length < synonymsLimit;
         }
 
         return Padding(
@@ -60,17 +69,17 @@ class _SynonymsWidgetState extends State<SynonymsWidget> {
                 spacing: 20,
                 alignment: WrapAlignment.start,
                 children: [
-                  ...List.generate(widget.synonyms.length, (index) {
+                  ...List.generate(word.synonyms.length, (index) {
                     return ElevatedButton(
-                        onPressed: () {}, child: Text(widget.synonyms[index]));
+                        onPressed: () {}, child: Text(word.synonyms[index]));
                   }),
 
-                  buildSynonymsAntonymsShimmer(context, state, synonymsLimit - widget.synonyms.length),
+                  buildSynonymsAntonymsShimmer(context, state, synonymsLimit - word.synonyms.length),
 
                   if (generateMoreWithAi)
                     ElevatedButton(
                       style: ButtonStyle(shape: WidgetStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)))),
-                      onPressed: () => context.read<GeminiBloc>().add(LoadSynonymsEvent(word: widget.word, limit: (synonymsLimit - widget.synonyms.length), filterOut: widget.synonyms)),
+                      onPressed: () => context.read<GeminiBloc>().add(LoadSynonymsEvent(word: word, limit: (synonymsLimit - word.synonyms.length), filterOut: word.synonyms)),
                       child: Text(
                         'Generate with AI',
                         style: textTheme.bodyMedium!

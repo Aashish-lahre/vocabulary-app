@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_improve_vocabulary/core/blocs/ViewSwitcherCubit/view_switcher_cubit.dart';
 import 'package:flutter_improve_vocabulary/core/blocs/network_bloc/internet_bloc.dart';
 import 'package:flutter_improve_vocabulary/core/theme/color_theme.dart';
 import 'package:flutter_improve_vocabulary/core/theme/cubit/theme_cubit.dart';
 import 'package:flutter_improve_vocabulary/features/gemini_ai/bloc/gemini_bloc.dart';
 import 'package:flutter_improve_vocabulary/features/gemini_ai/repository/gemini_ai_repository.dart';
-import 'package:flutter_improve_vocabulary/features/homeScreen/presentation/screens/home_screen.dart';
+import 'package:flutter_improve_vocabulary/app/home_screen.dart';
 import 'package:flutter_improve_vocabulary/core/blocs/later_word_fetch_bloc/later_word_fetch_bloc.dart';
-import 'package:flutter_improve_vocabulary/features/word/bloc/word_bloc.dart';
+import 'package:flutter_improve_vocabulary/features/dictionary/bloc/word_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../features/dictionary/repository/dictionary_repository.dart';
@@ -37,6 +38,8 @@ class VocabularyApp extends StatelessWidget {
               create: (_) => ThemeCubit(themeType: themeType),
             ),
 
+            BlocProvider(create: (_) => ViewSwitcherCubit(isAiWordGenerationOn ? ViewMode.geminiAi : ViewMode.dictionaryApi)),
+
             BlocProvider(
                 lazy: false,
                 create: (_) => GeminiBloc(repository: GeminiRepository(), isAiWordsGenerationOn : isAiWordGenerationOn)),
@@ -54,7 +57,7 @@ class VocabularyApp extends StatelessWidget {
             BlocProvider(
               // create: (context) => WordCubit(dictionary_repository:  context.read<DictionaryRepository>()),
               create: (context) =>
-                  WordBloc(geminiBloc: context.read<GeminiBloc>(),
+                  WordBloc(
                       repository: context.read<DictionaryRepository>()),
               lazy: false,
 
@@ -81,7 +84,6 @@ class VocabularyAppView extends StatelessWidget {
           debugShowCheckedModeBanner: false,
 
           builder: (context, child) {
-            print('later word bloc checking : ${context.read<LaterWordFetchBloc>().laterWordFetchLimit}');
 
             if(themes[state]!.backgroundGradient != null) {
               return Container(

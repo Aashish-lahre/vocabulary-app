@@ -15,7 +15,7 @@ class BannerWidget extends StatelessWidget {
         .colorScheme;
     return Container(
       width: double.infinity,
-      height: 50,
+      height: 40,
       decoration: BoxDecoration(
         color: colorScheme.secondaryContainer,
         borderRadius: BorderRadius.circular(5),

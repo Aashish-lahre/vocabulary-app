@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_improve_vocabulary/core/shared/detail_card_widgets/banner_widget.dart';
 import 'package:flutter_improve_vocabulary/features/gemini_ai/bloc/gemini_bloc.dart';
 import 'package:flutter_improve_vocabulary/core/screens/word_details_screen.dart';
 import 'package:gap/gap.dart';
@@ -12,7 +13,8 @@ import '../theme/cubit/theme_cubit.dart';
 
 class WordCard extends StatelessWidget {
   final Word word;
-  const WordCard({required this.word, super.key});
+  final String bannerName;
+  const WordCard({required this.word, required this.bannerName, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +25,7 @@ class WordCard extends StatelessWidget {
         Navigator.of(context).push(MaterialPageRoute(builder: (context) {
           return BlocProvider.value(
             value: BlocProvider.of<GeminiBloc>(context),
-            child: WordDetailsScreen(word: word),
+            child: WordDetailsScreen(word: word, bannerName: bannerName,),
           );
         },),);
       },
@@ -61,20 +63,7 @@ class WordCard extends StatelessWidget {
               Gap(20),
       
               // black banner container
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(5),
-                  color: colorScheme.secondary,
-                ),
-                padding: EdgeInsets.all(8),
-                child: Row(
-                  spacing: 30,
-                  children: [
-                    Icon(Icons.arrow_downward_rounded, color: colorScheme.onSecondary,),
-                    Text('AI Generated Word', style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSecondary),),
-                  ],
-                ),
-              ),
+              BannerWidget(type:bannerName),
       
             // list all the partOfSpeech
               Wrap(

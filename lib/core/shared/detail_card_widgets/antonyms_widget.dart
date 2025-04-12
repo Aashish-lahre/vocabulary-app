@@ -3,23 +3,28 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_improve_vocabulary/core/utility/syno_anto_shimmer.dart';
 
 import '../../../features/gemini_ai/bloc/gemini_bloc.dart';
-import '../../utility/base_class.dart';
+import '../../models/word.dart';
 
 class AntonymsWidget extends StatefulWidget {
-  final List<String> antonyms;
-  final BaseWord word;
 
-  const AntonymsWidget({required this.antonyms, required this.word, super.key});
+  final Word word;
+
+  const AntonymsWidget({required this.word, super.key});
 
   @override
   State<AntonymsWidget> createState() => _AntonymsWidgetState();
 }
 
 class _AntonymsWidgetState extends State<AntonymsWidget>{
+  late Word word;
   late bool generateMoreWithAi;
   int antonymsLimit = 4;
 
-
+  @override
+  void initState() {
+    word = widget.word;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +34,7 @@ class _AntonymsWidgetState extends State<AntonymsWidget>{
     final colorScheme = Theme
         .of(context)
         .colorScheme;
-    generateMoreWithAi = widget.antonyms.length < antonymsLimit ;
+    generateMoreWithAi = word.antonyms.length < antonymsLimit ;
 
     return BlocBuilder<GeminiBloc, GeminiState>(
       buildWhen: (_, currentState) {
@@ -41,7 +46,7 @@ class _AntonymsWidgetState extends State<AntonymsWidget>{
         }
 
         if(state is AntonymsLoadedState) {
-          generateMoreWithAi = (widget.antonyms.length + state.antonyms.length) < antonymsLimit;
+          generateMoreWithAi = word.antonyms.length < antonymsLimit;
         }
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -62,19 +67,19 @@ class _AntonymsWidgetState extends State<AntonymsWidget>{
                 spacing: 20,
                 alignment: WrapAlignment.start,
                 children: [
-                  ...List.generate(widget.antonyms.length, (index) {
+                  ...List.generate(word.antonyms.length, (index) {
                     return ElevatedButton(
-                        onPressed: () {}, child: Text(widget.antonyms[index]));
+                        onPressed: () {}, child: Text(word.antonyms[index]));
                   }),
 
-                  buildSynonymsAntonymsShimmer(context, state, antonymsLimit - widget.antonyms.length),
+                  buildSynonymsAntonymsShimmer(context, state, antonymsLimit - word.antonyms.length),
 
 
                   if (generateMoreWithAi)
                     ElevatedButton(
                       style: ButtonStyle(shape: WidgetStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)))),
                       onPressed: () {
-                        context.read<GeminiBloc>().add(LoadAntonymsEvent(word: widget.word, limit: (antonymsLimit - widget.antonyms.length), filterOut: widget.antonyms));
+                        context.read<GeminiBloc>().add(LoadAntonymsEvent(word: word, limit: (antonymsLimit - word.antonyms.length), filterOut: word.antonyms));
 
 
                       },

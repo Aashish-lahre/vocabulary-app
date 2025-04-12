@@ -5,7 +5,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-import '../models/word.dart';
+import '../../../core/models/word.dart';
 import './dictionary_failures.dart';
 
 /// Base URL for the dictionary API.
@@ -25,20 +25,26 @@ mixin DictionaryUtilsMixin {
 
 
   Map<String, dynamic> transformWordJson(Map<String, dynamic> wordData) {
-
-
     final word = wordData['word'];
     final meanings = wordData['meanings'] as List<dynamic>;
-
+    final partsOfSpeech = <String>{}; // Using a Set to avoid duplicates
     final allDefinitions = <String>[];
     final allSynonyms = <String>{};
     final allAntonyms = <String>{};
     final allExamples = <String>[];
 
     for (final meaning in meanings) {
+      final partOfSpeech = meaning['partOfSpeech'];
+      if (partOfSpeech != null) {
+        partsOfSpeech.add(partOfSpeech);
+      }
+
       final definitions = meaning['definitions'] as List<dynamic>;
       for (final def in definitions) {
-        allDefinitions.add(def['definition']);
+        final definition = def['definition'];
+        if (definition != null) {
+          allDefinitions.add(definition);
+        }
 
         if (def['synonyms'] != null) {
           allSynonyms.addAll(List<String>.from(def['synonyms']));
@@ -65,17 +71,18 @@ mixin DictionaryUtilsMixin {
 
     final transformed = [
       {
-        'word': word,
-        'meanings': meanings,
-        'allDefinitions': allDefinitions,
-        'allSynonyms': allSynonyms.toList(),
-        'allAntonyms': allAntonyms.toList(),
-        'allExamples': allExamples,
+        'wordName': word,
+        'partsOfSpeech': partsOfSpeech.toList(),
+        'definitions': allDefinitions,
+        'synonyms': allSynonyms.toList(),
+        'antonyms': allAntonyms.toList(),
+        'examples': allExamples,
       }
     ];
 
     return transformed.first;
   }
+
 
 }
 

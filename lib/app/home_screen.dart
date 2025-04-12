@@ -35,11 +35,11 @@ class _HomeScreenState extends State<HomeScreen> {
         context.read<GeminiBloc>().isAiWordsGenerationOn;
     if (isAiWordGenerationIsOn) {
       context.read<GeminiBloc>().add(
-          LoadAiWordsEvent(noOfAiWordsToLoad: widget.initialWordFetchLimit));
+          LoadAiWordsEvent(noOfAiWordsToLoad: widget.initialWordFetchLimit, autoLoad: true));
     } else {
       context
           .read<WordBloc>()
-          .add(LoadWords(noOfWordToSearch: widget.initialWordFetchLimit));
+          .add(LoadWords(noOfWordToSearch: widget.initialWordFetchLimit, autoLoad: true));
     }
     super.initState();
   }
@@ -71,12 +71,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
               ],
               child:
-              BlocBuilder<ViewSwitcherCubit, ViewMode>(
-  builder: (context, state) {
+              BlocBuilder<ViewSwitcherCubit, ViewSwitcherState>(
+                buildWhen: (previousState, currentState) {
+                  return (currentState is! ViewModeChanged);
+                },
+  builder: (context, viewState) {
+                  print('viewSwitcher state : ${viewState.runtimeType}');
+                  print('viewSwitcher state mode : ${viewState.mode}');
     return
       IndexedStack(
-                index: state.value,
+                index: viewState.mode.value,
                 children: [
+      //             viewState.mode == ViewMode.dictionaryApi ?
                   BlocConsumer<WordBloc, WordState>(
                     listener: (context, state) {
                       if (state is NoMoreWordAvailableState) {
@@ -207,15 +213,15 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: WordCardShimmer(),
                         );
                         case FetchedSingleWordState():
+
                           return Padding(
                             padding: const EdgeInsets.fromLTRB(30, 50, 30, 50),
                             child: Container(
                               color: Colors.transparent,
                               child: WordSlider(
-                                  wordsLength:
-                                  context.read<WordBloc>().allWords.length,
-                                  // key: UniqueKey(),
-                                  wordWidget: WordCard(word: state.word)
+
+                                  key: UniqueKey(),
+                                  wordWidget: WordCard(word: state.word, bannerName: 'Dictionary API Generated Word.',)
 
                               ),
                             ),
@@ -226,7 +232,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   .read<WordBloc>()
                                   .add(LoadWords(
                                   noOfWordToSearch:
-                                  widget.initialWordFetchLimit)),
+                                  widget.initialWordFetchLimit, autoLoad: true)),
                               child: Text('Retry'));
                           return Positioned.fill(
                               child: errorWidget(context, 'No Internet Connection', button)
@@ -241,11 +247,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                     .isAiWordsGenerationOn;
                                 if (isAiWordGenerationIsOn) {
                                   context.read<GeminiBloc>().add(
-                                      LoadAiWordsEvent(noOfAiWordsToLoad: 5));
+                                      LoadAiWordsEvent(noOfAiWordsToLoad: 5, autoLoad: true));
                                 } else {
                                   context
                                       .read<WordBloc>()
-                                      .add(LoadWords(noOfWordToSearch: 5));
+                                      .add(LoadWords(noOfWordToSearch: 5, autoLoad: true));
                                 }
                               },
                               child: Text('Retry'));
@@ -259,7 +265,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: Center(child: Text('unknown state')));
                       }
                     },
-                  ),
+                  ) ,
+                      // :
 
                   BlocConsumer<GeminiBloc, GeminiState>(
                     listener: (context, state) {
@@ -269,7 +276,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       if (state is NoMoreAiWordsAvailableState) {
                         context
                             .read<GeminiBloc>()
-                            .add(LoadAiWordsEvent(noOfAiWordsToLoad: context.read<LaterWordFetchBloc>().laterWordFetchLimit));
+                            .add(LoadAiWordsEvent(noOfAiWordsToLoad: context.read<LaterWordFetchBloc>().laterWordFetchLimit, autoLoad: false));
                       }
 
                       if (state is GeminiFailureState) {
@@ -311,7 +318,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     buildWhen: (previousState, currentState) {
                       return [
                         GeminiInitial,
-                        AiWordsLoadingState,
+                        // AiWordsLoadingState,
                         SingleAiWordFetchState,
                         GeminiFailureState,
                       ].contains(currentState.runtimeType);
@@ -325,15 +332,15 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: WordCardShimmer(),
                           );
                         case SingleAiWordFetchState():
+                          print('geminiBloc singleAiWordFetchState received');
                           return Padding(
                             padding: const EdgeInsets.fromLTRB(30, 50, 30, 50),
                             child: Container(
                               color: Colors.transparent,
                               child: WordSlider(
-                                  wordsLength:
-                                  context.read<WordBloc>().allWords.length,
-                                  // key: UniqueKey(),
-                                  wordWidget: WordCard(word: state.word)
+
+                                  key: UniqueKey(),
+                                  wordWidget: WordCard(word: state.word, bannerName: 'AI Generated Word.',)
 
                               ),
                             ),
@@ -347,22 +354,20 @@ class _HomeScreenState extends State<HomeScreen> {
                                     .isAiWordsGenerationOn;
                                 if (isAiWordGenerationIsOn) {
                                   context.read<GeminiBloc>().add(
-                                      LoadAiWordsEvent(noOfAiWordsToLoad: 5));
+                                      LoadAiWordsEvent(noOfAiWordsToLoad: 5, autoLoad: true));
                                 } else {
                                   context
                                       .read<WordBloc>()
-                                      .add(LoadWords(noOfWordToSearch: 5));
+                                      .add(LoadWords(noOfWordToSearch: 5, autoLoad: true));
                                 }
                               },
                               child: Text('Retry'));
                           // </editor-fold>
-                          print(' gemini failure happened');
                           return Positioned.fill(
                               child: errorWidget(
                                   context, state.errorMessage, button));
 
                         default:
-                          print('gemini default reached');
                           return Positioned.fill(
                               child: Center(child: Text('unknown state')));
                       }
@@ -446,321 +451,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
 
-  Positioned blocConsumerForWord(BuildContext context, BuildContext scaffoldContext) {
-     BlocConsumer<WordBloc, WordState>(
-      listener: (context, state) {
-        if (state is NoMoreWordAvailableState) {
-          context
-              .read<WordBloc>()
-              .add(LaterLoadWords(noOfWordsToLoad: 5));
-        }
 
-        if (state is LaterWordsLoading) {
-          String message = 'Loading more words.';
-          ContentType contentType = ContentType.help;
-
-          showOverlayBanner(scaffoldContext,
-              message: message,
-              contentType: contentType);
-        }
-
-        if (state is LaterWordsLoadingSuccess) {
-          String message = 'Loaded more words.';
-          ContentType contentType = ContentType.success;
-
-          showOverlayBanner(scaffoldContext,
-              message: message,
-              contentType: contentType);
-        }
-
-        if (state is PartialDataState) {
-          String message =
-              'Only ${state.wordFetchedCount} words loaded.';
-          ContentType contentType = ContentType.warning;
-
-          showOverlayBanner(scaffoldContext,
-              message: message,
-              contentType: contentType);
-        }
-
-        if (state is UnexpectedState) {
-          String errorMessage =
-              'Unexpected Error Occurred : ${state.errorMessage}';
-          final ({
-          String errorMessage,
-          HomeErrorType homeErrorType
-          }) errorData = (
-          errorMessage: errorMessage,
-          homeErrorType: HomeErrorType.unexpected
-          );
-          Navigator.of(context).pushReplacement(MaterialPageRoute(
-              builder: (_) =>
-                  HomeErrorScreen(errorData: errorData)));
-        }
-
-        if (state is InternetFailureState) {
-
-          ContentType contentType = ContentType.failure;
-          late String message;
-
-          if (state.wordNotSearched == 0 ||
-              state.wordRetrived == 0) {
-            message = 'No Internet Connection.';
-          } else {
-            message =
-            'Only ${state.wordRetrived} words loaded. No Internet Connection.';
-          }
-
-          showOverlayBanner(
-            scaffoldContext,
-            message: message,
-            contentType: contentType,
-          );
-        }
-
-        if (state is HomeErrorScreenState) {
-          String errorMessage =
-          state.homeErrorType == HomeErrorType.internet
-              ? 'No Internet Connection'
-              : 'Unexpected Error Occurred';
-          final ({
-          String errorMessage,
-          HomeErrorType homeErrorType
-          }) errorData = (
-          errorMessage: errorMessage,
-          homeErrorType: state.homeErrorType
-          );
-          // WidgetsBinding.instance.addPostFrameCallback((_) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (_) =>
-                  HomeErrorScreen(errorData: errorData),
-            ),
-          );
-          // });
-        }
-      },
-      listenWhen: (previousState, currentState) {
-        return (previousState != currentState) &&
-            [
-              NoMoreWordAvailableState,
-              LaterWordsLoading,
-              LaterWordsLoadingSuccess,
-              PartialDataState,
-              UnexpectedState,
-              InternetFailureState,
-              HomeErrorScreenState,
-            ].contains(currentState.runtimeType);
-      },
-      buildWhen: (previousState, currentState) {
-        bool flag = false;
-        if (currentState is InternetFailureState) {
-          if (context.read<WordBloc>().allWords.isEmpty) {
-            flag = true;
-          }
-        }
-
-        return flag ||
-            [
-              WordInitial,
-              WordLoadingState,
-              FetchedSingleWordState,
-              GeminiFailureWordState,
-            ].contains(currentState.runtimeType);
-      },
-      builder: (context, state) {
-        switch (state) {
-          case WordInitial():
-          case WordLoadingState():
-            return Positioned.fill(
-                left: 30,
-                right: 30,
-                top: 50,
-                bottom: 50,
-                child: WordCardShimmer());
-          case FetchedSingleWordState():
-            return Positioned.fill(
-              left: 30,
-              right: 30,
-              top: 50,
-              bottom: 50,
-              child: Container(
-                color: Colors.transparent,
-                child: WordSlider(
-                    wordsLength:
-                    context.read<WordBloc>().allWords.length,
-                    // key: UniqueKey(),
-                    wordWidget: WordCard(word: state.word)
-
-                ),
-              ),
-            );
-          case InternetFailureState():
-            ElevatedButton button = ElevatedButton(
-                onPressed: () => context
-                    .read<WordBloc>()
-                    .add(LoadWords(
-                    noOfWordToSearch:
-                    widget.initialWordFetchLimit)),
-                child: Text('Retry'));
-            return Positioned.fill(
-                child: errorWidget(context, 'No Internet Connection', button)
-
-            );
-          case GeminiFailureWordState():
-          // <editor-fold>
-            ElevatedButton button = ElevatedButton(
-                onPressed: () {
-                  final isAiWordGenerationIsOn = context
-                      .read<GeminiBloc>()
-                      .isAiWordsGenerationOn;
-                  if (isAiWordGenerationIsOn) {
-                    context.read<GeminiBloc>().add(
-                        LoadAiWordsEvent(noOfAiWordsToLoad: 5));
-                  } else {
-                    context
-                        .read<WordBloc>()
-                        .add(LoadWords(noOfWordToSearch: 5));
-                  }
-                },
-                child: Text('Retry'));
-            // </editor-fold>
-            return Positioned.fill(
-                child: errorWidget(
-                    context, state.errorMessage, button));
-
-          default:
-            return Positioned.fill(
-                child: Center(child: Text('unknown state')));
-        }
-      },
-    );
-     return Positioned.fill(
-         child: Center(child: Text('unknown state')));
-  }
-
-
-  Positioned blocConsumerForGeminiAi(BuildContext context, BuildContext scaffoldContext) {
-     BlocConsumer<GeminiBloc, GeminiState>(
-      listener: (context, state) {
-
-
-
-        if (state is NoMoreAiWordsAvailableState) {
-          context
-              .read<GeminiBloc>()
-              .add(LoadAiWordsEvent(noOfAiWordsToLoad: context.read<LaterWordFetchBloc>().laterWordFetchLimit));
-        }
-
-        if (state is GeminiFailureState) {
-          String message = 'Something went wrong.';
-          ContentType contentType = ContentType.failure;
-
-          showOverlayBanner(scaffoldContext,
-              message: message, contentType: contentType);
-        }
-
-        if (state is AiWordsLoadingState) {
-          String message = 'Loading AI words.';
-          ContentType contentType = ContentType.help;
-
-          showOverlayBanner(scaffoldContext,
-              message: message, contentType: contentType);
-        }
-
-        if (state is AiWordsLoadedState) {
-          String message = 'Loaded more AI words.';
-          ContentType contentType = ContentType.success;
-
-          showOverlayBanner(scaffoldContext,
-              message: message, contentType: contentType);
-        }
-
-
-      },
-      listenWhen: (previousState, currentState) {
-        return (previousState != currentState) &&
-            [
-        NoMoreAiWordsAvailableState,
-    GeminiFailureState,
-    AiWordsLoadingState,
-    AiWordsLoadedState,
-
-            ].contains(currentState.runtimeType);
-      },
-      buildWhen: (previousState, currentState) {
-        return [
-              GeminiInitial,
-              AiWordsLoadingState,
-              SingleAiWordFetchState,
-              GeminiFailureState,
-            ].contains(currentState.runtimeType);
-      },
-      builder: (context, state){
-        switch (state) {
-          case GeminiInitial():
-            return Positioned.fill(
-                left: 30,
-                right: 30,
-                top: 50,
-                bottom: 50,
-                child: WordCardShimmer());
-          case AiWordsLoadingState():
-            return Positioned.fill(
-                left: 30,
-                right: 30,
-                top: 50,
-                bottom: 50,
-                child: WordCardShimmer());
-          case SingleAiWordFetchState():
-            return Positioned.fill(
-              left: 30,
-              right: 30,
-              top: 50,
-              bottom: 50,
-              child: Container(
-                color: Colors.transparent,
-                child: WordSlider(
-                    wordsLength:
-                    context.read<WordBloc>().allWords.length,
-                    // key: UniqueKey(),
-                    wordWidget: WordCard(word: state.word)
-
-                ),
-              ),
-            );
-          case GeminiFailureState():
-          // <editor-fold>
-            ElevatedButton button = ElevatedButton(
-                onPressed: () {
-                  final isAiWordGenerationIsOn = context
-                      .read<GeminiBloc>()
-                      .isAiWordsGenerationOn;
-                  if (isAiWordGenerationIsOn) {
-                    context.read<GeminiBloc>().add(
-                        LoadAiWordsEvent(noOfAiWordsToLoad: 5));
-                  } else {
-                    context
-                        .read<WordBloc>()
-                        .add(LoadWords(noOfWordToSearch: 5));
-                  }
-                },
-                child: Text('Retry'));
-            // </editor-fold>
-            print(' gemini failure happened');
-            return Positioned.fill(
-                child: errorWidget(
-                    context, state.errorMessage, button));
-
-          default:
-            print('gemini default reached');
-            return Positioned.fill(
-                child: Center(child: Text('unknown state')));
-        }
-      },
-    );
-     return Positioned.fill(
-         child: Center(child: Text('unknown state')));
-  }
 
 }

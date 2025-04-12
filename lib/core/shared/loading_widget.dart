@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_improve_vocabulary/core/screens/word_card_shimmer.dart';
+import 'package:flutter_improve_vocabulary/core/shared/word_card_shimmer.dart';
 
 class LoadingWidget extends StatelessWidget {
   const LoadingWidget({super.key});

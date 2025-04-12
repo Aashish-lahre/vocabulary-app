@@ -9,9 +9,8 @@ import 'package:flutter_improve_vocabulary/features/dictionary/bloc/word_bloc.da
 
 class DraggableSlider extends StatefulWidget {
   final Widget widget;
-  final int allWordsLength;
   final void Function({required double angleInDegree, required Offset endOffset, required Offset startOffset,required int direction}) slideOut;
-  const DraggableSlider({required this.widget, required this.allWordsLength, required this.slideOut, super.key});
+  const DraggableSlider({required this.widget,  required this.slideOut, super.key});
 
   @override
   State<DraggableSlider> createState() => _DraggableSliderState();
@@ -86,6 +85,10 @@ class _DraggableSliderState extends State<DraggableSlider> with SingleTickerProv
 
   void animationListener() {
     if (_restoreController.isCompleted) {
+      print('restore animation completed');
+      // _fetchMoreWords();
+      // print('about to fetch words...');
+
       setState(() {
         _restoreController.reset();
         _angle = 0;
@@ -165,31 +168,31 @@ class _DraggableSliderState extends State<DraggableSlider> with SingleTickerProv
 
 
   void _fetchMoreWords() {
-
+print('fetch block started...');
     // is using Gemini AI to fetch words or no.
     if (context
         .read<GeminiBloc>()
         .isAiWordsGenerationOn) {
-
+print('ai is no...');
       if(context.read<GeminiBloc>().state.runtimeType != AiWordsLoadingState) {
 
-        context.read<ViewSwitcherCubit>().changeViewMode(ViewMode.geminiAi);
-
-        context.read<GeminiBloc>().add(LoadAiWordsEvent(noOfAiWordsToLoad: context
+print('loading more ai words....');
+        context.read<GeminiBloc>().add(LoadAiWordsEvent(autoLoad: false, noOfAiWordsToLoad: context
             .read<LaterWordFetchBloc>()
             .laterWordFetchLimit));
+        context.read<ViewSwitcherCubit>().changeViewMode(ViewMode.geminiAi);
       }
 
 
     } else {
-
+print('ai is off');
       if(context.read<WordBloc>().state.runtimeType != LaterWordsLoading) {
 
-        context.read<ViewSwitcherCubit>().changeViewMode(ViewMode.dictionaryApi);
-
+print('loading more api words...');
         context.read<WordBloc>().add(LaterLoadWords(noOfWordsToLoad: context
             .read<LaterWordFetchBloc>()
             .laterWordFetchLimit));
+        context.read<ViewSwitcherCubit>().changeViewMode(ViewMode.dictionaryApi);
       }
 
 
@@ -198,11 +201,13 @@ class _DraggableSliderState extends State<DraggableSlider> with SingleTickerProv
 
   void restorePosition() {
     if (_restoreController.isAnimating) return;
+    print('restoring start....');
     _restoreController.forward();
   }
 
   void handleSlideOut(
       {required double angle, required Offset endOffset, required Offset startOffset, required int direction}) {
+    print('called slide out');
     // provided angle is in radians, converting to degree
     widget.slideOut(angleInDegree: radiansToDegrees(angle),
         endOffset: endOffset,
@@ -211,19 +216,45 @@ class _DraggableSliderState extends State<DraggableSlider> with SingleTickerProv
   }
 
 
-  void onPanStart(DragStartDetails details, int allWordsLength) {
+  int getCurrentModeWordIndex() {
+    if(context.read<ViewSwitcherCubit>().viewMode == ViewMode.dictionaryApi) {
+      print('viewMode : dictionary');
+      return context
+          .read<WordBloc>()
+          .wordIndex;
+    } else {
+      print('viewMode : gemini');
+      return context
+          .read<GeminiBloc>()
+          .wordIndex;
+    }
+  }
+  int getCurrentModeWordsLength() {
+    if(context.read<ViewSwitcherCubit>().viewMode == ViewMode.dictionaryApi) {
+      return context
+          .read<WordBloc>()
+          .allWords
+          .length;
+    } else {
+      return context
+          .read<GeminiBloc>()
+          .allWords
+          .length;
+    }
+  }
+
+
+  void onPanStart(DragStartDetails details) {
     if (_restoreController.isAnimating) return;
 
-    int currentIndex = context
-        .read<WordBloc>()
-        .wordIndex;
-    int allWordsLength = context
-        .read<WordBloc>()
-        .allWords
-        .length;
+    int currentIndex = getCurrentModeWordIndex();
+    int allWordsLength = getCurrentModeWordsLength();
+    print('currentIndex : $currentIndex');
+    print('allWordsLength : $allWordsLength');
 
     setState(() {
       isEnableDrag = currentIndex != allWordsLength - 1;
+      print('isEnableDrag : $isEnableDrag');
       _startOffset = details.localPosition;
       _isPanEndTriggered = false;
     });
@@ -239,9 +270,9 @@ class _DraggableSliderState extends State<DraggableSlider> with SingleTickerProv
           setState(() {
             _isPanEndTriggered = true;
           });
-          _fetchMoreWords();
-
+          print('restoring position about to called');
           restorePosition();
+          _fetchMoreWords();
 
           return;
         }
@@ -252,8 +283,9 @@ class _DraggableSliderState extends State<DraggableSlider> with SingleTickerProv
           setState(() {
             _isPanEndTriggered = true;
           });
-          _fetchMoreWords();
           restorePosition();
+          _fetchMoreWords();
+
 
           return;
         }
@@ -264,8 +296,9 @@ class _DraggableSliderState extends State<DraggableSlider> with SingleTickerProv
           setState(() {
             _isPanEndTriggered = true;
           });
-          _fetchMoreWords();
           restorePosition();
+          _fetchMoreWords();
+
           return;
         }
 
@@ -275,22 +308,26 @@ class _DraggableSliderState extends State<DraggableSlider> with SingleTickerProv
           setState(() {
             _isPanEndTriggered = true;
           });
-          _fetchMoreWords();
           restorePosition();
+          _fetchMoreWords();
+
           return;
         }
       } else {
+        print('returned');
         return;
       }
     }
+      // print('isEnableDrag = true, not entered');
+
+      setState(() {
+        _endOffset = details.localPosition - _startOffset;
+        // _endOffset = details.globalPosition - _startOffset;
+
+        _angle = getAngle;
+      });
 
 
-    setState(() {
-      _endOffset = details.localPosition - _startOffset;
-      // _endOffset = details.globalPosition - _startOffset;
-
-      _angle = getAngle;
-    });
   }
 
   void onPanEnd(DragEndDetails end) {
@@ -330,13 +367,14 @@ class _DraggableSliderState extends State<DraggableSlider> with SingleTickerProv
     final child = SizedBox(key: _widgetKey, child: widget.widget,);
     return
       GestureDetector(
-        onPanStart: (details) => onPanStart(details, widget.allWordsLength),
+        onPanStart: (details) => onPanStart(details),
         onPanUpdate: onPanUpdate,
         onPanEnd: onPanEnd,
         child: AnimatedBuilder(
             animation: _restoreController,
             builder: (context, _) {
               final value = 1 - _restoreController.value;
+              print('value of restore animation : $value');
               return Transform.translate(
                   offset: _endOffset * value,
                   child: Transform.rotate(

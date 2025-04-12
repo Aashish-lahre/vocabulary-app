@@ -30,25 +30,36 @@ final class AiWordsLoadingState extends GeminiState {
 }
 
 
-/// loaded state for initial words fetch, brings list of AiWords
+/// loaded state for initial words fetch, brings list of Words
 final class AiWordsLoadedState extends GeminiState {
 
-  final List<AiWord> aiWords;
+  final List<Word> words;
 
-  const AiWordsLoadedState({required this.aiWords});
+  const AiWordsLoadedState({required this.words});
 
   @override
-  List<Object?> get props => [aiWords];
+  List<Object?> get props => [words];
 
 }
 
 
+final class SingleAiWordFetchState extends GeminiState {
+
+  final Word word;
+
+  const SingleAiWordFetchState({required this.word});
+
+  @override
+  List<Object?> get props => [word];
+
+}
+
 /// state emitted when searched for a single word.
-final class SingleAiWordFetchedState extends GeminiState {
+final class AiWordSearchCompleteState extends GeminiState {
 
-  final AiWord word;
+  final Word word;
 
-  const SingleAiWordFetchedState({required this.word});
+  const AiWordSearchCompleteState({required this.word});
 
   @override
   List<Object?> get props => [word];
@@ -56,7 +67,7 @@ final class SingleAiWordFetchedState extends GeminiState {
 }
 
 
-final class SingleAiWordLoadingState extends GeminiState {
+final class AiWordSearchingState extends GeminiState {
 
 
   @override
@@ -97,7 +108,7 @@ final class GeminiSingleWordLoadFailureState extends GeminiState {
 }
 
 
-/// state emitted when i swiped out all the AiWords from screen.
+/// state emitted when i swiped out all the Words from screen.
 final class NoMoreAiWordsAvailableState extends GeminiState {
   @override
   List<Object?> get props => [];
@@ -115,7 +126,7 @@ final class ExamplesLoadingState extends GeminiState {
 
 final class ExamplesLoadedState extends GeminiState {
 
-  final BaseWord word;
+  final Word word;
   final List<String> examples;
 
   const ExamplesLoadedState({required this.examples, required this.word});
@@ -133,7 +144,7 @@ final class SynonymsLoadingState extends GeminiState {
 
 
 final class SynonymsLoadedState extends GeminiState {
-  final BaseWord word;
+  final Word word;
 
   final List<String> synonyms;
 
@@ -150,7 +161,7 @@ final class AntonymsLoadingState extends GeminiState {
 }
 
 final class AntonymsLoadedState extends GeminiState {
-  final BaseWord word;
+  final Word word;
   final List<String> antonyms;
 
   const AntonymsLoadedState({required this.antonyms, required this.word});

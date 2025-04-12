@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../../features/homeScreen/presentation/utility/home_error_types_enum.dart';
+import '../../../app/home_error_types_enum.dart';
 
 
 class HomeErrorScreen extends StatelessWidget {

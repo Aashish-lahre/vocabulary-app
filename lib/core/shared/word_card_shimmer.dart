@@ -7,7 +7,7 @@ import 'package:gap/gap.dart';
 
 class WordCardShimmer extends StatefulWidget {
 
-  const WordCardShimmer({super.key});
+  const WordCardShimmer( {super.key});
 
   @override
   State<WordCardShimmer> createState() => _WordCardShimmerState();
@@ -42,6 +42,7 @@ class _WordCardShimmerState extends State<WordCardShimmer> with SingleTickerProv
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+
             Gap(50),
             // wordName and volume icon
             Row(

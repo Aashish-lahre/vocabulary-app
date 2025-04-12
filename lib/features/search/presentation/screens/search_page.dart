@@ -2,7 +2,7 @@ import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_improve_vocabulary/core/shared/error_widget.dart';
-import 'package:flutter_improve_vocabulary/features/gemini_ai/screens/ai_word_details_screen.dart';
+import 'package:flutter_improve_vocabulary/core/screens/word_details_screen.dart';
 import 'package:flutter_improve_vocabulary/features/search/presentation/screens/searched_word_detail_screen.dart';
 import 'package:gap/gap.dart';
 
@@ -48,10 +48,10 @@ class _SearchPageState extends State<SearchPage> {
   Widget build(BuildContext context) {
     return BlocConsumer<GeminiBloc, GeminiState>(
       listenWhen: (_, currentState) {
-        return [SingleAiWordFetchedState].contains(currentState.runtimeType);
+        return [AiWordSearchCompleteState].contains(currentState.runtimeType);
       },
       listener: (context, state) {
-        if (state is SingleAiWordFetchedState) {
+        if (state is AiWordSearchCompleteState) {
           Navigator.of(context).pushReplacement(
               MaterialPageRoute(builder: (context) =>
                   BlocProvider.value(
@@ -61,7 +61,7 @@ class _SearchPageState extends State<SearchPage> {
         }
       },
       buildWhen: (_, currentState) {
-        return [GeminiSingleWordLoadFailureState, SingleAiWordLoadingState]
+        return [GeminiSingleWordLoadFailureState, AiWordSearchingState]
             .contains(
             currentState.runtimeType);
       },
@@ -79,7 +79,7 @@ class _SearchPageState extends State<SearchPage> {
                   Navigator.of(context).pop();
                 }, child: Text('Home'),),),
 
-            SingleAiWordLoadingState() =>
+            AiWordSearchingState() =>
                 SizedBox.expand(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,

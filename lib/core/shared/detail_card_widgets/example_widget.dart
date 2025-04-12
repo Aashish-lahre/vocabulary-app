@@ -1,29 +1,38 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_improve_vocabulary/core/utility/base_class.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../features/gemini_ai/bloc/gemini_bloc.dart';
+import '../../models/word.dart';
 
 class ExampleWidget extends StatefulWidget {
-  final BaseWord word;
-  final List<String> examples;
-  const ExampleWidget({required this.word, required this.examples, super.key});
+  final Word word;
+  const ExampleWidget({required this.word, super.key});
 
   @override
   State<ExampleWidget> createState() => _ExampleWidgetState();
 }
 
 class _ExampleWidgetState extends State<ExampleWidget> {
+  late Word word;
+
+  @override
+  void initState() {
+    word = widget.word;
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
+
     final textTheme = Theme
         .of(context)
         .textTheme;
     final colorScheme = Theme
         .of(context)
         .colorScheme;
+
 
 
     return Padding(
@@ -56,21 +65,10 @@ class _ExampleWidgetState extends State<ExampleWidget> {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
-                    children: List.generate(widget.examples.length, (index) {
-                      return _buildExampleContainer(context, widget.examples[index]);
+                    children: List.generate(word.examples.length, (index) {
+                      return _buildExampleContainer(context, word.examples[index]);
                     }),
                   );
-                case SingleAiWordFetchedState _ :
-                case AiWordsLoadedState _ :
-                case GeminiInitial _ :
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: List.generate(widget.examples.length, (index) {
-                      return _buildExampleContainer(context, widget.examples[index]);
-                    }),
-                  );
-
                 case ExamplesLoadingState _ :
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,8 +78,8 @@ class _ExampleWidgetState extends State<ExampleWidget> {
                       // ...List.generate(examples.length, (index) {
                       //   return _buildExampleContainer(context, examples[index]);
                       // }),
-                      ...List.generate(widget.examples.length, (index) {
-                        return _buildExampleContainer(context, widget.examples[index]);
+                      ...List.generate(word.examples.length, (index) {
+                        return _buildExampleContainer(context, word.examples[index]);
                       }),
 
                       ...List.generate(3, (index) {
@@ -99,13 +97,19 @@ class _ExampleWidgetState extends State<ExampleWidget> {
                     child: Text(state.errorMessage, style: textTheme.bodyLarge!.copyWith(color: colorScheme.onSurface),),
                   );
                 default :
-                  return SizedBox();
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: List.generate(word.examples.length, (index) {
+                      return _buildExampleContainer(context, word.examples[index]);
+                    }),
+                  );
               }
             },
 
           ),
           GestureDetector(
-            onTap: () => context.read<GeminiBloc>().add(LoadExamplesEvent(word: widget.word, limit: 3, filterOut: widget.examples)),
+            onTap: () => context.read<GeminiBloc>().add(LoadExamplesEvent(word: word, limit: 3, filterOut: word.examples)),
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),

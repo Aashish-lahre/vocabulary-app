@@ -4,12 +4,13 @@ import 'package:flutter_improve_vocabulary/core/utility/syno_anto_shimmer.dart';
 import 'package:gap/gap.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../../../../core/models/word.dart';
 import '../../../../core/shared/detail_card_widgets/detail_card_widgets.dart' show TitleWidget, BannerWidget, DefinitionWidget;
 import '../../../gemini_ai/bloc/gemini_bloc.dart';
-import '../../../gemini_ai/data_model/ai_word.dart';
+
 
 class SearchedWordDetailScreen extends StatefulWidget {
-  final AiWord word;
+  final Word word;
   const SearchedWordDetailScreen({required this.word, super.key});
 
   @override
@@ -31,14 +32,14 @@ class _SearchedWordDetailScreenState extends State<SearchedWordDetailScreen> {
 
             BannerWidget(type: 'Word from AI'),
 
-            DefinitionWidget(definitions: widget.word.definition),
+            DefinitionWidget(definitions: widget.word.definitions),
 
             _buildSynonyms(context, widget.word.synonyms, widget.word),
 
             _buildAntonyms(context, widget.word.antonyms, widget.word),
 
 
-            _buildExample(context, widget.word, widget.word.example),
+            _buildExample(context, widget.word, widget.word.examples),
 
 
 
@@ -51,7 +52,7 @@ class _SearchedWordDetailScreenState extends State<SearchedWordDetailScreen> {
 
 
 
-Widget _buildSynonyms(BuildContext context, List<String> synonyms, AiWord word) {
+Widget _buildSynonyms(BuildContext context, List<String> synonyms, Word word) {
   late bool generateMoreWithAi;
   int synonymsLimit = 4;
   final textTheme = Theme
@@ -113,10 +114,10 @@ Widget _buildSynonyms(BuildContext context, List<String> synonyms, AiWord word) 
   );
 }
 
-Widget buildSynonymsSwitchWidget(BuildContext context, AiWord word, int synonymsLimit, GeminiState state, List<String> synonyms) {
+Widget buildSynonymsSwitchWidget(BuildContext context, Word word, int synonymsLimit, GeminiState state, List<String> synonyms) {
   switch(state) {
 
-    case SingleAiWordFetchedState _ :
+    case AiWordSearchCompleteState _ :
       return Wrap(
         spacing: 20,
         alignment: WrapAlignment.start,
@@ -175,7 +176,7 @@ Widget buildSynonymsSwitchWidget(BuildContext context, AiWord word, int synonyms
 
 
 
-Widget _buildAntonyms(BuildContext context, List<String> antonyms, AiWord word) {
+Widget _buildAntonyms(BuildContext context, List<String> antonyms, Word word) {
   late bool generateMoreWithAi;
   int antonymsLimit = 4;
   final textTheme = Theme
@@ -238,10 +239,10 @@ Widget _buildAntonyms(BuildContext context, List<String> antonyms, AiWord word) 
 }
 
 
-Widget buildAntonymsSwitchWidget(BuildContext context, AiWord word, int antonymsLimit, GeminiState state, List<String> antonyms) {
+Widget buildAntonymsSwitchWidget(BuildContext context, Word word, int antonymsLimit, GeminiState state, List<String> antonyms) {
   switch(state) {
 
-    case SingleAiWordFetchedState _ :
+    case AiWordSearchCompleteState _ :
       return Wrap(
       spacing: 20,
       alignment: WrapAlignment.start,
@@ -303,7 +304,7 @@ Widget buildAntonymsSwitchWidget(BuildContext context, AiWord word, int antonyms
 
 
 
-Widget _buildExample(BuildContext context, AiWord word, List<String> examples) {
+Widget _buildExample(BuildContext context, Word word, List<String> examples) {
   final textTheme = Theme
       .of(context)
       .textTheme;
@@ -344,7 +345,7 @@ Widget _buildExample(BuildContext context, AiWord word, List<String> examples) {
 
         ),
         GestureDetector(
-          onTap: () => context.read<GeminiBloc>().add(LoadExamplesEvent(word: word, limit: 3, filterOut: word.example)),
+          onTap: () => context.read<GeminiBloc>().add(LoadExamplesEvent(word: word, limit: 3, filterOut: word.examples)),
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
@@ -363,7 +364,7 @@ Widget _buildExample(BuildContext context, AiWord word, List<String> examples) {
 }
 
 
-Widget buildExampleSwitchWidget(BuildContext context, GeminiState state, AiWord word, List<String> examples) {
+Widget buildExampleSwitchWidget(BuildContext context, GeminiState state, Word word, List<String> examples) {
   final textTheme = Theme
       .of(context)
       .textTheme;
@@ -375,11 +376,11 @@ Widget buildExampleSwitchWidget(BuildContext context, GeminiState state, AiWord 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
-        children: List.generate(word.example.length, (index) {
-          return _buildExampleContainer(context, word.example[index]);
+        children: List.generate(word.examples.length, (index) {
+          return _buildExampleContainer(context, word.examples[index]);
         }),
       );
-    case SingleAiWordFetchedState _ :
+    case AiWordSearchCompleteState _ :
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -397,8 +398,8 @@ Widget buildExampleSwitchWidget(BuildContext context, GeminiState state, AiWord 
           // ...List.generate(examples.length, (index) {
           //   return _buildExampleContainer(context, examples[index]);
           // }),
-          ...List.generate(word.example.length, (index) {
-            return _buildExampleContainer(context, word.example[index]);
+          ...List.generate(word.examples.length, (index) {
+            return _buildExampleContainer(context, word.examples[index]);
           }),
 
           ...List.generate(3, (index) {
