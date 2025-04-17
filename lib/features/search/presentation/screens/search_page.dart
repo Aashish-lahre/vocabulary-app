@@ -2,8 +2,7 @@ import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_improve_vocabulary/core/shared/error_widget.dart';
-import 'package:flutter_improve_vocabulary/core/screens/word_details_screen.dart';
-import 'package:flutter_improve_vocabulary/features/search/presentation/screens/searched_word_detail_screen.dart';
+import './searched_word_detail_screen.dart';
 import 'package:gap/gap.dart';
 
 import '../../../gemini_ai/bloc/gemini_bloc.dart';

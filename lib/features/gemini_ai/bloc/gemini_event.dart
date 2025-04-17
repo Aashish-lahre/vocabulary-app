@@ -4,8 +4,8 @@ sealed class GeminiEvent extends Equatable {
   const GeminiEvent();
 }
 
-/// event fired when user toggles the gemini AI switch in settings page to make
-/// to generate words using gemini AI.
+/// event fired when user toggles the gemini AI switch in settings page to
+/// generate words using gemini AI.
 final class ToggleGenerateWordsWithAiSwitchEvent extends GeminiEvent {
 
   final bool isOn;
@@ -18,10 +18,11 @@ final class ToggleGenerateWordsWithAiSwitchEvent extends GeminiEvent {
 
 }
 
-/// Initial event fired to fetch [noOfAiWordsToLoad] words from Gemini AI.
+/// event fired to fetch [noOfAiWordsToLoad] words from Gemini AI.
 final class LoadAiWordsEvent extends GeminiEvent {
 
   final int noOfAiWordsToLoad;
+  /// if autoLoad is true, we show the first word on the home screen, without requesting to fetch first word.
   final bool autoLoad;
   const LoadAiWordsEvent({required this.noOfAiWordsToLoad, required this.autoLoad});
 
@@ -30,6 +31,7 @@ final class LoadAiWordsEvent extends GeminiEvent {
 
 }
 
+/// event fired to load the next word from [allWords] list.
 final class LoadSingleAiWordInOrderEvent extends GeminiEvent {
   @override
   List<Object?> get props => [];
@@ -39,7 +41,7 @@ final class LoadSingleAiWordInOrderEvent extends GeminiEvent {
 
 
 
-/// Fetch single word from Gemini AI.
+/// event fired to search a [word] from Gemini AI.
 final class SearchWordWithAiEvent extends GeminiEvent {
 
   final String wordName;

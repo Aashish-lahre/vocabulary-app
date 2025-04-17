@@ -44,9 +44,7 @@ class _WordCardShimmerState extends State<WordCardShimmer> with SingleTickerProv
           children: [
 
             Gap(50),
-            // wordName and volume icon
             Row(
-              // mainAxisAlignment: MainAxisAlignment.start,
         
               mainAxisAlignment: MainAxisAlignment.start,
         
@@ -101,7 +99,6 @@ Widget _buildDefinitionContainer(BuildContext context, AnimationController anima
     child: Container(
       padding: EdgeInsets.all(8),
       margin: EdgeInsets.all(8),
-      // alignment: Alignment.center,
       decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.primary,
         borderRadius: BorderRadius.circular(10),

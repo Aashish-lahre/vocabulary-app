@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_improve_vocabulary/core/blocs/ViewSwitcherCubit/view_switcher_cubit.dart';
 import 'package:flutter_improve_vocabulary/features/gemini_ai/bloc/gemini_bloc.dart';
-import 'package:flutter_improve_vocabulary/core/blocs/later_word_fetch_bloc/later_word_fetch_bloc.dart';
 import 'package:flutter_improve_vocabulary/features/dictionary/bloc/word_bloc.dart';
 
 class DraggableSlider extends StatefulWidget {
@@ -17,23 +16,32 @@ class DraggableSlider extends StatefulWidget {
 }
 
 class _DraggableSliderState extends State<DraggableSlider> with SingleTickerProviderStateMixin {
+  // Global key to get the size and position of the card widget.
   final GlobalKey _widgetKey = GlobalKey();
+  // start offset of the drag
   Offset _startOffset = Offset.zero;
+  // end offset of the drag
   Offset _endOffset = Offset.zero;
+  // angle of the drag
   double _angle = 0;
+  // restore controller to restore the position of the card widget.
   late AnimationController _restoreController;
+  // screen size of the device
   late Size screenSize;
-  Size slideSize = Size.zero;
-  late Offset initialSlideTopLeftPosition;
-  late Offset initialSlideTopRightPosition;
+  // size of the card widget
+  Size  cardSize = Size.zero;
+
+  late Offset initialCardTopLeftPosition;
+  late Offset initialCardTopRightPosition;
+  // flag to check if the drag is enabled, used to prevent the drag when the card is at the last index.
   bool isEnableDrag = true;
   bool _isPanEndTriggered = false; // To prevent multiple manual panEnd triggers
 
 
-  // left limit to remove the magazine
+  // left limit to remove the card
   double get outSizeLimitLeft => -50;
 
-  // right limit to remove the magazine
+  // right limit to remove the card
   double get outSizeLimitRight => screenSize.width + 50;
 
   @override
@@ -43,9 +51,9 @@ class _DraggableSliderState extends State<DraggableSlider> with SingleTickerProv
       ..addListener(animationListener);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      getSlideSize();
-      getInitialSlideTopLeftGlobalPosition();
-      getInitialSlideTopRightGlobalPosition();
+      getCardSize();
+      getInitialCardTopLeftGlobalPosition();
+      getInitialCardTopRightGlobalPosition();
       screenSize = MediaQuery
           .of(context)
           .size;
@@ -62,32 +70,31 @@ class _DraggableSliderState extends State<DraggableSlider> with SingleTickerProv
   }
 
 
-  void getSlideSize() {
-    slideSize =
+  void getCardSize() {
+     cardSize =
         (_widgetKey.currentContext?.findRenderObject() as RenderBox?)?.size ??
             Size.zero;
   }
 
-  void getInitialSlideTopLeftGlobalPosition() {
+  void getInitialCardTopLeftGlobalPosition() {
     final renderBox = (_widgetKey.currentContext
         ?.findRenderObject() as RenderBox?);
-    initialSlideTopLeftPosition =
+    initialCardTopLeftPosition =
         renderBox?.localToGlobal(Offset.zero) ?? Offset.zero;
   }
 
-  void getInitialSlideTopRightGlobalPosition() {
+  void getInitialCardTopRightGlobalPosition() {
     final renderBox = (_widgetKey.currentContext
         ?.findRenderObject() as RenderBox?);
-    initialSlideTopRightPosition =
+    initialCardTopRightPosition =
         renderBox?.localToGlobal(Offset(renderBox.size.width, 0)) ??
             Offset.zero;
   }
 
   void animationListener() {
     if (_restoreController.isCompleted) {
-      print('restore animation completed');
-      // _fetchMoreWords();
-      // print('about to fetch words...');
+       
+
 
       setState(() {
         _restoreController.reset();
@@ -99,7 +106,7 @@ class _DraggableSliderState extends State<DraggableSlider> with SingleTickerProv
   }
 
 
-  Offset get getCurrentTopLeftPosition {
+  Offset get getCardCurrentTopLeftPosition {
     // 1. localToGlobal(Offset.zero) means widget's screen position of widgets top-left corner.
     // 2. localToGlobal(renderBox.size.center(Offset.zero)) means widget's screen position of widgets center.
     //    we use Offset.zero again because center(Offset) requires a reference point to calculate center point.
@@ -111,21 +118,21 @@ class _DraggableSliderState extends State<DraggableSlider> with SingleTickerProv
     return renderBox ?? Offset.zero;
   }
 
-  Offset get getCurrentTopRightPosition {
+  Offset get getCardCurrentTopRightPosition {
     final renderBox = (_widgetKey.currentContext
         ?.findRenderObject() as RenderBox?);
     return renderBox?.localToGlobal(Offset(renderBox.size.width, 0)) ??
         Offset.zero;
   }
 
-  Offset get getCurrentBottomLeftPosition {
+  Offset get getCardCurrentBottomLeftPosition {
     final renderBox = (_widgetKey.currentContext
         ?.findRenderObject() as RenderBox?);
     return renderBox?.localToGlobal(Offset(0, renderBox.size.height)) ??
         Offset.zero;
   }
 
-  Offset get getCurrentBottomRightPosition {
+  Offset get getCardCurrentBottomRightPosition {
     final renderBox = (_widgetKey.currentContext
         ?.findRenderObject() as RenderBox?);
     return renderBox?.localToGlobal(
@@ -134,19 +141,19 @@ class _DraggableSliderState extends State<DraggableSlider> with SingleTickerProv
 
 
   double get getAngle {
-    if (slideSize == Size.zero || screenSize == Size.zero) return 0;
+    if ( cardSize == Size.zero || screenSize == Size.zero) return 0;
 
-    double leftDx = getCurrentTopLeftPosition.dx;
-    double rightDx = getCurrentTopRightPosition.dx;
+    double leftDx = getCardCurrentTopLeftPosition.dx;
+    double rightDx = getCardCurrentTopRightPosition.dx;
 
-    // Calculate slide's center X position
-    double slideCenterDx = (leftDx + rightDx) / 2;
+    // Calculate card's center X position
+    double cardCenterDx = (leftDx + rightDx) / 2;
 
     // Get screen center X position
     double screenCenterDx = screenSize.width / 2;
 
     // Normalize the deviation (-1 to 1 range)
-    double normalizedDeviation = (slideCenterDx - screenCenterDx) /
+    double normalizedDeviation = (cardCenterDx - screenCenterDx) /
         screenCenterDx;
 
     // Max angle range (adjust as needed)
@@ -168,30 +175,32 @@ class _DraggableSliderState extends State<DraggableSlider> with SingleTickerProv
 
 
   void _fetchMoreWords() {
-print('fetch block started...');
+ 
     // is using Gemini AI to fetch words or no.
     if (context
         .read<GeminiBloc>()
         .isAiWordsGenerationOn) {
-print('ai is no...');
+ 
       if(context.read<GeminiBloc>().state.runtimeType != AiWordsLoadingState) {
 
-print('loading more ai words....');
+ 
         context.read<GeminiBloc>().add(LoadAiWordsEvent(autoLoad: false, noOfAiWordsToLoad: context
-            .read<LaterWordFetchBloc>()
-            .laterWordFetchLimit));
+            .read<WordBloc>()
+            .moreWordFetchLimit));
         context.read<ViewSwitcherCubit>().changeViewMode(ViewMode.geminiAi);
       }
 
 
     } else {
-print('ai is off');
-      if(context.read<WordBloc>().state.runtimeType != LaterWordsLoading) {
+        // fetching words from dictionary api.
+      if(context.read<WordBloc>().state.runtimeType != WordsLoadingState) {
 
-print('loading more api words...');
-        context.read<WordBloc>().add(LaterLoadWords(noOfWordsToLoad: context
-            .read<LaterWordFetchBloc>()
-            .laterWordFetchLimit));
+ 
+        context.read<WordBloc>().add(LoadWords(
+          autoLoad: false,
+          noOfWordToSearch: context
+            .read<WordBloc>()
+            .moreWordFetchLimit));
         context.read<ViewSwitcherCubit>().changeViewMode(ViewMode.dictionaryApi);
       }
 
@@ -201,13 +210,13 @@ print('loading more api words...');
 
   void restorePosition() {
     if (_restoreController.isAnimating) return;
-    print('restoring start....');
+     
     _restoreController.forward();
   }
 
   void handleSlideOut(
       {required double angle, required Offset endOffset, required Offset startOffset, required int direction}) {
-    print('called slide out');
+     
     // provided angle is in radians, converting to degree
     widget.slideOut(angleInDegree: radiansToDegrees(angle),
         endOffset: endOffset,
@@ -215,15 +224,15 @@ print('loading more api words...');
         direction: direction);
   }
 
-
+  // current mode = Gemini AI or Dictionary API.
   int getCurrentModeWordIndex() {
     if(context.read<ViewSwitcherCubit>().viewMode == ViewMode.dictionaryApi) {
-      print('viewMode : dictionary');
+       
       return context
           .read<WordBloc>()
           .wordIndex;
     } else {
-      print('viewMode : gemini');
+       
       return context
           .read<GeminiBloc>()
           .wordIndex;
@@ -249,102 +258,147 @@ print('loading more api words...');
 
     int currentIndex = getCurrentModeWordIndex();
     int allWordsLength = getCurrentModeWordsLength();
-    print('currentIndex : $currentIndex');
-    print('allWordsLength : $allWordsLength');
+     
+     
 
     setState(() {
+      // if the current index is not the last index(means there are more words to load in the home screen), then enable the drag.
       isEnableDrag = currentIndex != allWordsLength - 1;
-      print('isEnableDrag : $isEnableDrag');
+       
       _startOffset = details.localPosition;
       _isPanEndTriggered = false;
     });
   }
 
   void onPanUpdate(DragUpdateDetails details) {
+    // Don't process updates if a restore animation is currently running
     if (_restoreController.isAnimating) return;
+
+    // This block handles the case when we're at the last card (dragging is disabled)
     if (!isEnableDrag) {
-      if (_isPanEndTriggered != true) {
-        if (getCurrentTopLeftPosition.dx <= 0 ||
-            getCurrentBottomLeftPosition.dx <= 0) {
-          // Moving left (prevent going beyond the left screen boundary)
-          setState(() {
-            _isPanEndTriggered = true;
-          });
-          print('restoring position about to called');
-          restorePosition();
-          _fetchMoreWords();
 
-          return;
+
+
+
+
+        // PROTECTION MECHANISM:
+        // This flag prevents multiple animations and word fetches from triggering
+        // when the card hits screen boundaries. Without this, rapid successive
+        // onPanUpdate calls could cause visual glitches and state inconsistencies.
+
+// Without _isPanEndTriggered Flag:
+// User Drags → Hit Boundary → onPanUpdate
+//                          → restore animation starts
+//                          → fetch words starts
+//                          → onPanUpdate (again)
+//                          → another restore animation tries to start
+//                          → another fetch words starts
+//                          → [VISUAL GLITCHES]
+
+
+// With _isPanEndTriggered Flag:
+// User Drags → Hit Boundary → onPanUpdate
+//                          → _isPanEndTriggered = false
+//                          → restore animation starts
+//                          → fetch words starts
+//                          → _isPanEndTriggered = true
+//                          → onPanUpdate (again)
+//                          → [Blocked by flag ✓]
+//                          → [SMOOTH ANIMATION]
+
+
+
+        if (_isPanEndTriggered != true) {
+            // LEFT BOUNDARY CHECK
+            if (getCardCurrentTopLeftPosition.dx <= 0 ||
+                getCardCurrentBottomLeftPosition.dx <= 0) {
+                // When card hits the left boundary:
+                // 1. Mark that we've handled this boundary hit
+                // 2. Restore card to center
+                // 3. Load more words
+                setState(() {
+                    _isPanEndTriggered = true;
+                });
+                restorePosition();
+                _fetchMoreWords();
+                return;
+            }
+
+            // RIGHT BOUNDARY CHECK
+            if (getCardCurrentTopRightPosition.dx >= screenSize.width ||
+                getCardCurrentBottomRightPosition.dx >= screenSize.height) {
+                // Same protection mechanism for right boundary
+                setState(() {
+                    _isPanEndTriggered = true;
+                });
+                restorePosition();
+                _fetchMoreWords();
+                return;
+            }
+
+            // TOP BOUNDARY CHECK
+            if (getCardCurrentTopLeftPosition.dy <= 0 ||
+                getCardCurrentTopRightPosition.dy <= 0) {
+                // Same protection mechanism for top boundary
+                setState(() {
+                    _isPanEndTriggered = true;
+                });
+                restorePosition();
+                _fetchMoreWords();
+                return;
+            }
+
+            // BOTTOM BOUNDARY CHECK
+            if (getCardCurrentBottomLeftPosition.dy >= screenSize.height ||
+                getCardCurrentBottomRightPosition.dy >= screenSize.height) {
+                // Same protection mechanism for bottom boundary
+                setState(() {
+                    _isPanEndTriggered = true;
+                });
+                restorePosition();
+                _fetchMoreWords();
+                return;
+            }
+        } else {
+            // If we've already handled a boundary hit, ignore further pan updates
+            // This prevents multiple animations from conflicting with each other
+            return;
         }
-
-        if (getCurrentTopRightPosition.dx >= screenSize.width ||
-            getCurrentBottomRightPosition.dx >= screenSize.height) {
-          // Moving right (prevent going beyond the right screen boundary)
-          setState(() {
-            _isPanEndTriggered = true;
-          });
-          restorePosition();
-          _fetchMoreWords();
-
-
-          return;
-        }
-
-        if (getCurrentTopLeftPosition.dy <= 0 ||
-            getCurrentTopRightPosition.dy <= 0) {
-          // Moving top (prevent going beyond the top screen boundary)
-          setState(() {
-            _isPanEndTriggered = true;
-          });
-          restorePosition();
-          _fetchMoreWords();
-
-          return;
-        }
-
-        if (getCurrentBottomLeftPosition.dy >= screenSize.height ||
-            getCurrentBottomRightPosition.dy >= screenSize.height) {
-          // Moving bottom (prevent going beyond the bottom screen boundary)
-          setState(() {
-            _isPanEndTriggered = true;
-          });
-          restorePosition();
-          _fetchMoreWords();
-
-          return;
-        }
-      } else {
-        print('returned');
-        return;
-      }
     }
-      // print('isEnableDrag = true, not entered');
 
-      setState(() {
+    // Normal dragging behavior when not at the last card:
+    // Update the card's position and rotation based on the drag movement
+    setState(() {
         _endOffset = details.localPosition - _startOffset;
-        // _endOffset = details.globalPosition - _startOffset;
-
         _angle = getAngle;
-      });
-
-
+    });
   }
 
   void onPanEnd(DragEndDetails end) {
-    print('onPanEnd');
+     
     if (_restoreController.isAnimating) return;
+
+
+    // SCENARIO HANDLING:
+    // Scenario 1 (Normal Swipe): _isPanEndTriggered is false
+    //   → Process the natural swipe animation
+    //   → Card can slide out or restore based on position
+    //
+    // Scenario 2 (Boundary Hit): _isPanEndTriggered is true
+    //   → Skip this entirely as animation is already handled
+    //   → Prevents conflict with boundary hit animation
     if (!_isPanEndTriggered) {
-      double leftX = getCurrentTopLeftPosition.dx;
-      double rightX = getCurrentTopRightPosition.dx;
+      double leftX = getCardCurrentTopLeftPosition.dx;
+      double rightX = getCardCurrentTopRightPosition.dx;
 
       if (leftX < outSizeLimitLeft) {
-        // Entire widget has moved past the left limit
+        // Card has moved past the left limit
         handleSlideOut(angle: getAngle,
             endOffset: _endOffset,
             startOffset: _startOffset,
             direction: -1);
       } else if (rightX > outSizeLimitRight) {
-        // Entire widget has moved past the right limit
+        // Card has moved past the right limit
         handleSlideOut(angle: getAngle,
             endOffset: _endOffset,
             startOffset: _startOffset,
@@ -357,8 +411,6 @@ print('loading more api words...');
       });
     }
 
-
-    // restorePosition();
   }
 
 
@@ -374,7 +426,7 @@ print('loading more api words...');
             animation: _restoreController,
             builder: (context, _) {
               final value = 1 - _restoreController.value;
-              print('value of restore animation : $value');
+               
               return Transform.translate(
                   offset: _endOffset * value,
                   child: Transform.rotate(

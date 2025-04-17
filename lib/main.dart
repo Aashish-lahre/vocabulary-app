@@ -17,6 +17,7 @@ import 'app/app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // This is to prevent the font from being fetched from the internet.
   GoogleFonts.config.allowRuntimeFetching = false;
   HydratedBloc.storage = await HydratedStorage.build(
     storageDirectory: kIsWeb
@@ -30,7 +31,6 @@ void main() async {
   bool isAiWordsGenerationOn = await GeminiStatusStorage.instance.getGeminiStatus;
 
   runApp(VocabularyApp(wordFetchLimit, themeType, isAiWordsGenerationOn));
-  // runApp(MaterialApp(home: SearchPage(),));
 
 }
 

@@ -96,7 +96,6 @@ Widget _buildSynonyms(BuildContext context, List<String> synonyms, Word word) {
                 ElevatedButton(
                   style: ButtonStyle(shape: WidgetStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)))),
                   onPressed: () {
-                    print('limit : ${(synonymsLimit - synonyms.length)}');
                     context.read<GeminiBloc>().add(LoadSynonymsEvent(word: word, limit: (synonymsLimit - synonyms.length), filterOut: synonyms));
 
                   },
@@ -154,7 +153,6 @@ Widget buildSynonymsSwitchWidget(BuildContext context, Word word, int synonymsLi
         spacing: 20,
         alignment: WrapAlignment.start,
         children: List.generate((word.synonyms.length), (index) {
-          print('synonyms count : $index');
           return ElevatedButton(
               onPressed: () {}, child: Text(word.synonyms[index]));
         }),

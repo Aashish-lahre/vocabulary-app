@@ -5,21 +5,45 @@ sealed class WordState extends Equatable {
 }
 
 final class WordInitial extends WordState {
+
+  final int moreWordFetchLimit;
+
+  const WordInitial({required this.moreWordFetchLimit});
+
   @override
-  List<Object> get props => [];
+  List<Object> get props => [moreWordFetchLimit];
 }
 
 
-// In Dart, a final class is a class that cannot be extended (inherited)
-// by other classes. This means that other classes cannot create subclasses from it.
-
-final class WordLoadingState extends WordState {
+// State when initial and more words are being loaded
+final class WordsLoadingState extends WordState {
   @override
-  // TODO: implement props
   List<Object?> get props => [];
 
 }
 
+
+
+final class WordsLoadingSuccessState extends WordState {
+  @override
+  List<Object?> get props => [];
+
+}
+
+
+final class MoreWordsLoadingState extends WordState {
+  @override
+  List<Object?> get props => [];
+}
+
+
+final class MoreWordsLoadingSuccessState extends WordState {
+  @override
+  List<Object?> get props => [];
+}
+
+
+// State when a single word is successfully loaded via search
 final class WordSearchLoadSuccess extends WordState {
 
   final Word word;
@@ -33,6 +57,15 @@ final class WordSearchLoadSuccess extends WordState {
 }
 
 
+
+// State when a single word is being loaded via search
+final class WordSearchLoadingState extends WordState {
+  @override
+  List<Object?> get props => [];
+}
+
+
+// State when a single word is requested to show in the UI(Home Screen) from the allWords list.
 final class FetchedSingleWordState extends WordState {
 
   final Word word;
@@ -46,6 +79,8 @@ final class FetchedSingleWordState extends WordState {
 
 }
 
+
+// State when no more words are available to load from the allWords list. User swiped all the words. now must fetch more words from the API.
 final class NoMoreWordAvailableState extends WordState {
   @override
   List<Object?> get props => [];
@@ -53,20 +88,7 @@ final class NoMoreWordAvailableState extends WordState {
 }
 
 
-final class LaterWordsLoading extends WordState {
-
-  @override
-  List<Object?> get props => [];
-
-}
-
-final class LaterWordsLoadingSuccess extends WordState {
-
-  @override
-  List<Object?> get props => [];
-
-}
-
+// State when the word is not found in the dictionary API
 final class WordSearchUnavailabilityState extends WordState {
   @override
 
@@ -74,7 +96,7 @@ final class WordSearchUnavailabilityState extends WordState {
 
 }
 
-
+// State when the internet connection is lost while fetching words from the dictionary API
 final class InternetFailureState extends WordState {
 
   final int wordNotSearched;
@@ -88,29 +110,20 @@ final class InternetFailureState extends WordState {
 
 }
 
-final class HomeErrorScreenState extends WordState {
-  final HomeErrorType homeErrorType;
-
-  const HomeErrorScreenState({required this.homeErrorType});
-
-  @override
-  // TODO: implement props
-  List<Object?> get props => [homeErrorType];
 
 
-}
 
-final class GeminiFailureWordState extends WordState {
+final class MoreWordsFetchLimitChangedState extends WordState {
+  final int changedLimit;
 
-  final String errorMessage;
-
-  const GeminiFailureWordState({required this.errorMessage});
+  const MoreWordsFetchLimitChangedState({required this.changedLimit});
 
   @override
-  List<Object?> get props => [errorMessage];
-
+  List<Object?> get props => [changedLimit];
 }
 
+
+// State when an unexpected error occurs while fetching words from the dictionary API
 final class UnexpectedState extends WordState {
   final String errorMessage;
 
@@ -119,6 +132,7 @@ final class UnexpectedState extends WordState {
   List<Object?> get props => [errorMessage];
 }
 
+// State when partial data is fetched from the dictionary API
 final class PartialDataState extends WordState {
 
   final int wordFailedCount;

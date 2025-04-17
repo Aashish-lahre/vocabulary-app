@@ -215,28 +215,8 @@ Result<Word, GeminiError> processResponseForWord(String text) {
   try {
     // Attempt to parse JSON
     final jsonData = jsonDecode(text)  as Map<String, dynamic>;
-    // final jsonData = jsonDecode(text)  as dynamic;
 
-    // Ensure jsonData is a List
-    // if (jsonData is! List) {
-    //   return Result(
-    //     failure: GeminiResponseFormatException(
-    //       errorMessage: 'Expected a JSON array but got ${jsonData.runtimeType}.',
-    //     ),
-    //   );
-    // }
 
-    // Ensure every item in the list is a Map<String, dynamic>
-    // final condition = !(jsonData is Map<String, dynamic>);
-    // if (condition) {
-    //   return Result(
-    //     failure: GeminiResponseFormatException(
-    //       errorMessage: 'List contains non-object elements.',
-    //     ),
-    //   );
-    // }
-
-    print(jsonData);
 
     // Parse all items into Word objects
     final Word word = Word.fromJson(jsonData);

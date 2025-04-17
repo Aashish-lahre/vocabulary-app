@@ -12,7 +12,6 @@ part of 'internet_bloc.dart';
       );
 
   @override
-  // TODO: implement props
   List<Object?> get props => [status];
 }
 

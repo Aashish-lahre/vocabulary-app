@@ -22,7 +22,7 @@ final class AiWordsSwitchChangedState extends GeminiState {
 }
 
 
-/// loading state for initial words fetch.
+/// state emitted when Gemini AI is loading words.
 final class AiWordsLoadingState extends GeminiState {
   @override
   List<Object?> get props => [];
@@ -30,7 +30,7 @@ final class AiWordsLoadingState extends GeminiState {
 }
 
 
-/// loaded state for initial words fetch, brings list of Words
+/// state emitted when Gemini AI loads words successfully. also contains the list of words.
 final class AiWordsLoadedState extends GeminiState {
 
   final List<Word> words;
@@ -43,6 +43,7 @@ final class AiWordsLoadedState extends GeminiState {
 }
 
 
+/// state emitted when requested to fetch a single word to show on the home screen from the allWords list.
 final class SingleAiWordFetchState extends GeminiState {
 
   final Word word;
@@ -67,6 +68,7 @@ final class AiWordSearchCompleteState extends GeminiState {
 }
 
 
+/// state emitted when Gemini AI is searching for a word.
 final class AiWordSearchingState extends GeminiState {
 
 
@@ -108,7 +110,7 @@ final class GeminiSingleWordLoadFailureState extends GeminiState {
 }
 
 
-/// state emitted when i swiped out all the Words from screen.
+/// state emitted when user swiped out all the Words from screen.
 final class NoMoreAiWordsAvailableState extends GeminiState {
   @override
   List<Object?> get props => [];
@@ -116,6 +118,7 @@ final class NoMoreAiWordsAvailableState extends GeminiState {
 }
 
 
+/// state emitted when Gemini AI is loading examples for a word.
 final class ExamplesLoadingState extends GeminiState {
 
   @override
@@ -124,6 +127,7 @@ final class ExamplesLoadingState extends GeminiState {
 }
 
 
+/// state emitted when Gemini AI loads examples for a word successfully.
 final class ExamplesLoadedState extends GeminiState {
 
   final Word word;
@@ -137,12 +141,14 @@ final class ExamplesLoadedState extends GeminiState {
 }
 
 
+/// state emitted when Gemini AI is loading synonyms for a word.
 final class SynonymsLoadingState extends GeminiState {
   @override
   List<Object?> get props => [];
 }
 
 
+/// state emitted when Gemini AI loads synonyms for a word successfully.
 final class SynonymsLoadedState extends GeminiState {
   final Word word;
 
@@ -154,12 +160,13 @@ final class SynonymsLoadedState extends GeminiState {
 }
 
 
-
+/// state emitted when Gemini AI is loading antonyms for a word.
 final class AntonymsLoadingState extends GeminiState {
   @override
   List<Object?> get props => [];
 }
 
+/// state emitted when Gemini AI loads antonyms for a word successfully.
 final class AntonymsLoadedState extends GeminiState {
   final Word word;
   final List<String> antonyms;

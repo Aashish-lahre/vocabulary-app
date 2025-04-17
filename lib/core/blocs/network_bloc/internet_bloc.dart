@@ -21,6 +21,9 @@ class InternetBloc extends Bloc<InternetEvent, InternetState> {
         add(InternetStatusChanged(isConnected: false));
       }
 
+
+      /// when app starts and connection is true, we do not emit event.
+      /// we only do it when connection is false and then becomes true.
       else if(result.contains(ConnectivityResult.mobile) && _internetConnectionChanged > 0) {
         add(InternetStatusChanged(isConnected: true));
       }

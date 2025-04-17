@@ -20,20 +20,17 @@ class ViewSwitcherCubit extends Cubit<ViewSwitcherState> {
   ViewSwitcherCubit( this.viewMode) : super(ViewSwitcherInitial(mode: viewMode));
 
 
-
+  // changeViewMode is used to represent from where we are featching the data. i.e. Gemini AI or Dictionary API.
   void changeViewMode(ViewMode newMode) {
-    // if(newMode == viewMode) return;
     viewMode = newMode;
-    print('viewMode changed = $viewMode');
 
     emit(ViewModeChanged(mode: newMode));
   }
 
+  // updateViewMode handles the change in BlocConsumer in home_screen.
   void updateViewMode(ViewMode newMode) {
-    // if(newMode == viewMode) return;
 
     viewMode = newMode;
-    print('viewMode updated : $viewMode');
     emit(ViewModeUpdate(mode: newMode));
   }
 }

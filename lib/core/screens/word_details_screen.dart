@@ -26,7 +26,7 @@ class _WordDetailsScreenState extends State<WordDetailsScreen> {
           children: [
 
             Gap(50),
-            // WordName and definition
+            
             TitleWidget(wordName: widget.word.wordName),
 
             BannerWidget(type: widget.bannerName),

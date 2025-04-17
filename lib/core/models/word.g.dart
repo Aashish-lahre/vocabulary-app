@@ -22,11 +22,4 @@ Word _$WordFromJson(Map<String, dynamic> json) => Word(
           (json['examples'] as List<dynamic>).map((e) => e as String).toList(),
     );
 
-Map<String, dynamic> _$WordToJson(Word instance) => <String, dynamic>{
-      'wordName': instance.wordName,
-      'partsOfSpeech': instance.partsOfSpeech,
-      'definitions': instance.definitions,
-      'synonyms': instance.synonyms,
-      'antonyms': instance.antonyms,
-      'examples': instance.examples,
-    };
+

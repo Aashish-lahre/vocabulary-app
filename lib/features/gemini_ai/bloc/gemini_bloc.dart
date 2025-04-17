@@ -31,13 +31,6 @@ class GeminiBloc extends Bloc<GeminiEvent, GeminiState> {
     };
   }
 
-  // String getWordName(BaseWord word) {
-  //   return switch(word) {
-  //   // Word _ => word.word,
-  //   AiWord _ => word.wordName,
-  //   _ =>  throw UnimplementedError('Unknown subclass of BaseWord'),
-  //   };
-  // }
 
 
 
@@ -50,7 +43,7 @@ class GeminiBloc extends Bloc<GeminiEvent, GeminiState> {
       apiKey: apiKey,
 
     );
-
+    /// event fired when user toggles the gemini AI switch in settings page to generate words using Gemini AI.
     on<ToggleGenerateWordsWithAiSwitchEvent>((event, emit) {
       isAiWordsGenerationOn = event.isOn;
       GeminiStatusStorage.instance.changeGeminiStatus(isAiWordsGenerationOn);
@@ -64,11 +57,9 @@ class GeminiBloc extends Bloc<GeminiEvent, GeminiState> {
           allWords.addAll(response.data!);
           emit(AiWordsLoadedState(words: response.data!));
           if(event.autoLoad) {
-            print('GeminiBloc event autoLoad');
 
             emit(SingleAiWordFetchState(word: allWords[wordIndex]));
           } else {
-            print('GeminiBloc event not autoLoad');
 
             if(wordIndex == 0) {
               wordIndex = -1;
@@ -177,21 +168,4 @@ class GeminiBloc extends Bloc<GeminiEvent, GeminiState> {
 
   }
 
-  // void _mapFailuresToStates(GeminiError failure, Emitter<GeminiState> emit) {
-  //   switch(failure) {
-  //     case GeminiGenerativeAiException _:
-  //       emit(InternetFailureState(wordRetrived: failure.wordsRetrieved, wordNotSearched: failure.wordsNotSearched, wordSkipped: failure.wordsSkipped));
-  //       break;
-  //     case WordNotFoundFailure _:
-  //       emit(WordSearchUnavailabilityState());
-  //       break;
-  //     case PartialDataFailure _:
-  //       emit(PartialDataState(wordFailedCount: failure.failedWordsCount, wordFetchedCount: failure.fetchedWordCount));
-  //       break;
-  //     case UnexpectedFailure _:
-  //
-  //       emit(UnexpectedState(errorMessage: failure.errorMessage));
-  //       break;
-  //   }
-  // }
 }

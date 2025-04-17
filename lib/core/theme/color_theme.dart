@@ -155,10 +155,12 @@ AppTheme dark = AppTheme(
     onInverseSurface: Color(0xFF2F3036),
     inversePrimary: Color(0xFF485D92),
     surfaceTint: Color(0xFFB1C5FF),
-  ),);
+  ),
+  );
 
 
-AppTheme pinkSakura = AppTheme(colorScheme: ColorScheme(
+AppTheme pinkSakura = AppTheme(
+  colorScheme: ColorScheme(
   brightness: Brightness.dark,
   primary: Color(0xFFFFB1C0),
   onPrimary: Color(0xFF551D2C),
@@ -206,7 +208,11 @@ AppTheme pinkSakura = AppTheme(colorScheme: ColorScheme(
   onInverseSurface: Color(0xFF382E2F),
   inversePrimary: Color(0xFF8D4959),
   surfaceTint: Color(0xFFFFB1C0),
-));
+),
+);
+
+
+
 AppTheme jangle = AppTheme(colorScheme: ColorScheme(
       brightness: Brightness.light,
       primary: Color(0xFF3A693B),
@@ -255,7 +261,11 @@ AppTheme jangle = AppTheme(colorScheme: ColorScheme(
       onInverseSurface: Color(0xFFEEF2E9),
       inversePrimary: Color(0xFFA0D49B),
       surfaceTint: Color(0xFF3A693B),
-    ));
+    ),
+    );
+
+
+
 AppTheme darkPurple = AppTheme(colorScheme: ColorScheme(
   brightness: Brightness.dark,
   primary: Color(0xFFCCBEFF),
@@ -304,7 +314,8 @@ AppTheme darkPurple = AppTheme(colorScheme: ColorScheme(
   onInverseSurface: Color(0xFF312F35),
   inversePrimary: Color(0xFF625690),
   surfaceTint: Color(0xFFCCBEFF),
-));
+),
+);
 
 
 

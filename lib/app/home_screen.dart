@@ -1,28 +1,23 @@
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_improve_vocabulary/core/blocs/ViewSwitcherCubit/view_switcher_cubit.dart';
-import 'package:flutter_improve_vocabulary/core/error/screen/home_error_screen.dart';
-import 'package:flutter_improve_vocabulary/features/gemini_ai/bloc/gemini_bloc.dart';
-import 'package:flutter_improve_vocabulary/core/shared/word_card.dart';
-import 'package:flutter_improve_vocabulary/app/home_error_types_enum.dart';
-import 'package:flutter_improve_vocabulary/features/search/presentation/screens/search_page.dart';
-import 'package:flutter_improve_vocabulary/core/shared/loading_widget.dart';
 
-import 'package:flutter_improve_vocabulary/features/settings/presentation/screens/settings.dart';
-
+import '../core/blocs/ViewSwitcherCubit/view_switcher_cubit.dart';
+import '../core/error/screen/home_error_screen.dart';
+import '../features/gemini_ai/bloc/gemini_bloc.dart';
+import '../core/shared/word_card.dart';
+import './home_error_types_enum.dart';
+import '../features/search/presentation/screens/search_page.dart';
+import '../features/settings/presentation/screens/settings.dart';
 import '../core/blocs/network_bloc/internet_bloc.dart';
 import '../core/shared/error_widget.dart';
 import '../core/shared/card_widgets/word_slider.dart';
 import '../core/shared/word_card_shimmer.dart';
 import '../features/dictionary/bloc/word_bloc.dart';
 import '../core/utility/above_banner.dart';
-import '../core/blocs/later_word_fetch_bloc/later_word_fetch_bloc.dart';
 
 class HomeScreen extends StatefulWidget {
-  final int initialWordFetchLimit;
-
-  const HomeScreen({required this.initialWordFetchLimit, super.key});
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -31,28 +26,32 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
+    // Initialize word loading based on the selected mode (AI or Dictionary API)
     final isAiWordGenerationIsOn =
         context.read<GeminiBloc>().isAiWordsGenerationOn;
+
+    int moreWordFetchLimit = context.read<WordBloc>().moreWordFetchLimit;
+
+    // Load initial words based on the selected mode
     if (isAiWordGenerationIsOn) {
-      context.read<GeminiBloc>().add(
-          LoadAiWordsEvent(noOfAiWordsToLoad: widget.initialWordFetchLimit, autoLoad: true));
+      context.read<GeminiBloc>().add(LoadAiWordsEvent(
+          noOfAiWordsToLoad: moreWordFetchLimit, autoLoad: true));
     } else {
       context
           .read<WordBloc>()
-          .add(LoadWords(noOfWordToSearch: widget.initialWordFetchLimit, autoLoad: true));
+          .add(LoadWords(noOfWordToSearch: moreWordFetchLimit, autoLoad: true));
     }
     super.initState();
   }
 
   @override
-  Widget build(BuildContext homeContext)  {
+  Widget build(BuildContext homeContext) {
     return Scaffold(
       body: Builder(
         builder: (scaffoldContext) {
           return SizedBox.expand(
-            child: MultiBlocListener(
-              listeners: [
-                BlocListener<InternetBloc, InternetState>(
+           // Listen for internet connectivity changes and show appropriate messages
+            child: BlocListener<InternetBloc, InternetState>(
                   listener: (context, state) {
                     String title = state.status ? 'Hooray!' : 'Oh Snap!';
                     String message = state.status
@@ -67,327 +66,274 @@ class _HomeScreenState extends State<HomeScreen> {
                         message: message,
                         contentType: contentType);
                   },
-                ),
-
-              ],
-              child:
-              BlocBuilder<ViewSwitcherCubit, ViewSwitcherState>(
-                buildWhen: (previousState, currentState) {
+            
+              // ViewSwitcherCubit manages switching between Dictionary API and Gemini AI modes
+              child: BlocBuilder<ViewSwitcherCubit, ViewSwitcherState>(
+                buildWhen: (_, currentState) {
                   return (currentState is! ViewModeChanged);
                 },
-  builder: (context, viewState) {
-                  print('viewSwitcher state : ${viewState.runtimeType}');
-                  print('viewSwitcher state mode : ${viewState.mode}');
-    return
-      IndexedStack(
-                index: viewState.mode.value,
-                children: [
-      //             viewState.mode == ViewMode.dictionaryApi ?
-                  BlocConsumer<WordBloc, WordState>(
-                    listener: (context, state) {
-                      if (state is NoMoreWordAvailableState) {
-                        context
-                            .read<WordBloc>()
-                            .add(LaterLoadWords(noOfWordsToLoad: 5));
-                      }
+                builder: (context, viewState) {
+                  // IndexedStack to switch between Dictionary API and Gemini AI views
+                  return IndexedStack(
+                    index: viewState.mode.value,
+                    children: [
+                      // Dictionary API Word Display
+                      BlocConsumer<WordBloc, WordState>(
+                        listener: (context, state) {
+                          if (state is NoMoreWordAvailableState) {
+                            context.read<WordBloc>().add(LoadWords(
+                                noOfWordToSearch:
+                                    context.read<WordBloc>().moreWordFetchLimit,
+                                autoLoad: true));
+                          }
 
-                      if (state is LaterWordsLoading) {
-                        String message = 'Loading more words.';
-                        ContentType contentType = ContentType.help;
+                          if (state is MoreWordsLoadingState) {
+                            String message = 'Loading words.';
+                            ContentType contentType = ContentType.help;
 
-                        showOverlayBanner(scaffoldContext,
-                            message: message,
-                            contentType: contentType);
-                      }
+                            showOverlayBanner(scaffoldContext,
+                                message: message, contentType: contentType);
+                          }
 
-                      if (state is LaterWordsLoadingSuccess) {
-                        String message = 'Loaded more words.';
-                        ContentType contentType = ContentType.success;
+                          if (state is MoreWordsLoadingSuccessState) {
+                            String message = 'Loaded more words.';
+                            ContentType contentType = ContentType.success;
 
-                        showOverlayBanner(scaffoldContext,
-                            message: message,
-                            contentType: contentType);
-                      }
+                            showOverlayBanner(scaffoldContext,
+                                message: message, contentType: contentType);
+                          }
 
-                      if (state is PartialDataState) {
-                        String message =
-                            'Only ${state.wordFetchedCount} words loaded.';
-                        ContentType contentType = ContentType.warning;
+                          if (state is PartialDataState) {
+                            String message =
+                                'Only ${state.wordFetchedCount} words loaded.';
+                            ContentType contentType = ContentType.warning;
 
-                        showOverlayBanner(scaffoldContext,
-                            message: message,
-                            contentType: contentType);
-                      }
+                            showOverlayBanner(scaffoldContext,
+                                message: message, contentType: contentType);
+                          }
 
-                      if (state is UnexpectedState) {
-                        String errorMessage =
-                            'Unexpected Error Occurred : ${state.errorMessage}';
-                        final ({
-                        String errorMessage,
-                        HomeErrorType homeErrorType
-                        }) errorData = (
-                        errorMessage: errorMessage,
-                        homeErrorType: HomeErrorType.unexpected
-                        );
-                        Navigator.of(context).pushReplacement(MaterialPageRoute(
-                            builder: (_) =>
-                                HomeErrorScreen(errorData: errorData)));
-                      }
+                          if (state is UnexpectedState) {
+                            String errorMessage =
+                                'Unexpected Error Occurred : ${state.errorMessage}';
+                            final ({
+                              String errorMessage,
+                              HomeErrorType homeErrorType
+                            }) errorData = (
+                              errorMessage: errorMessage,
+                              homeErrorType: HomeErrorType.unexpected
+                            );
+                            Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(
+                                    builder: (_) =>
+                                        HomeErrorScreen(errorData: errorData)));
+                          }
 
-                      if (state is InternetFailureState) {
+                          if (state is InternetFailureState) {
+                            ContentType contentType = ContentType.failure;
+                            late String message;
 
-                        ContentType contentType = ContentType.failure;
-                        late String message;
+                            if (state.wordNotSearched == 0 ||
+                                state.wordRetrived == 0) {
+                              message = 'No Internet Connection.';
+                            } else {
+                              message =
+                                  'Only ${state.wordRetrived} words loaded. No Internet Connection.';
+                            }
 
-                        if (state.wordNotSearched == 0 ||
-                            state.wordRetrived == 0) {
-                          message = 'No Internet Connection.';
-                        } else {
-                          message =
-                          'Only ${state.wordRetrived} words loaded. No Internet Connection.';
-                        }
+                            showOverlayBanner(
+                              scaffoldContext,
+                              message: message,
+                              contentType: contentType,
+                            );
+                          }
+                        },
+                        listenWhen: (previousState, currentState) {
+                          return (previousState != currentState) &&
+                              [
+                                NoMoreWordAvailableState,
+                                MoreWordsLoadingState,
+                                MoreWordsLoadingSuccessState,
+                                PartialDataState,
+                                UnexpectedState,
+                                InternetFailureState,
+                              ].contains(currentState.runtimeType);
+                        },
+                        buildWhen: (previousState, currentState) {
+                          bool flag = false;
+                          if (currentState is InternetFailureState) {
+                            if (context.read<WordBloc>().allWords.isEmpty) {
+                              flag = true;
+                            }
+                          }
 
-                        showOverlayBanner(
-                          scaffoldContext,
-                          message: message,
-                          contentType: contentType,
-                        );
-                      }
+                          return flag ||
+                              [
+                                WordInitial,
+                                WordsLoadingState,
+                                FetchedSingleWordState,
+                              ].contains(currentState.runtimeType);
+                        },
+                        builder: (context, state) {
+                          switch (state) {
+                            case WordInitial():
+                            case WordsLoadingState():
+                              return Padding(
+                                padding:
+                                    const EdgeInsets.fromLTRB(30, 50, 30, 50),
+                                child: WordCardShimmer(),
+                              );
+                            case FetchedSingleWordState():
+                              return Padding(
+                                padding:
+                                    const EdgeInsets.fromLTRB(30, 50, 30, 50),
+                                child: Container(
+                                  color: Colors.transparent,
+                                  child: WordSlider(
+                                      key: UniqueKey(),
+                                      wordWidget: WordCard(
+                                        word: state.word,
+                                        bannerName:
+                                            'Dictionary API Generated Word.',
+                                      )),
+                                ),
+                              );
+                            case InternetFailureState():
+                              ElevatedButton button = ElevatedButton(
+                                  onPressed: () => context.read<WordBloc>().add(
+                                      LoadWords(
+                                          noOfWordToSearch: context
+                                              .read<WordBloc>()
+                                              .moreWordFetchLimit,
+                                          autoLoad: true)),
+                                  child: Text('Retry'));
+                              return Positioned.fill(
+                                  child: errorWidget(context,
+                                      'No Internet Connection', button));
 
-                      if (state is HomeErrorScreenState) {
-                        String errorMessage =
-                        state.homeErrorType == HomeErrorType.internet
-                            ? 'No Internet Connection'
-                            : 'Unexpected Error Occurred';
-                        final ({
-                        String errorMessage,
-                        HomeErrorType homeErrorType
-                        }) errorData = (
-                        errorMessage: errorMessage,
-                        homeErrorType: state.homeErrorType
-                        );
-                        // WidgetsBinding.instance.addPostFrameCallback((_) {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                HomeErrorScreen(errorData: errorData),
-                          ),
-                        );
-                        // });
-                      }
-                    },
-                    listenWhen: (previousState, currentState) {
-                      return (previousState != currentState) &&
-                          [
-                            NoMoreWordAvailableState,
-                            LaterWordsLoading,
-                            LaterWordsLoadingSuccess,
-                            PartialDataState,
-                            UnexpectedState,
-                            InternetFailureState,
-                            HomeErrorScreenState,
-                          ].contains(currentState.runtimeType);
-                    },
-                    buildWhen: (previousState, currentState) {
-                      bool flag = false;
-                      if (currentState is InternetFailureState) {
-                        if (context.read<WordBloc>().allWords.isEmpty) {
-                          flag = true;
-                        }
-                      }
+                            default:
+                              return Positioned.fill(
+                                  child: Center(child: Text('unknown state')));
+                          }
+                        },
+                      ),
+                      
+                      // Gemini AI Word Display
+                      BlocConsumer<GeminiBloc, GeminiState>(
+                        listener: (context, state) {
+                          if (state is NoMoreAiWordsAvailableState) {
+                            context.read<GeminiBloc>().add(LoadAiWordsEvent(
+                                noOfAiWordsToLoad:
+                                    context.read<WordBloc>().moreWordFetchLimit,
+                                autoLoad: false));
+                          }
 
-                      return flag ||
-                          [
-                            WordInitial,
-                            WordLoadingState,
-                            FetchedSingleWordState,
-                            GeminiFailureWordState,
-                          ].contains(currentState.runtimeType);
-                    },
-                    builder: (context, state) {
-                      switch (state) {
-                        case WordInitial():
-                        case WordLoadingState():
-                        return Padding(
-                          padding: const EdgeInsets.fromLTRB(30, 50, 30, 50),
-                          child: WordCardShimmer(),
-                        );
-                        case FetchedSingleWordState():
+                          if (state is GeminiFailureState) {
+                            String message = 'Something went wrong.';
+                            ContentType contentType = ContentType.failure;
 
-                          return Padding(
-                            padding: const EdgeInsets.fromLTRB(30, 50, 30, 50),
-                            child: Container(
-                              color: Colors.transparent,
-                              child: WordSlider(
+                            showOverlayBanner(scaffoldContext,
+                                message: message, contentType: contentType);
+                          }
 
-                                  key: UniqueKey(),
-                                  wordWidget: WordCard(word: state.word, bannerName: 'Dictionary API Generated Word.',)
+                          if (state is AiWordsLoadingState) {
+                            String message = 'Loading AI words.';
+                            ContentType contentType = ContentType.help;
 
-                              ),
-                            ),
-                          );
-                        case InternetFailureState():
-                          ElevatedButton button = ElevatedButton(
-                              onPressed: () => context
-                                  .read<WordBloc>()
-                                  .add(LoadWords(
-                                  noOfWordToSearch:
-                                  widget.initialWordFetchLimit, autoLoad: true)),
-                              child: Text('Retry'));
-                          return Positioned.fill(
-                              child: errorWidget(context, 'No Internet Connection', button)
+                            showOverlayBanner(scaffoldContext,
+                                message: message, contentType: contentType);
+                          }
 
-                          );
-                        case GeminiFailureWordState():
-                        // <editor-fold>
-                          ElevatedButton button = ElevatedButton(
-                              onPressed: () {
-                                final isAiWordGenerationIsOn = context
-                                    .read<GeminiBloc>()
-                                    .isAiWordsGenerationOn;
-                                if (isAiWordGenerationIsOn) {
-                                  context.read<GeminiBloc>().add(
-                                      LoadAiWordsEvent(noOfAiWordsToLoad: 5, autoLoad: true));
-                                } else {
-                                  context
-                                      .read<WordBloc>()
-                                      .add(LoadWords(noOfWordToSearch: 5, autoLoad: true));
-                                }
-                              },
-                              child: Text('Retry'));
-                          // </editor-fold>
-                          return Positioned.fill(
-                              child: errorWidget(
-                                  context, state.errorMessage, button));
+                          if (state is AiWordsLoadedState) {
+                            String message = 'Loaded more AI words.';
+                            ContentType contentType = ContentType.success;
 
-                        default:
-                          return Positioned.fill(
-                              child: Center(child: Text('unknown state')));
-                      }
-                    },
-                  ) ,
-                      // :
-
-                  BlocConsumer<GeminiBloc, GeminiState>(
-                    listener: (context, state) {
-
-
-
-                      if (state is NoMoreAiWordsAvailableState) {
-                        context
-                            .read<GeminiBloc>()
-                            .add(LoadAiWordsEvent(noOfAiWordsToLoad: context.read<LaterWordFetchBloc>().laterWordFetchLimit, autoLoad: false));
-                      }
-
-                      if (state is GeminiFailureState) {
-                        String message = 'Something went wrong.';
-                        ContentType contentType = ContentType.failure;
-
-                        showOverlayBanner(scaffoldContext,
-                            message: message, contentType: contentType);
-                      }
-
-                      if (state is AiWordsLoadingState) {
-                        String message = 'Loading AI words.';
-                        ContentType contentType = ContentType.help;
-
-                        showOverlayBanner(scaffoldContext,
-                            message: message, contentType: contentType);
-                      }
-
-                      if (state is AiWordsLoadedState) {
-                        String message = 'Loaded more AI words.';
-                        ContentType contentType = ContentType.success;
-
-                        showOverlayBanner(scaffoldContext,
-                            message: message, contentType: contentType);
-                      }
-
-
-                    },
-                    listenWhen: (previousState, currentState) {
-                      return (previousState != currentState) &&
-                          [
-                            NoMoreAiWordsAvailableState,
+                            showOverlayBanner(scaffoldContext,
+                                message: message, contentType: contentType);
+                          }
+                        },
+                        listenWhen: (previousState, currentState) {
+                          return (previousState != currentState) &&
+                              [
+                                NoMoreAiWordsAvailableState,
+                                GeminiFailureState,
+                                AiWordsLoadingState,
+                                AiWordsLoadedState,
+                              ].contains(currentState.runtimeType);
+                        },
+                        buildWhen: (previousState, currentState) {
+                          return [
+                            GeminiInitial,
+                            SingleAiWordFetchState,
                             GeminiFailureState,
-                            AiWordsLoadingState,
-                            AiWordsLoadedState,
-
                           ].contains(currentState.runtimeType);
-                    },
-                    buildWhen: (previousState, currentState) {
-                      return [
-                        GeminiInitial,
-                        // AiWordsLoadingState,
-                        SingleAiWordFetchState,
-                        GeminiFailureState,
-                      ].contains(currentState.runtimeType);
-                    },
-                    builder: (context, state){
-                      switch (state) {
-                        case GeminiInitial():
-                        case AiWordsLoadingState():
-                          return Padding(
-                            padding: const EdgeInsets.fromLTRB(30, 50, 30, 50),
-                            child: WordCardShimmer(),
-                          );
-                        case SingleAiWordFetchState():
-                          print('geminiBloc singleAiWordFetchState received');
-                          return Padding(
-                            padding: const EdgeInsets.fromLTRB(30, 50, 30, 50),
-                            child: Container(
-                              color: Colors.transparent,
-                              child: WordSlider(
+                        },
+                        builder: (context, state) {
+                          switch (state) {
+                            case GeminiInitial():
+                            case AiWordsLoadingState():
+                              return Padding(
+                                padding:
+                                    const EdgeInsets.fromLTRB(30, 50, 30, 50),
+                                child: WordCardShimmer(),
+                              );
+                            case SingleAiWordFetchState():
+                              return Padding(
+                                padding:
+                                    const EdgeInsets.fromLTRB(30, 50, 30, 50),
+                                child: Container(
+                                  color: Colors.transparent,
+                                  child: WordSlider(
+                                      key: UniqueKey(),
+                                      wordWidget: WordCard(
+                                        word: state.word,
+                                        bannerName: 'AI Generated Word.',
+                                      )),
+                                ),
+                              );
+                            case GeminiFailureState():
+                              // <editor-fold>
+                              ElevatedButton button = ElevatedButton(
+                                  onPressed: () {
+                                    final isAiWordGenerationIsOn = context
+                                        .read<GeminiBloc>()
+                                        .isAiWordsGenerationOn;
+                                    if (isAiWordGenerationIsOn) {
+                                      context.read<GeminiBloc>().add(
+                                          LoadAiWordsEvent(
+                                              noOfAiWordsToLoad: 5,
+                                              autoLoad: true));
+                                    } else {
+                                      context.read<WordBloc>().add(LoadWords(
+                                          noOfWordToSearch: 5, autoLoad: true));
+                                    }
+                                  },
+                                  child: Text('Retry'));
+                              // </editor-fold>
+                              return Positioned.fill(
+                                  child: errorWidget(
+                                      context, state.errorMessage, button));
 
-                                  key: UniqueKey(),
-                                  wordWidget: WordCard(word: state.word, bannerName: 'AI Generated Word.',)
-
-                              ),
-                            ),
-                          );
-                        case GeminiFailureState():
-                        // <editor-fold>
-                          ElevatedButton button = ElevatedButton(
-                              onPressed: () {
-                                final isAiWordGenerationIsOn = context
-                                    .read<GeminiBloc>()
-                                    .isAiWordsGenerationOn;
-                                if (isAiWordGenerationIsOn) {
-                                  context.read<GeminiBloc>().add(
-                                      LoadAiWordsEvent(noOfAiWordsToLoad: 5, autoLoad: true));
-                                } else {
-                                  context
-                                      .read<WordBloc>()
-                                      .add(LoadWords(noOfWordToSearch: 5, autoLoad: true));
-                                }
-                              },
-                              child: Text('Retry'));
-                          // </editor-fold>
-                          return Positioned.fill(
-                              child: errorWidget(
-                                  context, state.errorMessage, button));
-
-                        default:
-                          return Positioned.fill(
-                              child: Center(child: Text('unknown state')));
-                      }
-                    },
-                  ),
-
-
-                ],
-              )
-    ;
-  },
-),
+                            default:
+                              return Positioned.fill(
+                                  child: Center(child: Text('unknown state')));
+                          }
+                        },
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
+          
           );
         },
       ),
+      // Navigation buttons for Search and Settings
       floatingActionButton: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
+          // Search button
           FloatingActionButton(
             heroTag: null,
             backgroundColor: Theme.of(context).colorScheme.primaryFixedDim,
@@ -402,6 +348,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           SizedBox(height: 12),
+          // Settings button
           FloatingActionButton(
             heroTag: null,
             backgroundColor: Theme.of(context).colorScheme.primaryFixedDim,
@@ -425,7 +372,7 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: (_) => MultiBlocProvider(
               providers: [
                 BlocProvider.value(
-                  value: BlocProvider.of<LaterWordFetchBloc>(context),
+                  value: BlocProvider.of<WordBloc>(context),
                 ),
                 BlocProvider.value(
                   value: BlocProvider.of<GeminiBloc>(context),
@@ -449,8 +396,4 @@ class _HomeScreenState extends State<HomeScreen> {
               child: SearchPage(),
             )));
   }
-
-
-
-
 }

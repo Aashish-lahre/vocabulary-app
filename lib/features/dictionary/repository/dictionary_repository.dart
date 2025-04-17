@@ -119,6 +119,7 @@ class DictionaryRepository {
         const int maxRetries = 5;
         for (int i = 0; i < maxRetries; i++) {
           try {
+            // It's a list of 1 word, that we generate randomly.
             final newWordList =
             GetRandomWords().generateRandomWords(count: 1);
             final newWord = newWordList.first;
@@ -151,7 +152,7 @@ class DictionaryRepository {
             );
           } on UnexpectedFailure catch (err) {
             // Some other error happened: stop and return.
-            print('entered here in unexpected error');
+            debugPrint('entered here in unexpected error');
             return Result(
               data: receivedWords,
               failure: UnexpectedFailure(errorMessage: err.errorMessage),
@@ -160,7 +161,7 @@ class DictionaryRepository {
         }
       } on NoInternetFailure {
         // Network error on the first attempt: stop and return.
-        // Internet was down when this function was called.
+        // Internet connection was down when this function was called.
         int wordsNotSearched = count - (receivedWords.length + wordSkipped);
         return Result<List<Word>, DictionaryFailure>(
           data: receivedWords,

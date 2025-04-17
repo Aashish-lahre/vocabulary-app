@@ -47,7 +47,6 @@ class WordCard extends StatelessWidget {
               Gap(50),
               // wordName and volume icon
               Wrap(
-                // mainAxisAlignment: MainAxisAlignment.start,
       
                 alignment: WrapAlignment.start,
       

@@ -1,7 +1,6 @@
 import 'package:bloc/bloc.dart';
-import 'package:flutter_improve_vocabulary/features/gemini_ai/bloc/gemini_bloc.dart';
 
-import 'package:flutter_improve_vocabulary/app/home_error_types_enum.dart';
+import '../../../core/shared_preference/word_fetch_limit.dart';
 import '../../../core/utility/result.dart';
 import '../data/dictionary_failures.dart';
 import '../../../core/models/word.dart';
@@ -20,11 +19,13 @@ class WordBloc extends Bloc<WordEvent, WordState> {
   final DictionaryRepository repository;
 
 
-  // this word will be shown on homeScreen first, than as "wordIndex" increments, following words will be shown.
+  // this word will be shown on homeScreen first, than as "wordIndex" increments, following words will be shown from the allWords list.
   int wordIndex = 0;
   final List<Word> allWords = [];
+  int moreWordFetchLimit;
 
 
+  // Throttle the events to prevent spamming the API
   EventTransformer<E> throttleRestartable<E>() {
     return (events, mapper) {
       return events
@@ -40,23 +41,56 @@ class WordBloc extends Bloc<WordEvent, WordState> {
 
 
 
-  WordBloc({ required this.repository}) : super(WordInitial()) {
+  WordBloc({ required this.repository, required this.moreWordFetchLimit}) : super(WordInitial(moreWordFetchLimit: moreWordFetchLimit)) {
 
 
 
 
-    on<LoadWords>((event, emit) async {
+    // Load words from the dictionary API
+    on<LoadWords>(
+      
+      transformer: throttleRestartable(),
+      (event, emit) async {
 
-        emit(WordLoadingState());
+        if(allWords.isEmpty) {
+          emit(WordsLoadingState());
+        } else {
+          emit(MoreWordsLoadingState());
+        }
         final Result<List<Word>, DictionaryFailure> receivedWords = await repository.fetchRandomWords(event.noOfWordToSearch);
 
         if(receivedWords.isSuccess) {
+
+
+          if(allWords.isEmpty) {
+            emit(WordsLoadingSuccessState());
+          } else {
+            emit(MoreWordsLoadingSuccessState());
+          }
+
+
+
           allWords.addAll(receivedWords.data!);
+          
+          
+                  
+          // intially when user opens the app, the first word will be shown, without requesting to fetch first word, if autoLoad is true.
           if(event.autoLoad) {
-            print('wordBloc event autoLoad');
             emit(FetchedSingleWordState(word: allWords[wordIndex]));
           } else {
-            print('wordBloc event not autoLoad');
+            // else block represents the case where user requested to fetch more words from the Dictionary API.
+
+
+            /// user starts the app, and [isAiWordsGenerationOn] is true, app will fetch specified number of words from the Gemini AI.
+            /// now user switches [isAiWordsGenerationOn] to false, now the next words will be fetched from the Dictionary API.
+            /// when we add event toload more Dictionary API words then we enter this else block.
+
+            ///  if wordIndex is 0, we switch it to -1, so that when we add event [LoadSingleWordInOrderEvent] 
+            /// we turn wordIndex to 0 via [++wordIndex], and fetch the first word from the allWords list.
+
+            /// when will wordIndex be 0?
+            /// If initial words are from Gemini AI then we switch it off(isAiWordsGenerationOn = false) then Dictionary API words will be loaded (in this case wordIndex will be 0).
+            /// If initial words are from Dictionary API, wordIndex will be 0, but we won't enter this block, because event.autoLoad is true.
 
             if(wordIndex == 0) {
               wordIndex = -1;
@@ -67,6 +101,7 @@ class WordBloc extends Bloc<WordEvent, WordState> {
           final failure = receivedWords.failure!;
 
           if(failure is NoInternetFailure) {
+            // any partial data we received from the Dictionary API before internet connection is lost, will be added to the allWords list.
             allWords.addAll(receivedWords.data ?? []);
             emit(InternetFailureState(wordNotSearched: failure.wordsNotSearched, wordSkipped: failure.wordsSkipped, wordRetrived: failure.wordsRetrieved));
 
@@ -74,11 +109,13 @@ class WordBloc extends Bloc<WordEvent, WordState> {
           }
 
           if(failure is UnexpectedFailure) {
-            emit(HomeErrorScreenState(homeErrorType: HomeErrorType.unexpected));
+            emit(UnexpectedState(errorMessage: failure.errorMessage));
           }
 
           if (failure is PartialDataFailure) {
-            // allWords.addAll(receivedWords.data!);
+
+            // No actual error occurred, but we just couldn't fetch expected number of words from the Dictionary API.
+            allWords.addAll(receivedWords.data!);
             emit(PartialDataState(wordFailedCount: failure.failedWordsCount, wordFetchedCount: failure.fetchedWordCount));
           }
           
@@ -87,20 +124,33 @@ class WordBloc extends Bloc<WordEvent, WordState> {
         }
     });
 
-    on<LaterLoadWords>(
-      _onLaterLoadWords,
-      transformer: throttleRestartable(),
-    );
 
-    on<GeminiFailureWordEvent>((event, emit) {
-      emit(GeminiFailureWordState(errorMessage: event.errorMessage));
+    
+
+
+
+    on<MoreWordsFetchLimitChangedEvent>((event, emit) {
+      moreWordFetchLimit = event.changedLimit;
+      WordFetchLimit.instance.changeWordFetchLimit(moreWordFetchLimit);
+      emit(MoreWordsFetchLimitChangedState(changedLimit: moreWordFetchLimit));
     });
+
+
+    // on<LaterLoadWords>(
+    //   _onLaterLoadWords,
+    //   transformer: throttleRestartable(),
+    // );
+
+    // on<GeminiFailureWordEvent>((event, emit) {
+    //   emit(GeminiFailureWordState(errorMessage: event.errorMessage));
+    // });
 
 
 
     on<SearchWord>((event, emit) async {
 
-        emit(WordLoadingState());
+        emit(WordSearchLoadingState());
+        // fetch a single word from the Dictionary API
         final Result<Word, DictionaryFailure> receivedWord = await repository.fetchWord(event.wordToSearch);
 
         if(receivedWord.isSuccess) {
@@ -115,12 +165,11 @@ class WordBloc extends Bloc<WordEvent, WordState> {
 
 
     on<LoadSingleWordInOrderEvent>((event, emit) {
+      // we increment wordIndex, and fetch the next word from the allWords list.
       if(++wordIndex < allWords.length) {
-        print('emitting fetchedsingle word state....');
         emit(FetchedSingleWordState(word: allWords[wordIndex]));
       } else {
         // index for words exceeds allWords items
-        print('emitting no words available state state....');
         emit(NoMoreWordAvailableState());
       }
     });
@@ -129,6 +178,8 @@ class WordBloc extends Bloc<WordEvent, WordState> {
 
   }
 
+
+  // Map the failures to the states
   void _mapFailuresToStates(DictionaryFailure failure, Emitter<WordState> emit) {
     switch(failure) {
       case NoInternetFailure _:
@@ -148,28 +199,33 @@ class WordBloc extends Bloc<WordEvent, WordState> {
   }
 
 
-  Future<void> _onLaterLoadWords(LaterLoadWords event, Emitter<WordState> emit) async {
+  // Future<void> _onLaterLoadWords(LaterLoadWords event, Emitter<WordState> emit) async {
 
-      emit(LaterWordsLoading());
-      final Result<List<Word>, DictionaryFailure> receivedWords = await repository.fetchRandomWords(event.noOfWordsToLoad);
+  //     emit(LaterWordsLoading());
+  //     final Result<List<Word>, DictionaryFailure> receivedWords = await repository.fetchRandomWords(event.noOfWordsToLoad);
 
 
-      if(receivedWords.isSuccess) {
-        allWords.addAll(receivedWords.data!);
-        emit(LaterWordsLoadingSuccess());
+  //     if(receivedWords.isSuccess) {
+  //       allWords.addAll(receivedWords.data!);
+  //       emit(LaterWordsLoadingSuccess());
 
-      } else {
-        if(receivedWords.failure!.runtimeType == PartialDataFailure) {
-          allWords.addAll(receivedWords.data!);
-        }
+  //     } else {
+  //       if(receivedWords.failure!.runtimeType == PartialDataFailure) {
+  //         allWords.addAll(receivedWords.data!);
+  //       }
 
-        if(receivedWords.failure!.runtimeType == NoInternetFailure) {
-          allWords.addAll(receivedWords.data!);
+  //       if(receivedWords.failure!.runtimeType == NoInternetFailure) {
+  //         allWords.addAll(receivedWords.data!);
 
-        }
+  //       }
 
-        _mapFailuresToStates(receivedWords.failure!, emit);
-      }
+  //       _mapFailuresToStates(receivedWords.failure!, emit);
+  //     }
 
-  }
+  // }
+
+
+
+
+
 }
