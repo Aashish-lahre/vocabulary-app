@@ -176,3 +176,13 @@ final class AntonymsLoadedState extends GeminiState {
   List<Object?> get props => [antonyms, word];
 }
 
+/// state emitted when Gemini AI model is changed.
+final class GeminiModelChangedState extends GeminiState {
+  final GeminiModels model;
+
+  const GeminiModelChangedState({required this.model});
+
+  @override
+  List<Object?> get props => [model];
+}
+

@@ -22,6 +22,7 @@ class GeminiBloc extends Bloc<GeminiEvent, GeminiState> {
   int wordIndex = 0;
   final List<Word> allWords = [];
   GeminiModels defaultModel = GeminiModels.Gemini15Flash;
+  late GenerativeModel model;
 
   EventTransformer<E> throttleRestartable<E>() {
     return (events, mapper) {
@@ -37,7 +38,7 @@ class GeminiBloc extends Bloc<GeminiEvent, GeminiState> {
   GeminiBloc({required this.repository, required this.isAiWordsGenerationOn}) : super(GeminiInitial()) {
 
 
-    final model = GenerativeModel(
+    model = GenerativeModel(
       // model: 'gemini-2.5-pro-exp-03-25',
       model : defaultModel.model,
       apiKey: apiKey,
@@ -51,7 +52,6 @@ class GeminiBloc extends Bloc<GeminiEvent, GeminiState> {
     });
 
     on<LoadAiWordsEvent>(transformer: throttleRestartable(), (event, emit) async {
-
         emit(AiWordsLoadingState());
         final Result<List<Word>, GeminiError> response = await repository.generateWords(promptForWords(event.noOfAiWordsToLoad), model);
         if(response.isSuccess) {
@@ -182,10 +182,11 @@ class GeminiBloc extends Bloc<GeminiEvent, GeminiState> {
 
 
     on<ChangeGeminiModelEvent>((event, emit) {
-
       defaultModel = event.modelType;
-
-
+      model = GenerativeModel(
+        model: defaultModel.model,
+        apiKey: apiKey,
+      );
     });
 
   }
