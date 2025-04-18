@@ -17,7 +17,6 @@ import '../../../core/models/word.dart';
 class GeminiRepository {
 
   static GeminiRepository?  instance;
-  GenerativeModel? _model;
 
   GeminiRepository._();
 
@@ -25,18 +24,7 @@ class GeminiRepository {
     return instance ??= GeminiRepository._();
   }
 
-  void updateModel(GenerativeModel model) {
-    _model = model;
-  }
-
-
-
-
-
-
-
   Future<Result<List<Word>, GeminiError>> generateWords(String prompt, GenerativeModel model) async {
-    _model = model;
     final List<Content> content = [Content.text(prompt)];
     late Result<List<Word>, GeminiError> response;
     try {
