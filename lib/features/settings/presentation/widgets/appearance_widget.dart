@@ -16,13 +16,13 @@ class AppearanceWidget extends StatefulWidget {
 }
 class AppearanceWidgetState extends State<AppearanceWidget> {
 
-  String  themeModeLabel(int index) {
-    return {
-      0: 'Light',
-      1: 'Dark',
-      2: 'Auto'
-    }[index] ?? 'Light';
-  }
+  // String  themeModeLabel(int index) {
+  //   return {
+  //     0: 'Light',
+  //     1: 'Dark',
+  //     2: 'Auto'
+  //   }[index] ?? 'Light';
+  // }
 
   late int _selectedIndex;
 
@@ -32,70 +32,90 @@ class AppearanceWidgetState extends State<AppearanceWidget> {
     super.initState();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Row(
-          spacing: 10,
-          children: [
-            Icon(Icons.sunny, color: Theme.of(context).colorScheme.onSecondaryContainer,),
-            Text('Appearance', style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Theme.of(context).colorScheme.onSecondaryContainer),),
-          ],
-        ),
-        Gap(20),
-        SizedBox(
-          width: widget.constraints.maxWidth,
-          height: MediaQuery.of(context).size.height * .15,
-          child: ListView.builder(
-            shrinkWrap: true,
-            scrollDirection: Axis.horizontal,
-              itemCount: themes.length,
-              itemBuilder: (context, index) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 5.0),
-              child: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    context.read<ThemeCubit>().changeThemeType(themes.keys.toList()[index]);
-                    _selectedIndex = index;
-                  });
-
-
-                },
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  spacing: 10,
-                  children: [
-                    Container(
-                      clipBehavior: Clip.antiAlias,
-                      decoration: BoxDecoration(
-                        color: themes[themes.keys.toList()[index]]!.colorScheme.primary,
-                        gradient: themes[themes.keys.toList()[index]]!.containerGradient,
-                        borderRadius: BorderRadius.circular(10),
-                        border:
-                         _selectedIndex == index ? Border.all(color: Color(0xFF6666FF), style: BorderStyle.solid, width: 4) : null,
-                      ),
-
-                      width: widget.constraints.maxWidth * 0.28,
-                      height: widget.constraints.maxWidth * 0.20,
-
-                      // child:
-                      // ClipRRect(
-                      //     borderRadius: BorderRadius.circular(5),
-                      //     child: Image.asset('assets/images/mode_$index.png', fit: BoxFit.cover,)),
-                    ),
-                    Text(themes.keys.toList()[index].label, style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Theme.of(context).colorScheme.onSecondaryContainer),)
-                  ],
+@override
+Widget build(BuildContext context) {
+  return Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Row(
+        children: [
+          Icon(
+            Icons.sunny,
+            color: Theme.of(context).colorScheme.onSecondaryContainer,
+          ),
+          const SizedBox(width: 10),
+          Text(
+            'Appearance',
+            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                  color: Theme.of(context).colorScheme.onSecondaryContainer,
                 ),
-              ),
-            );
-          }),
-        ),
-      ],
-    );
-  }
+          ),
+        ],
+      ),
+      const Gap(20),
+      SizedBox(
+  width: widget.constraints.maxWidth,
+  height: MediaQuery.of(context).size.height * 0.20,
+  child: Padding(
+    padding: const EdgeInsets.only(left: 20.0), // Move start position slightly forward
+    child: PageView.builder(
+      controller: PageController(viewportFraction: 0.35),
+      itemCount: themes.length,
+      padEnds: false, // prevents the first and last items from centering
+      itemBuilder: (context, index) {
+        final themeKey = themes.keys.toList()[index];
+        final theme = themes[themeKey]!;
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0), // spacing between items
+          child: GestureDetector(
+            onTap: () {
+              setState(() {
+                context.read<ThemeCubit>().changeThemeType(themeKey);
+                _selectedIndex = index;
+              });
+            },
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  clipBehavior: Clip.antiAlias,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary,
+                    gradient: theme.containerGradient,
+                    borderRadius: BorderRadius.circular(10),
+                    border: _selectedIndex == index
+                        ? Border.all(
+                            color: const Color(0xFF6666FF),
+                            width: 4,
+                          )
+                        : null,
+                  ),
+                  width: widget.constraints.maxWidth * 0.3,
+                  height: widget.constraints.maxWidth * 0.22,
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  themeKey.label,
+                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSecondaryContainer,
+                      ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    ),
+  ),
+),
+
+    ],
+  );
+}
+
 }
 
 

@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../features/gemini_ai/bloc/gemini_bloc.dart';
-import '../../blocs/ViewSwitcherCubit/view_switcher_cubit.dart';
 import '../../models/word.dart';
 import '../../utility/above_banner.dart';
 

@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_improve_vocabulary/core/utility/syno_anto_shimmer.dart';
 
 import '../../../features/gemini_ai/bloc/gemini_bloc.dart';
-import '../../blocs/ViewSwitcherCubit/view_switcher_cubit.dart';
 import '../../models/word.dart';
 import '../../utility/above_banner.dart';
 

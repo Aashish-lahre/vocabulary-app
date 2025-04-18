@@ -40,7 +40,7 @@ class GeminiBloc extends Bloc<GeminiEvent, GeminiState> {
     final model = GenerativeModel(
       // model: 'gemini-2.5-pro-exp-03-25',
       model : defaultModel.model,
-      apiKey: 'vyhjvujv',
+      apiKey: apiKey,
 
     );
     /// event fired when user toggles the gemini AI switch in settings page to generate words using Gemini AI.
