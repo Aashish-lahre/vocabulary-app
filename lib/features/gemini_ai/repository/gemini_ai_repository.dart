@@ -40,7 +40,14 @@ class GeminiRepository {
 
     response = processResponseForWords(generateContentResponse.text!);
 
-    } on GenerativeAIException catch(err) {
+    } on InvalidApiKey catch (err) {
+
+      return Result(failure: GeminiInvalidApiKey(errorMessage: err.message));
+    } 
+    
+    
+    
+    on GenerativeAIException catch(err) {
       // GenerativeAiException is a super type of all gemini exception,
       // so we don't require to handle other types of gemini exceptions because GenerativeAIException handles all of them.
       return Result(failure: GeminiGenerativeAiException(errorMessage: err.message));
@@ -66,7 +73,13 @@ class GeminiRepository {
 
       response = processResponseForWord(generateContentResponse.text!);
 
-    } on GenerativeAIException catch(err) {
+    } on InvalidApiKey catch (err) {
+
+      return Result(failure: GeminiInvalidApiKey(errorMessage: err.message));
+    }
+    
+    
+     on GenerativeAIException catch(err) {
       // GenerativeAiException is a super type of all gemini exception,
       // so we don't require to handle other types of gemini exceptions because GenerativeAIException handles all of them.
       return Result(failure: GeminiGenerativeAiException(errorMessage: err.message));
@@ -89,6 +102,9 @@ class GeminiRepository {
 
       response = processResponseForExamples(generateContentResponse.text!);
 
+    }  on InvalidApiKey catch (err) {
+
+      return Result(failure: GeminiInvalidApiKey(errorMessage: err.message));
     } on GenerativeAIException catch(err) {
       // GenerativeAiException is a super type of all gemini exception,
       // so we don't require to handle other types of gemini exceptions because GenerativeAIException handles all of them.
@@ -116,6 +132,9 @@ class GeminiRepository {
 
       response = processResponseForSynonymsAndAntonyms(generateContentResponse.text!);
 
+    }  on InvalidApiKey catch (err) {
+
+      return Result(failure: GeminiInvalidApiKey(errorMessage: err.message));
     } on GenerativeAIException catch(err) {
       // GenerativeAiException is a super type of all gemini exception,
       // so we don't require to handle other types of gemini exceptions because GenerativeAIException handles all of them.
@@ -144,6 +163,9 @@ class GeminiRepository {
 
       response = processResponseForSynonymsAndAntonyms(generateContentResponse.text!);
 
+    }  on InvalidApiKey catch (err) {
+
+      return Result(failure: GeminiInvalidApiKey(errorMessage: err.message));
     } on GenerativeAIException catch(err) {
       // GenerativeAiException is a super type of all gemini exception,
       // so we don't require to handle other types of gemini exceptions because GenerativeAIException handles all of them.

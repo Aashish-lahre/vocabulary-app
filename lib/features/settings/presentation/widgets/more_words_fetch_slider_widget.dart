@@ -6,17 +6,18 @@ import 'package:flutter_improve_vocabulary/features/dictionary/bloc/word_bloc.da
 
 class MoreWordFetchSliderWidget extends StatefulWidget {
   final BoxConstraints constraints;
-  final ValueNotifier<int> moreWordFetchCountController;
-  const MoreWordFetchSliderWidget({super.key, required this.constraints, required this.moreWordFetchCountController});
+  const MoreWordFetchSliderWidget({super.key, required this.constraints});
 
   @override
   State<MoreWordFetchSliderWidget> createState() => MoreWordFetchSliderWidgetState();
 }
 class MoreWordFetchSliderWidgetState extends State<MoreWordFetchSliderWidget> {
 
+  late int moreWordFetchLimitCountController;
+
 @override
   void initState() {
-  widget.moreWordFetchCountController.value = context.read<WordBloc>().moreWordFetchLimit;
+  moreWordFetchLimitCountController = context.read<WordBloc>().moreWordFetchLimit;
   super.initState();
   }
 
@@ -49,14 +50,14 @@ class MoreWordFetchSliderWidgetState extends State<MoreWordFetchSliderWidget> {
                   overlayShape: RoundSliderOverlayShape(overlayRadius: 8.0), ),// Default is 24.0
                 child: Slider.adaptive(
                 
-                              value: widget.moreWordFetchCountController.value.toDouble(),
+                              value: moreWordFetchLimitCountController.toDouble(),
                               min: 1,
                               max: 10,
                               divisions: 9,
-                              label: widget.moreWordFetchCountController.value.toString(),
+                              label: moreWordFetchLimitCountController.toString(),
                               onChanged: (changedValue) {
                                 setState(() {
-                                  widget.moreWordFetchCountController.value = changedValue.toInt();
+                                  moreWordFetchLimitCountController = changedValue.toInt();
                                   context.read<WordBloc>().add(MoreWordsFetchLimitChangedEvent(changedLimit: changedValue.toInt()));
 
                                 });

@@ -258,6 +258,8 @@ class _DraggableSliderState extends State<DraggableSlider> with SingleTickerProv
 
     int currentIndex = getCurrentModeWordIndex();
     int allWordsLength = getCurrentModeWordsLength();
+    print('currentIndex: $currentIndex');
+    print('allWordsLength: $allWordsLength');
      
      
 

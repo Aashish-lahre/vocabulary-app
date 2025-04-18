@@ -89,11 +89,11 @@ final class GeminiFailureState extends GeminiState {
 }
 
 
-/// state emitted when fetching of multiple words failed.
-final class GeminiWordsLoadFailureState extends GeminiState {
+/// state emitted when invalid api key is provided.
+final class GeminiInvalidApiKeyState extends GeminiState {
   final String errorMessage;
 
-  const GeminiWordsLoadFailureState({required this.errorMessage});
+  const GeminiInvalidApiKeyState({required this.errorMessage});
 
   @override
   List<Object?> get props => [errorMessage];

@@ -1,10 +1,13 @@
 
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../features/gemini_ai/bloc/gemini_bloc.dart';
+import '../../blocs/ViewSwitcherCubit/view_switcher_cubit.dart';
 import '../../models/word.dart';
+import '../../utility/above_banner.dart';
 
 class ExampleWidget extends StatefulWidget {
   final Word word;
@@ -52,11 +55,19 @@ class _ExampleWidgetState extends State<ExampleWidget> {
 
           BlocConsumer<GeminiBloc, GeminiState>(
             listenWhen: (previousState, currentState) {
-              return [GeminiFailureState].contains(currentState.runtimeType);
+              return [GeminiFailureState, GeminiInvalidApiKeyState].contains(currentState.runtimeType);
             },
-            listener:(context, state) {},
+            listener:(context, state) {
+              if(state is GeminiInvalidApiKeyState) {
+          String message = 'Cannot Generate Examples with Invalid API Key.';
+                            ContentType contentType = ContentType.failure;
+
+                            showOverlayBanner(context,
+                                message: message, contentType: contentType);
+        }
+            },
             buildWhen: (previousState, currentState) {
-              return [ExamplesLoadedState, ExamplesLoadingState, GeminiFailureState].contains(currentState.runtimeType);
+              return [ExamplesLoadedState, ExamplesLoadingState, GeminiInvalidApiKeyState].contains(currentState.runtimeType);
             },
             builder:(context, state) {
 
@@ -90,7 +101,7 @@ class _ExampleWidgetState extends State<ExampleWidget> {
                       }),
                     ],
                   );
-                case GeminiFailureState _ :
+                case GeminiInvalidApiKeyState _ :
                   return SizedBox(
                     width: double.infinity,
                     height: 100,

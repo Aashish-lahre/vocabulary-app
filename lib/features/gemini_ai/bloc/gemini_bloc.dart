@@ -40,13 +40,14 @@ class GeminiBloc extends Bloc<GeminiEvent, GeminiState> {
     final model = GenerativeModel(
       // model: 'gemini-2.5-pro-exp-03-25',
       model : defaultModel.model,
-      apiKey: apiKey,
+      apiKey: 'vyhjvujv',
 
     );
     /// event fired when user toggles the gemini AI switch in settings page to generate words using Gemini AI.
     on<ToggleGenerateWordsWithAiSwitchEvent>((event, emit) {
       isAiWordsGenerationOn = event.isOn;
       GeminiStatusStorage.instance.changeGeminiStatus(isAiWordsGenerationOn);
+      emit(AiWordsSwitchChangedState(isOn: isAiWordsGenerationOn));
     });
 
     on<LoadAiWordsEvent>(transformer: throttleRestartable(), (event, emit) async {
@@ -69,7 +70,14 @@ class GeminiBloc extends Bloc<GeminiEvent, GeminiState> {
 
 
         } else {
-          emit(GeminiWordsLoadFailureState(errorMessage: response.failure!.errorMessage));
+
+          if(response.failure!.runtimeType == GeminiInvalidApiKey) {
+            emit(GeminiInvalidApiKeyState(errorMessage: response.failure!.errorMessage));
+          } else {
+            emit(GeminiFailureState(errorMessage: response.failure!.errorMessage));
+          }
+          
+          
         }
 
 
@@ -96,7 +104,9 @@ class GeminiBloc extends Bloc<GeminiEvent, GeminiState> {
         if(response.isSuccess) {
           emit(AiWordSearchCompleteState(word: response.data!));
         } else {
-          emit(GeminiSingleWordLoadFailureState(errorMessage: response.failure!.errorMessage));
+          
+            emit(GeminiSingleWordLoadFailureState(errorMessage: response.failure!.errorMessage));
+          
         }
 
     });
@@ -114,7 +124,11 @@ class GeminiBloc extends Bloc<GeminiEvent, GeminiState> {
 
         emit(ExamplesLoadedState(examples: response.data!, word: word));
       } else {
-        emit(GeminiFailureState(errorMessage: response.failure!.errorMessage));
+        if(response.failure!.runtimeType == GeminiInvalidApiKey) {
+          emit(GeminiInvalidApiKeyState(errorMessage: response.failure!.errorMessage));
+        } else {
+          emit(GeminiFailureState(errorMessage: response.failure!.errorMessage));
+        }
       }
 
 
@@ -133,7 +147,11 @@ class GeminiBloc extends Bloc<GeminiEvent, GeminiState> {
 
         emit(SynonymsLoadedState(synonyms: response.data!, word: word));
       } else {
-        emit(GeminiFailureState(errorMessage: response.failure!.errorMessage));
+        if(response.failure!.runtimeType == GeminiInvalidApiKey) {
+          emit(GeminiInvalidApiKeyState(errorMessage: response.failure!.errorMessage));
+        } else {
+          emit(GeminiFailureState(errorMessage: response.failure!.errorMessage));
+        }
       }
 
 
@@ -152,7 +170,11 @@ class GeminiBloc extends Bloc<GeminiEvent, GeminiState> {
 
         emit(AntonymsLoadedState(antonyms: response.data!, word: word));
       } else {
-        emit(GeminiFailureState(errorMessage: response.failure!.errorMessage));
+        if(response.failure!.runtimeType == GeminiInvalidApiKey) {
+          emit(GeminiInvalidApiKeyState(errorMessage: response.failure!.errorMessage));
+        } else {
+          emit(GeminiFailureState(errorMessage: response.failure!.errorMessage));
+        }
       }
 
 

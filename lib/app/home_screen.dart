@@ -24,13 +24,15 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  late int moreWordFetchLimit;
+
   @override
   void initState() {
     // Initialize word loading based on the selected mode (AI or Dictionary API)
     final isAiWordGenerationIsOn =
         context.read<GeminiBloc>().isAiWordsGenerationOn;
 
-    int moreWordFetchLimit = context.read<WordBloc>().moreWordFetchLimit;
+    moreWordFetchLimit = context.read<WordBloc>().moreWordFetchLimit;
 
     // Load initial words based on the selected mode
     if (isAiWordGenerationIsOn) {
@@ -50,23 +52,20 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Builder(
         builder: (scaffoldContext) {
           return SizedBox.expand(
-           // Listen for internet connectivity changes and show appropriate messages
+            // Listen for internet connectivity changes and show appropriate messages
             child: BlocListener<InternetBloc, InternetState>(
-                  listener: (context, state) {
-                    String title = state.status ? 'Hooray!' : 'Oh Snap!';
-                    String message = state.status
-                        ? "We are back Online!"
-                        : 'No Internet Connection, try again!';
-                    ContentType contentType = state.status
-                        ? ContentType.success
-                        : ContentType.failure;
+              listener: (context, state) {
+                String title = state.status ? 'Hooray!' : 'Oh Snap!';
+                String message = state.status
+                    ? "We are back Online!"
+                    : 'No Internet Connection, try again!';
+                ContentType contentType =
+                    state.status ? ContentType.success : ContentType.failure;
 
-                    showOverlayBanner(scaffoldContext,
-                        title: title,
-                        message: message,
-                        contentType: contentType);
-                  },
-            
+                showOverlayBanner(scaffoldContext,
+                    title: title, message: message, contentType: contentType);
+              },
+
               // ViewSwitcherCubit manages switching between Dictionary API and Gemini AI modes
               child: BlocBuilder<ViewSwitcherCubit, ViewSwitcherState>(
                 buildWhen: (_, currentState) {
@@ -216,7 +215,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           }
                         },
                       ),
-                      
+
                       // Gemini AI Word Display
                       BlocConsumer<GeminiBloc, GeminiState>(
                         listener: (context, state) {
@@ -226,6 +225,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                     context.read<WordBloc>().moreWordFetchLimit,
                                 autoLoad: false));
                           }
+
+                          if (state is GeminiInvalidApiKeyState) {
+                             context.read<ViewSwitcherCubit>().updateViewMode(ViewMode.geminiAi);
+
+                      
+                          }
+
+                          
 
                           if (state is GeminiFailureState) {
                             String message = 'Something went wrong.';
@@ -255,6 +262,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           return (previousState != currentState) &&
                               [
                                 NoMoreAiWordsAvailableState,
+                                GeminiInvalidApiKeyState,
                                 GeminiFailureState,
                                 AiWordsLoadingState,
                                 AiWordsLoadedState,
@@ -265,31 +273,38 @@ class _HomeScreenState extends State<HomeScreen> {
                             GeminiInitial,
                             SingleAiWordFetchState,
                             GeminiFailureState,
+                            GeminiInvalidApiKeyState,
                           ].contains(currentState.runtimeType);
                         },
                         builder: (context, state) {
                           switch (state) {
                             case GeminiInitial():
-                            case AiWordsLoadingState():
+                            case AiWordsLoadingState(): 
+                            {
                               return Padding(
-                                padding:
-                                    const EdgeInsets.fromLTRB(30, 50, 30, 50),
-                                child: WordCardShimmer(),
-                              );
+                                  padding:
+                                      const EdgeInsets.fromLTRB(30, 50, 30, 50),
+                                  child: WordCardShimmer());
+                            }
+                            
                             case SingleAiWordFetchState():
-                              return Padding(
-                                padding:
-                                    const EdgeInsets.fromLTRB(30, 50, 30, 50),
-                                child: Container(
-                                  color: Colors.transparent,
-                                  child: WordSlider(
+                              {
+                                return Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(30, 50, 30, 50),
+                                  child: Container(
+                                    color: Colors.transparent,
+                                    child: WordSlider(
                                       key: UniqueKey(),
                                       wordWidget: WordCard(
                                         word: state.word,
                                         bannerName: 'AI Generated Word.',
-                                      )),
-                                ),
-                              );
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }
+
                             case GeminiFailureState():
                               // <editor-fold>
                               ElevatedButton button = ElevatedButton(
@@ -309,13 +324,39 @@ class _HomeScreenState extends State<HomeScreen> {
                                   },
                                   child: Text('Retry'));
                               // </editor-fold>
-                              return Positioned.fill(
-                                  child: errorWidget(
-                                      context, state.errorMessage, button));
+                              return errorWidget(
+                                  context, state.errorMessage, button);
 
-                            default:
-                              return Positioned.fill(
-                                  child: Center(child: Text('unknown state')));
+                            case GeminiInvalidApiKeyState():
+                              ElevatedButton elevatedButton = ElevatedButton(
+                                  onPressed: () {
+                                    context.read<WordBloc>().add(LoadWords(
+                                        noOfWordToSearch: moreWordFetchLimit,
+                                        autoLoad: true));
+
+                                    context.read<GeminiBloc>().add(
+                                        ToggleGenerateWordsWithAiSwitchEvent(
+                                            isOn: false));
+
+                                    context
+                                        .read<ViewSwitcherCubit>()
+                                        .changeViewMode(ViewMode.dictionaryApi);
+                                    context
+                                        .read<ViewSwitcherCubit>()
+                                        .updateViewMode(ViewMode.dictionaryApi);
+                                  },
+                                  child: Text('Retry'));
+
+                              final errorMessage =
+                                  'Provide Api Key is Invalid \n Please Generate Words Using Dictionary API';
+
+                              return errorWidget(
+                                  context, errorMessage, elevatedButton);
+
+                            default: 
+                            {  
+                              return Center(child: Text('unknown state'));
+                            }
                           }
                         },
                       ),
@@ -324,7 +365,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
               ),
             ),
-          
           );
         },
       ),

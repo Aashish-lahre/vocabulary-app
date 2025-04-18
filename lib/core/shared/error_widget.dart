@@ -21,15 +21,18 @@ Column errorWidget(BuildContext context, String errorMessage, ElevatedButton? el
                 .colorScheme
                 .onSurface),
       ),
-      Text(
-        errorMessage,
-        style: Theme.of(context)
-            .textTheme
-            .bodyLarge!
-            .copyWith(
-            color: Theme.of(context)
-                .colorScheme
-                .onSurface),
+      Center(
+        child: Text(
+          textAlign: TextAlign.center,
+          errorMessage,
+          style: Theme.of(context)
+              .textTheme
+              .bodyLarge!
+              .copyWith(
+              color: Theme.of(context)
+                  .colorScheme
+                  .onSurface),
+        ),
       ),
       elevatedButton ?? SizedBox.shrink(),
     ],

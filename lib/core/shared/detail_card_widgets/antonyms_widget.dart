@@ -1,9 +1,12 @@
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_improve_vocabulary/core/utility/syno_anto_shimmer.dart';
 
 import '../../../features/gemini_ai/bloc/gemini_bloc.dart';
+import '../../blocs/ViewSwitcherCubit/view_switcher_cubit.dart';
 import '../../models/word.dart';
+import '../../utility/above_banner.dart';
 
 class AntonymsWidget extends StatefulWidget {
 
@@ -36,9 +39,21 @@ class _AntonymsWidgetState extends State<AntonymsWidget>{
         .colorScheme;
     generateMoreWithAi = word.antonyms.length < antonymsLimit ;
 
-    return BlocBuilder<GeminiBloc, GeminiState>(
+    return BlocConsumer<GeminiBloc, GeminiState>(
+      listener: (context, state) {
+        if(state is GeminiInvalidApiKeyState) {
+          String message = 'Cannot Generate Antonyms with Invalid API Key.';
+                            ContentType contentType = ContentType.failure;
+
+                            showOverlayBanner(context,
+                                message: message, contentType: contentType);
+        }
+      },
+      listenWhen: (_, currentState) {
+        return [GeminiInvalidApiKeyState].contains(currentState.runtimeType);
+      },
       buildWhen: (_, currentState) {
-        return [AntonymsLoadedState, AntonymsLoadingState].contains(currentState.runtimeType);
+        return [AntonymsLoadedState, AntonymsLoadingState, GeminiInvalidApiKeyState].contains(currentState.runtimeType);
       },
       builder: (context, state) {
         if(state is AntonymsLoadingState) {
@@ -47,6 +62,9 @@ class _AntonymsWidgetState extends State<AntonymsWidget>{
 
         if(state is AntonymsLoadedState) {
           generateMoreWithAi = word.antonyms.length < antonymsLimit;
+        }
+        if(state is GeminiInvalidApiKeyState) {
+          generateMoreWithAi = false;
         }
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),

@@ -5,8 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../gemini_ai/bloc/gemini_bloc.dart';
 
 class GeminiAiSwitch extends StatefulWidget {
-  final ValueNotifier<bool> isGeminiAiOn;
-  const GeminiAiSwitch({super.key, required this.isGeminiAiOn});
+  const GeminiAiSwitch({super.key,});
 
   @override
   State<GeminiAiSwitch> createState() => GeminiAiSwitchState();
@@ -34,7 +33,7 @@ class GeminiAiSwitchState extends State<GeminiAiSwitch> {
       onChanged: (bool value) {
         setState(() {
           _isOn = value;
-          widget.isGeminiAiOn.value = value;
+          // widget.isGeminiAiOn.value = value;
           context.read<GeminiBloc>().add(ToggleGenerateWordsWithAiSwitchEvent(isOn: value));
 
         });

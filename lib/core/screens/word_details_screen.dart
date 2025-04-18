@@ -33,7 +33,7 @@ class _WordDetailsScreenState extends State<WordDetailsScreen> {
 
             DefinitionWidget(definitions: widget.word.definitions),
 
-            SynonymsWidget(word: widget.word,),
+            SynonymsWidget(word: widget.word),
 
 
             AntonymsWidget(word: widget.word,),

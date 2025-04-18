@@ -1,9 +1,11 @@
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_improve_vocabulary/core/utility/syno_anto_shimmer.dart';
 
 import '../../../features/gemini_ai/bloc/gemini_bloc.dart';
 import '../../models/word.dart';
+import '../../utility/above_banner.dart';
 
 class SynonymsWidget extends StatefulWidget {
 
@@ -39,9 +41,21 @@ class _SynonymsWidgetState extends State<SynonymsWidget> {
 
     generateMoreWithAi = word.synonyms.length < synonymsLimit ;
 
-    return BlocBuilder<GeminiBloc, GeminiState>(
+    return BlocConsumer<GeminiBloc, GeminiState>(
+      listener: (context, state) {
+        if(state is GeminiInvalidApiKeyState) {
+          String message = 'Cannot Generate Synonyms with Invalid API Key.';
+                            ContentType contentType = ContentType.failure;
+
+                            showOverlayBanner(context,
+                                message: message, contentType: contentType);
+        }
+      },
+      listenWhen: (_, currentState) {
+        return [GeminiInvalidApiKeyState].contains(currentState.runtimeType);
+      },
       buildWhen: (_, currentState) {
-        return [SynonymsLoadedState, SynonymsLoadingState].contains(currentState.runtimeType);
+        return [SynonymsLoadedState, SynonymsLoadingState, GeminiInvalidApiKeyState].contains(currentState.runtimeType);
       },
       builder: (context, state) {
         if(state is SynonymsLoadingState) {
@@ -50,6 +64,9 @@ class _SynonymsWidgetState extends State<SynonymsWidget> {
 
         if(state is SynonymsLoadedState) {
           generateMoreWithAi = word.synonyms.length < synonymsLimit;
+        }
+        if(state is GeminiInvalidApiKeyState) {
+         generateMoreWithAi = false;
         }
 
         return Padding(

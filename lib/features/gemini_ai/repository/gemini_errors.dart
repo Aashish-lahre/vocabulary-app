@@ -11,6 +11,14 @@ final class GeminiGenerativeAiException extends GeminiError {
 }
 
 
+final class GeminiInvalidApiKey extends GeminiError {
+
+  GeminiInvalidApiKey({required super.errorMessage});
+}
+
+
+
+
 final class GeminiUnexpectedFailure extends GeminiError {
 
   GeminiUnexpectedFailure({required super.errorMessage});
