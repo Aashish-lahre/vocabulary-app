@@ -13,3 +13,29 @@ Swipe through a beautifully animated draggable slider to explore new words—eac
 📱 Flutter-powered for a smooth, cross-platform experience
 
 Ideal for learners who want to build their vocabulary one swipe at a time.
+
+
+
+
+
+
+checkout = `assets/ui` for app screenshots.
+
+
+
+If you want to run this App and use Gemini AI.
+
+consider using your own Api Key in "apiKey" field.
+you can generate apikey from Google Ai Studio.
+
+file = lib/features/gemini_ai/bloc/gemini_bloc.dart
+
+```dart
+final model = GenerativeModel(
+      model : defaultModel.model,
+      apiKey: apiKey, // use your own API KEY.
+
+    );
+```    
+
+
