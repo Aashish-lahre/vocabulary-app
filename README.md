@@ -38,4 +38,13 @@ final model = GenerativeModel(
     );
 ```    
 
+![App Video](assets/ui/app.mp4)
+![Home Screen](assets/ui/ai_word_card.png)
+![Word Detail Screen](assets/ui/ai_word_card_details_screen.png)
+![Word Detail Screen examples](assets/ui/ai_word_card_details_screen_2.png)
+![Settings Screen](assets/ui/settings_ui.png)
+![Gradient Themes](assets/ui/gradient_theme.png)
+![Gemini Models](assets/ui/gemini_models.png)
+
+
 
