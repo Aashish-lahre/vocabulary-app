@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_improve_vocabulary/core/blocs/ViewSwitcherCubit/view_switcher_cubit.dart';
-import 'package:flutter_improve_vocabulary/core/blocs/network_bloc/internet_bloc.dart';
-import 'package:flutter_improve_vocabulary/core/theme/color_theme.dart';
-import 'package:flutter_improve_vocabulary/core/theme/cubit/theme_cubit.dart';
-import 'package:flutter_improve_vocabulary/features/gemini_ai/bloc/gemini_bloc.dart';
-import 'package:flutter_improve_vocabulary/features/gemini_ai/repository/gemini_ai_repository.dart';
-import 'package:flutter_improve_vocabulary/app/home_screen.dart';
-import 'package:flutter_improve_vocabulary/features/dictionary/bloc/word_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../core/blocs/ViewSwitcherCubit/view_switcher_cubit.dart';
+import '../core/blocs/network_bloc/internet_bloc.dart';
+import '../core/theme/color_theme.dart';
+import '../core/theme/cubit/theme_cubit.dart';
+import '../features/gemini_ai/quiz/bloc/quiz_bloc.dart';
+import '../features/gemini_ai/quiz/repository.dart';
+import '../features/gemini_ai/word/bloc/gemini_bloc.dart';
+import '../features/gemini_ai/word/repository/gemini_ai_repository.dart';
+import '../app/home_screen.dart';
+import '../features/dictionary/bloc/word_bloc.dart';
 import '../features/dictionary/repository/dictionary_repository.dart';
 
 
@@ -38,9 +40,12 @@ class VocabularyApp extends StatelessWidget {
             // ViewSwitcherCubit is used to switch between the dictionary API and the gemini ai.
             BlocProvider(create: (_) => ViewSwitcherCubit(isAiWordGenerationOn ? ViewMode.geminiAi : ViewMode.dictionaryApi)),
 
+            BlocProvider(create: (_) => QuizBloc(repository: GeminiRepositoryForQuiz())),
+
+
             BlocProvider(
                 lazy: false,
-                create: (_) => GeminiBloc(repository: GeminiRepository(), isAiWordsGenerationOn : isAiWordGenerationOn)),
+                create: (_) => GeminiBloc(repository: GeminiRepositoryForWord(), isAiWordsGenerationOn : isAiWordGenerationOn)),
 
 
             BlocProvider(create: (context) => InternetBloc(), lazy: false,),

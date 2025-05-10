@@ -1,9 +1,12 @@
+import 'package:flutter/material.dart';
+
+
 import '../data/dictionary_api_client.dart';
-import 'package:flutter_improve_vocabulary/core/utility/result.dart';
+import '../../../core/utility/result.dart';
 import '../data/dictionary_failures.dart';
 import '../../../core/models/word.dart';
 import '../utility/get_random_words.dart';
-import 'package:flutter/material.dart';
+
 
 /// A repository that talks to the Dictionary API to get word data.
 ///

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_improve_vocabulary/core/theme/color_theme.dart';
+import '../../../../core/theme/color_theme.dart';
 
 import '../../../../core/theme/cubit/theme_cubit.dart';
-import '../../../gemini_ai/bloc/gemini_bloc.dart';
+import '../../../gemini_ai/word/bloc/gemini_bloc.dart';
 import '../widgets/widgets.dart';
 
 class SettingScreen extends StatefulWidget {

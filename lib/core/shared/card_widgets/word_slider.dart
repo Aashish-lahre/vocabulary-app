@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../features/gemini_ai/bloc/gemini_bloc.dart';
+import '../../../features/gemini_ai/word/bloc/gemini_bloc.dart';
 import '../../blocs/ViewSwitcherCubit/view_switcher_cubit.dart';
 import './draggable.dart';
 import '../word_card_shimmer.dart';

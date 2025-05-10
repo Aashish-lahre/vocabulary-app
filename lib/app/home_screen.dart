@@ -1,10 +1,12 @@
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_improve_vocabulary/features/gemini_ai/quiz/bloc/quiz_bloc.dart' hide GeminiInvalidApiKeyState;
+import 'package:flutter_improve_vocabulary/features/gemini_ai/quiz/presentation/quiz.dart';
 
 import '../core/blocs/ViewSwitcherCubit/view_switcher_cubit.dart';
 import '../core/error/screen/home_error_screen.dart';
-import '../features/gemini_ai/bloc/gemini_bloc.dart';
+import '../features/gemini_ai/word/bloc/gemini_bloc.dart';
 import '../core/shared/word_card.dart';
 import './home_error_types_enum.dart';
 import '../features/search/presentation/screens/search_page.dart';
@@ -402,6 +404,22 @@ class _HomeScreenState extends State<HomeScreen> {
               color: Theme.of(context).colorScheme.onPrimaryFixed,
             ),
           ),
+
+          SizedBox(height: 12),
+          // Settings button
+          FloatingActionButton(
+            heroTag: null,
+            backgroundColor: Theme.of(context).colorScheme.primaryFixedDim,
+            shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            onPressed: () {
+              _navigateToQuizScreen(homeContext);
+            },
+            child: Icon(
+              Icons.quiz_rounded,
+              color: Theme.of(context).colorScheme.onPrimaryFixed,
+            ),
+          ),
         ],
       ),
     );
@@ -436,4 +454,19 @@ class _HomeScreenState extends State<HomeScreen> {
               child: SearchPage(),
             )));
   }
+
+  void _navigateToQuizScreen(BuildContext context) {
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => MultiBlocProvider(
+          providers: [
+
+            BlocProvider.value(
+              value: BlocProvider.of<QuizBloc>(context),
+            ),
+          ],
+          child: QuizScreen(),
+        )));
+  }
+
+
 }

@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../gemini_ai/bloc/gemini_bloc.dart';
+import '../../../gemini_ai/word/bloc/gemini_bloc.dart';
 
 class GeminiAiSwitch extends StatefulWidget {
   const GeminiAiSwitch({super.key,});

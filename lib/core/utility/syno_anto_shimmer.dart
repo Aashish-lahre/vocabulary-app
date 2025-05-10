@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../features/gemini_ai/bloc/gemini_bloc.dart';
+import '../../features/gemini_ai/word/bloc/gemini_bloc.dart';
 
 Widget buildSynonymsAntonymsShimmer(
     BuildContext context, GeminiState state, int loadingCount) {

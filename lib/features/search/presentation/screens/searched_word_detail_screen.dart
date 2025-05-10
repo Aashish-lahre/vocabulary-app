@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_improve_vocabulary/core/utility/syno_anto_shimmer.dart';
+import '../../../../core/utility/syno_anto_shimmer.dart';
 import 'package:gap/gap.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../../core/models/word.dart';
 import '../../../../core/shared/detail_card_widgets/detail_card_widgets.dart' show TitleWidget, BannerWidget, DefinitionWidget;
-import '../../../gemini_ai/bloc/gemini_bloc.dart';
+import '../../../gemini_ai/word/bloc/gemini_bloc.dart';
 
 
 class SearchedWordDetailScreen extends StatefulWidget {

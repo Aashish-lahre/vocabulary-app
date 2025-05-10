@@ -3,8 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../gemini_ai/bloc/gemini_bloc.dart';
-import '../../../gemini_ai/gemini_models/gemini_models.dart';
+import '../../../gemini_ai/word/bloc/gemini_bloc.dart';
+import '../../../gemini_ai/gemini_models.dart';
 
 class GeminiModelsWidget extends StatefulWidget {
   final BoxConstraints constraints;
